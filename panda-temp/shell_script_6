@@ -1,0 +1,4 @@
+#!/bin/bash
+ulimit -s 131072
+cd /home/cindy/hls-dse
+(cd /home/cindy/hls-dse/panda-temp//temp-archive-dir-6970-0ff4-6b96-41a7; ar x /tmp/.mount_bambuzJLO97/usr/lib/panda/libsoftfloat_gcc49.a)  > /home/cindy/hls-dse/panda-temp/shell_output_6 2>&1 

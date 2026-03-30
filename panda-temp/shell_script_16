@@ -1,0 +1,4 @@
+#!/bin/bash
+ulimit -s 131072
+cd /home/cindy/hls-dse
+(chmod +x /home/cindy/hls-dse/./synthesize_Synthesis_matmul.sh)  > /home/cindy/hls-dse/panda-temp//synthesis_script_generation_output 2>&1 

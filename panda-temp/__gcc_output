@@ -1,0 +1,2 @@
+cc1: note: disable pass tree-bswap for functions in the range of [0, 4294967295]
+optimize

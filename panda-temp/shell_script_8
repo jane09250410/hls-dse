@@ -1,0 +1,4 @@
+#!/bin/bash
+ulimit -s 131072
+cd /home/cindy/hls-dse
+(CPLUS_INCLUDE_PATH="/tmp/.mount_bambuzJLO97/usr/include/c++/$(ls -x -v -1a /tmp/.mount_bambuzJLO97/usr/include/c++ 2> /dev/null | tail -1)" /tmp/.mount_bambuzJLO97/usr/bin/clang-12 -D__NO_INLINE__    -D_FORTIFY_SOURCE=0  -m32 -mno-sse2  -c -fplugin=/tmp/.mount_bambuzJLO97/usr/gcc_plugins/clang12_plugin_ASTAnalyzer.so -Xclang -add-plugin -Xclang clang12_plugin_ASTAnalyzer -Xclang -plugin-arg-clang12_plugin_ASTAnalyzer -Xclang -outputdir -Xclang -plugin-arg-clang12_plugin_ASTAnalyzer -Xclang /home/cindy/hls-dse/panda-temp/ -Xclang -plugin-arg-clang12_plugin_ASTAnalyzer -Xclang -topfname -Xclang -plugin-arg-clang12_plugin_ASTAnalyzer -Xclang matmul -o /home/cindy/hls-dse/panda-temp//run-80db-debd-c07d-3602.o -D'printf(fmt, ...)=' -D__BAMBU__ "/home/cindy/hls-dse/benchmarks/matmul/matmul.c")  > /home/cindy/hls-dse/panda-temp/__gcc_output 2>&1 
