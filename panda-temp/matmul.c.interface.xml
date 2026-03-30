@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<module>
-  <function id="matmul">
-    <arg id="A" interface_type="array" interface_typename="int *" interface_typename_include="" interface_typename_orig="int (*)[8]" size="64"/>
-    <arg id="B" interface_type="array" interface_typename="int *" interface_typename_include="" interface_typename_orig="int (*)[8]" size="64"/>
-    <arg id="C" interface_type="array" interface_typename="int *" interface_typename_include="" interface_typename_orig="int (*)[8]" size="64"/>
-  </function>
-</module>

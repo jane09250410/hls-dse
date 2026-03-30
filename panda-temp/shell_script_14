@@ -1,4 +1,0 @@
-#!/bin/bash
-ulimit -s 131072
-cd /home/cindy/hls-dse
-(if test -f chmod ; then    true; else    if test `which chmod`; then       true;    else       false;    fi fi>& /home/cindy/hls-dse/__stdouterr)  > /home/cindy/hls-dse/panda-temp//check_command_output 2>&1 

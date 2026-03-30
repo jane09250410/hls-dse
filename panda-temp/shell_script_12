@@ -1,4 +1,0 @@
-#!/bin/bash
-ulimit -s 131072
-cd /home/cindy/hls-dse
-(/tmp/.mount_bambuzJLO97/usr/bin/cpp-4.9 -v  < /dev/null 2>&1 | grep -v -E "(#|Configured with|Using built-in|Target|Thread model|gcc version|End of search list|ignoring nonexistent directory|cc1 -E -quiet|cc1.exe -E -quiet|COMPILER_PATH|LIBRARY_PATH|COLLECT_GCC|OFFLOAD_TARGET_NAMES|OFFLOAD_TARGET_DEFAULT|ignoring duplicate directory|ignoring nonexistent directory|InstalledDir|clang version|Found candidate|Selected GCC installation|Candidate multilib|Selected multilib|-cc1)" | tr '\n' ' ' | tr '\r' ' '  | sed 's/\\/\//g')  > /home/cindy/hls-dse/__include 2>&1 

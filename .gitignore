@@ -13,3 +13,6 @@ out/
 *~
 .vscode/
 .idea/
+panda-temp/
+test.xml
+synthesize_*.sh
