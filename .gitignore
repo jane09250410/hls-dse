@@ -1,0 +1,15 @@
+HLS_output/
+bambu_results/
+out/
+*.o
+*.out
+*.vcd
+*.v
+*.vhd
+*.dot
+*.mlir
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
