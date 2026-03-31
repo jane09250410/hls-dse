@@ -1,0 +1,52 @@
+[
+  {
+    "id": 0,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 1,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 2,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 3,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 4,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  }
+]

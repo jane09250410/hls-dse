@@ -1,0 +1,7 @@
+Please report bugs to <panda-info@polimi.it>
+
+
+ ==  Bambu executed with: /tmp/.mount_bambu94SYNC/usr/bin/bambu --top-fname=matmul --clock-period=10 --memory-allocation-policy=ALL_BRAM --channels-type=MEM_ACC_11 --channels-number=2 --no-clean /home/cindy/hls-dse/benchmarks/matmul/matmul.c 
+
+error -> the number of channels cannot be specified for MEM_ACC_11
+

@@ -1,0 +1,102 @@
+Please report bugs to <panda-info@polimi.it>
+
+
+ ==  Bambu executed with: /tmp/.mount_bambufmdmHd/usr/bin/bambu --top-fname=matmul --clock-period=5 --memory-allocation-policy=ALL_BRAM --channels-type=MEM_ACC_NN --channels-number=1 --no-clean /home/cindy/hls-dse/benchmarks/matmul/matmul.c 
+
+
+********************************************************************************
+                    ____                  _
+                   | __ )  __ _ _ __ ___ | |_   _   _
+                   |  _ \ / _` | '_ ` _ \| '_ \| | | |
+                   | |_) | (_| | | | | | | |_) | |_| |
+                   |____/ \__,_|_| |_| |_|_.__/ \__,_|
+
+********************************************************************************
+                         High-Level Synthesis Tool
+
+                         Politecnico di Milano - DEIB
+                          System Architectures Group
+********************************************************************************
+                Copyright (C) 2004-2022 Politecnico di Milano
+  Version: PandA 0.9.8 - Revision eda4c22d5adaec44fd8489ae49b854b244d2cf70-main
+
+Target technology = FPGA
+
+  Functions to be synthesized:
+    matmul
+
+
+  Memory allocation information:
+Warning: This function uses unknown addresses: matmul
+    BRAM bitsize: 16
+    Spec may not exploit DATA bus width
+    Spec accesses data having an address unknown at compile time
+    Internal data is not externally accessible
+    DATA bus bitsize: 32
+    ADDRESS bus bitsize: 32
+    SIZE bus bitsize: 6
+    Internally allocated memory (no private memories): 0
+    Internally allocated memory: 0
+  Time to perform memory allocation: 0.00 seconds
+
+
+  Module allocation information for function matmul:
+    Number of complex operations: 5
+    Number of complex operations: 5
+  Time to perform module allocation: 0.14 seconds
+
+
+  Scheduling Information of function matmul:
+    Number of control steps: 18
+    Minimum slack: 0.5673999970000001
+    Estimated max frequency (MHz): 225.6012271179886
+  Time to perform scheduling: 0.04 seconds
+
+
+  State Transition Graph Information of function matmul:
+    Number of states: 16
+    Done port is registered
+  Time to perform creation of STG: 0.00 seconds
+
+
+  Easy binding information for function matmul:
+    Bound operations:20/44
+  Time to perform easy binding: 0.00 seconds
+
+
+  Storage Value Information of function matmul:
+    Number of storage values inserted: 21
+  Time to compute storage value information: 0.00 seconds
+
+  Slack computed in 0.00 seconds
+  Weight computation completed in 0.01 seconds
+  False-loop computation completed in 0.00 seconds
+
+  Register binding information for function matmul:
+    Register allocation algorithm obtains a sub-optimal result: 17 registers(LB:13)
+  Time to perform register binding: 0.00 seconds
+
+  Clique covering computation completed in 0.02 seconds
+
+  Module binding information for function matmul:
+    Number of modules instantiated: 41
+    Number of performance conflicts: 2
+    Estimated resources area (no Muxes and address logic): 375
+    Estimated area of MUX21: 70
+    Total estimated area: 445
+    Estimated number of DSPs: 3
+  Time to perform module binding: 0.03 seconds
+
+
+  Register binding information for function matmul:
+    Register allocation algorithm obtains a sub-optimal result: 17 registers(LB:13)
+  Time to perform register binding: 0.00 seconds
+
+
+  Connection Binding Information for function matmul:
+    Number of allocated multiplexers (2-to-1 equivalent): 8
+  Time to perform interconnection binding: 0.02 seconds
+
+  Total number of flip-flops in function matmul: 451
+error -> Number of ports not specialized for Datapath_i/BMEMORY_CTRLN_15_i0/in1 (GetPointer<port_o>(port)->get_ports_size())
+

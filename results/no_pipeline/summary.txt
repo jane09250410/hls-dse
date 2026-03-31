@@ -1,0 +1,25 @@
+============================================================
+  DESIGN SPACE EXPLORATION - SUMMARY REPORT
+============================================================
+
+Total configurations: 5
+Successful: 3
+Failed: 2
+Success rate: 60.0%
+Pipeline explored: No
+Unique QoR points: 1
+
+--- Best Results ---
+
+Smallest area (config 0):
+  Area=445.0, States=16.0, Clock=5ns, Mem=ALL_BRAM, Ch=MEM_ACC_11
+
+Lowest latency (config 0):
+  Area=445.0, States=16.0, Clock=5ns, Mem=ALL_BRAM, Ch=MEM_ACC_11
+
+--- Statistics ---
+  total_area: min=445.0, max=445.0, mean=445.0
+  num_states: min=16.0, max=16.0, mean=16.0
+  max_freq_mhz: min=225.6, max=225.6, mean=225.6
+  num_dsps: min=3.0, max=3.0, mean=3.0
+  num_ffs: min=451.0, max=451.0, mean=451.0

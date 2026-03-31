@@ -1,0 +1,602 @@
+[
+  {
+    "id": 0,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 1,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 2,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 3,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 4,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 5,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 6,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 7,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 8,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 9,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 10,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 11,
+    "tool": "bambu",
+    "clock_period": 5,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 12,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 13,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 14,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 15,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 16,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 17,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 18,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 19,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 20,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 21,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 22,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 23,
+    "tool": "bambu",
+    "clock_period": 8,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 24,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 25,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 26,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 27,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 28,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 29,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 30,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 31,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 32,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 33,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 34,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 35,
+    "tool": "bambu",
+    "clock_period": 10,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 36,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 37,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 38,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 39,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 40,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 41,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 42,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 43,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 44,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 45,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 46,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 47,
+    "tool": "bambu",
+    "clock_period": 15,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 48,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 49,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 50,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 51,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 52,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 53,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "ALL_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  },
+  {
+    "id": 54,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 1
+  },
+  {
+    "id": 55,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_11",
+    "channels_number": 2
+  },
+  {
+    "id": 56,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 1
+  },
+  {
+    "id": 57,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_N1",
+    "channels_number": 2
+  },
+  {
+    "id": 58,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 1
+  },
+  {
+    "id": 59,
+    "tool": "bambu",
+    "clock_period": 20,
+    "pipeline": false,
+    "pipeline_ii": null,
+    "memory_policy": "NO_BRAM",
+    "channels_type": "MEM_ACC_NN",
+    "channels_number": 2
+  }
+]
