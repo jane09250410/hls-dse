@@ -1,0 +1,4 @@
+strategy,total_configs,successful,failed,success_rate_pct,total_time_s,best_area,mean_area,best_latency,mean_latency,pareto_points,unique_qor_points
+Grid Search,20,13,7,65.0,343.5,444.0,501.5,11.0,14.8,1,7
+Random 30%,18,12,6,66.7,301.2,444.0,506.2,10.0,13.4,2,9
+LHS 20%,12,6,6,50.0,210.9,445.0,551.0,10.0,14.2,1,6
