@@ -45,8 +45,7 @@ class PADSE:
         benchmark_name: str,
         results_dir: str = "results/pa_dse",
         budget: Optional[int] = None,
-        autophagy_threshold: int = 2,
-        ablation_mode: str = "full",
+        autophagy_threshold: int = 2
     ) -> None:
         self.src_file = src_file
         self.top_func = top_func
@@ -54,7 +53,6 @@ class PADSE:
         self.results_dir = results_dir
         self.budget = budget
         self.autophagy_threshold = autophagy_threshold
-        self.ablation_mode = ablation_mode
         self.learner = FailurePatternLearner(threshold=autophagy_threshold)
 
     def _suppress_matching_configs(
@@ -74,25 +72,12 @@ class PADSE:
     def explore(self, configs: List[Config]) -> PADSEResult:
         Path(self.results_dir).mkdir(parents=True, exist_ok=True)
 
-        if self.ablation_mode == "no_filter":
-            active_configs = list(configs)
-            static_blocked = []
-            static_suppressed = []
-            static_log = []
-        elif self.ablation_mode == "static_only":
-            active_configs, static_blocked, static_suppressed, static_log = phagocytosis(
-                configs=configs,
-                rules=default_static_rules(),
-                source_path=self.src_file,
-                benchmark_name=self.benchmark_name,
-            )
-        else:
-            active_configs, static_blocked, static_suppressed, static_log = phagocytosis(
-                configs=configs,
-                rules=default_static_rules(),
-                source_path=self.src_file,
-                benchmark_name=self.benchmark_name,
-            )
+        active_configs, static_blocked, static_suppressed, static_log = phagocytosis(
+            configs=configs,
+            rules=default_static_rules(),
+            source_path=self.src_file,
+            benchmark_name=self.benchmark_name,
+        )
 
         queue = list(active_configs) + list(static_suppressed)
 
@@ -156,26 +141,23 @@ class PADSE:
                     f"freq={metrics.get('max_freq_mhz')}MHz"
                 )
             else:
-                if self.ablation_mode in ("no_filter", "static_only"):
-                    print(f"       -> FAILED ({elapsed:.1f}s)")
-                else:
-                    pattern = self.learner.add_failure(
-                        config=cfg,
-                        output=output,
-                        runtime_s=elapsed,
-                        benchmark_name=self.benchmark_name,
-                    )
-                    result["error_type"] = self.learner.failure_log[-1].error_type
-                    print(f"       -> FAILED ({elapsed:.1f}s), error={result['error_type']}")
+                pattern = self.learner.add_failure(
+                    config=cfg,
+                    output=output,
+                    runtime_s=elapsed,
+                    benchmark_name=self.benchmark_name,
+                )
+                result["error_type"] = self.learner.failure_log[-1].error_type
+                print(f"       -> FAILED ({elapsed:.1f}s), error={result['error_type']}")
 
-                    if pattern is not None:
-                        desc = pattern.description()
-                        learned_rules.append(desc)
-                        before = len(queue)
-                        queue, newly_suppressed = self._suppress_matching_configs(queue, pattern)
-                        autophagy_suppressed_ids.extend(newly_suppressed)
-                        print(f"       -> AUTOPHAGY: learned pattern [{desc}]")
-                        print(f"       -> AUTOPHAGY: suppressed {before - len(queue)} future configs")
+                if pattern is not None:
+                    desc = pattern.description()
+                    learned_rules.append(desc)
+                    before = len(queue)
+                    queue, newly_suppressed = self._suppress_matching_configs(queue, pattern)
+                    autophagy_suppressed_ids.extend(newly_suppressed)
+                    print(f"       -> AUTOPHAGY: learned pattern [{desc}]")
+                    print(f"       -> AUTOPHAGY: suppressed {before - len(queue)} future configs")
 
             all_results.append(result)
 
