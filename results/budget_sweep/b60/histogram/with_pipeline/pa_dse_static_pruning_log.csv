@@ -1,0 +1,321 @@
+config_id,rule,reason,source,severity
+1,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+4,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+7,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+10,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+13,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+16,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+19,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+22,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+25,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+28,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+31,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+34,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+37,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+40,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+43,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+46,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+49,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+52,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+55,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+58,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+60,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+60,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+61,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+62,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+62,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+63,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+63,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+64,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+65,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+65,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+66,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+66,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+67,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+68,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+68,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+69,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+69,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+70,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+71,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+71,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+72,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+72,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+73,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+74,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+74,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+75,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+75,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+76,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+77,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+77,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+78,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+78,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+79,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+80,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+80,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+81,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+81,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+82,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+83,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+83,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+84,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+84,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+85,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+86,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+86,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+87,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+87,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+88,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+89,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+89,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+90,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+90,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+91,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+92,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+92,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+93,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+93,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+94,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+95,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+95,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+96,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+96,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+97,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+98,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+98,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+99,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+99,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+100,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+101,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+101,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+102,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+102,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+103,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+104,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+104,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+105,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+105,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+106,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+107,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+107,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+108,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+108,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+109,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+110,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+110,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+111,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+111,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+112,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+113,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+113,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+114,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+114,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+115,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+116,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+116,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+117,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+117,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+118,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+119,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+119,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+120,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+120,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+121,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+122,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+122,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+123,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+123,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+124,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+125,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+125,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+126,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+126,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+127,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+128,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+128,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+129,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+129,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+130,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+131,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+131,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+132,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+132,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+133,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+134,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+134,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+135,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+135,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+136,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+137,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+137,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+138,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+138,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+139,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+140,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+140,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+141,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+141,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+142,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+143,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+143,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+144,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+144,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+145,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+146,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+146,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+147,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+147,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+148,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+149,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+149,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+150,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+150,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+151,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+152,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+152,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+153,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+153,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+154,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+155,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+155,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+156,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+156,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+157,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+158,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+158,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+159,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+159,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+160,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+161,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+161,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+162,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+162,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+163,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+164,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+164,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+165,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+165,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+166,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+167,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+167,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+168,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+168,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+169,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+170,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+170,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+171,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+171,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+172,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+173,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+173,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+174,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+174,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+175,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+176,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+176,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+177,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+177,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+178,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+179,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+179,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+180,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+180,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+181,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+182,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+182,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+183,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+183,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+184,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+185,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+185,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+186,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+186,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+187,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+188,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+188,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+189,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+189,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+190,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+191,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+191,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+192,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+192,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+193,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+194,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+194,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+195,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+195,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+196,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+197,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+197,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+198,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+198,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+199,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+200,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+200,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+201,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+201,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+202,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+203,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+203,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+204,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+204,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+205,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+206,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+206,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+207,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+207,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+208,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+209,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+209,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+210,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+210,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+211,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+212,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+212,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+213,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+213,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+214,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+215,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+215,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+216,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+216,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+217,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+218,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+218,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+219,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+219,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+220,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+221,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+221,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+222,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+222,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+223,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+224,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+224,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+225,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+225,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+226,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+227,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+227,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+228,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+228,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+229,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+230,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+230,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+231,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+231,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+232,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+233,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+233,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+234,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+234,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+235,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+236,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+236,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+237,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+237,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress
+238,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+239,pipeline_with_accumulation_pattern,Pipeline enabled on code with accumulation pattern inside loop; high risk of loop-carried dependence failure.,code_analysis,suppress
+239,pipeline_with_branch_inside_loop,Pipeline enabled on code with branch inside loop; high risk of control-flow related pipeline failure.,code_analysis,suppress

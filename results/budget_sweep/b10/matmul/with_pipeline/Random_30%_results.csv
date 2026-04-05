@@ -1,0 +1,11 @@
+id,tool,clock_period,pipeline,pipeline_ii,memory_policy,channels_type,channels_number,num_control_steps,num_states,max_freq_mhz,min_slack,total_area,area_no_mux,mux_area,num_dsps,num_ffs,num_modules,num_registers,num_muxes,runtime_s,success,strategy
+163,bambu,10,True,4.0,NO_BRAM,MEM_ACC_11,2,,,,,,,,,,,,,4.93,False,Random 30%
+28,bambu,10,False,,ALL_BRAM,MEM_ACC_NN,1,13.0,11.0,118.48341232227484,1.5599999999999963,445.0,375.0,70.0,3.0,387.0,41.0,15.0,8.0,18.57,False,Random 30%
+6,bambu,5,False,,NO_BRAM,MEM_ACC_11,1,15.0,17.0,225.6012271179886,0.5673999970000001,545.0,441.0,104.0,3.0,451.0,41.0,17.0,11.0,20.94,True,Random 30%
+189,bambu,15,True,2.0,NO_BRAM,MEM_ACC_N1,2,12.0,14.0,82.80064915708941,2.922800000000003,,,,,,,,,20.69,False,Random 30%
+70,bambu,5,True,1.0,NO_BRAM,MEM_ACC_NN,1,15.0,17.0,225.6012271179886,0.5673999970000001,,,,,,,,,20.52,False,Random 30%
+62,bambu,5,True,1.0,ALL_BRAM,MEM_ACC_N1,1,18.0,16.0,225.6012271179886,0.5673999970000001,,,,,,,,,19.89,False,Random 30%
+57,bambu,20,False,,NO_BRAM,MEM_ACC_N1,2,12.0,14.0,82.80064915708941,7.922800000000003,545.0,441.0,104.0,3.0,419.0,41.0,16.0,11.0,20.26,True,Random 30%
+35,bambu,10,False,,NO_BRAM,MEM_ACC_NN,2,12.0,13.0,118.48341232227494,1.5600000000000034,781.0,642.0,139.0,3.0,451.0,42.0,17.0,10.0,18.22,True,Random 30%
+188,bambu,15,True,2.0,NO_BRAM,MEM_ACC_N1,1,12.0,14.0,82.80064915708941,2.922800000000003,,,,,,,,,19.04,False,Random 30%
+26,bambu,10,False,,ALL_BRAM,MEM_ACC_N1,1,13.0,11.0,118.48341232227484,1.5599999999999963,445.0,375.0,70.0,3.0,387.0,41.0,15.0,8.0,20.64,True,Random 30%

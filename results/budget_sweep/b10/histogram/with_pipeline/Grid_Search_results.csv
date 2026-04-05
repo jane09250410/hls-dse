@@ -1,0 +1,11 @@
+id,tool,clock_period,pipeline,pipeline_ii,memory_policy,channels_type,channels_number,num_control_steps,num_states,max_freq_mhz,min_slack,total_area,area_no_mux,mux_area,num_dsps,num_ffs,num_modules,num_registers,num_muxes,runtime_s,success,strategy
+0,bambu,5,False,,ALL_BRAM,MEM_ACC_11,1,14.0,12.0,218.40737328982172,0.4213999969999993,359.0,256.0,103.0,0.0,310.0,48.0,16.0,5.0,17.48,True,Grid Search
+24,bambu,10,False,,ALL_BRAM,MEM_ACC_11,1,10.0,8.0,103.85077631770244,0.370798992000027,360.0,256.0,104.0,0.0,257.0,48.0,9.0,6.0,21.29,True,Grid Search
+48,bambu,20,False,,ALL_BRAM,MEM_ACC_11,1,10.0,8.0,87.85646987758756,8.617798991999985,359.0,256.0,103.0,0.0,225.0,48.0,8.0,5.0,21.57,True,Grid Search
+72,bambu,5,True,2.0,ALL_BRAM,MEM_ACC_11,1,14.0,12.0,218.40737328982172,0.4213999969999993,,,,,,,,,20.6,False,Grid Search
+96,bambu,8,True,1.0,ALL_BRAM,MEM_ACC_11,1,11.0,9.0,128.92911470620749,0.24379999600002233,,,,,,,,,19.64,False,Grid Search
+120,bambu,8,True,4.0,ALL_BRAM,MEM_ACC_11,1,11.0,9.0,128.92911470620749,0.24379999600002233,,,,,,,,,19.62,False,Grid Search
+144,bambu,10,True,2.0,ALL_BRAM,MEM_ACC_11,1,10.0,8.0,103.85077631770244,0.370798992000027,,,,,,,,,18.91,False,Grid Search
+168,bambu,15,True,1.0,ALL_BRAM,MEM_ACC_11,1,10.0,8.0,87.85646987758764,3.617798991999998,,,,,,,,,19.94,False,Grid Search
+192,bambu,15,True,4.0,ALL_BRAM,MEM_ACC_11,1,10.0,8.0,87.85646987758764,3.617798991999998,,,,,,,,,20.49,False,Grid Search
+216,bambu,20,True,2.0,ALL_BRAM,MEM_ACC_11,1,10.0,8.0,87.85646987758756,8.617798991999985,,,,,,,,,20.57,False,Grid Search

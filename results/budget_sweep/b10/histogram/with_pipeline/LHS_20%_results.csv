@@ -1,0 +1,11 @@
+id,tool,clock_period,pipeline,pipeline_ii,memory_policy,channels_type,channels_number,num_control_steps,num_states,max_freq_mhz,min_slack,total_area,area_no_mux,mux_area,num_dsps,num_ffs,num_modules,num_registers,num_muxes,runtime_s,success,strategy
+160,bambu,10,True,4.0,ALL_BRAM,MEM_ACC_NN,1,10.0,8.0,101.83090948803952,0.17979899200002447,,,,,,,,,21.03,False,LHS 20%
+43,bambu,15,False,,NO_BRAM,MEM_ACC_11,2,,,,,,,,,,,,,4.82,False,LHS 20%
+49,bambu,20,False,,ALL_BRAM,MEM_ACC_11,2,,,,,,,,,,,,,2.78,False,LHS 20%
+95,bambu,5,True,4.0,NO_BRAM,MEM_ACC_NN,2,12.0,14.0,218.40737328982172,0.4213999969999993,,,,,,,,,18.55,False,LHS 20%
+101,bambu,8,True,1.0,ALL_BRAM,MEM_ACC_NN,2,11.0,9.0,125.83048111242708,0.05279999600001983,,,,,,,,,20.46,False,LHS 20%
+15,bambu,8,False,,ALL_BRAM,MEM_ACC_N1,2,11.0,9.0,128.92911470620749,0.24379999600002233,359.0,256.0,103.0,0.0,243.0,48.0,12.0,5.0,20.59,True,LHS 20%
+119,bambu,8,True,2.0,NO_BRAM,MEM_ACC_NN,2,11.0,13.0,156.88240749624057,1.6257989920000224,,,,,,,,,20.82,False,LHS 20%
+36,bambu,15,False,,ALL_BRAM,MEM_ACC_11,1,10.0,8.0,87.85646987758764,3.617798991999998,359.0,256.0,103.0,0.0,225.0,48.0,8.0,5.0,20.78,True,LHS 20%
+199,bambu,15,True,4.0,NO_BRAM,MEM_ACC_11,2,,,,,,,,,,,,,3.01,False,LHS 20%
+42,bambu,15,False,,NO_BRAM,MEM_ACC_11,1,10.0,12.0,105.18785437483075,5.493198991999983,460.0,322.0,138.0,0.0,322.0,48.0,12.0,9.0,21.3,True,LHS 20%

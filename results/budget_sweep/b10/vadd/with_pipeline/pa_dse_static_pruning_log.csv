@@ -1,0 +1,81 @@
+config_id,rule,reason,source,severity
+1,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+4,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+7,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+10,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+13,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+16,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+19,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+22,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+25,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+28,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+31,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+34,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+37,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+40,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+43,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+46,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+49,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+52,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+55,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+58,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+61,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+64,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+67,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+70,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+73,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+76,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+79,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+82,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+85,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+88,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+91,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+94,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+97,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+100,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+103,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+106,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+109,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+112,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+115,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+118,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+121,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+124,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+127,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+130,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+133,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+136,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+139,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+142,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+145,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+148,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+151,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+154,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+157,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+160,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+163,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+166,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+169,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+172,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+175,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+178,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+181,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+184,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+187,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+190,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+193,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+196,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+199,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+202,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+205,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+208,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+211,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+214,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+217,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+220,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+223,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+226,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+229,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+232,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block
+235,mem_acc_11_multichannel_invalid,MEM_ACC_11 is incompatible with channels_number > 1.,static,block
+238,mem_acc_nn_requires_two_channels,MEM_ACC_NN requires at least 2 channels.,static,block

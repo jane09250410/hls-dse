@@ -1,0 +1,18 @@
+generic_error: benchmark=fir, clock_period=5, pipeline=True, channels_type=MEM_ACC_11, channels_number=1
+generic_error: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=2
+generic_error: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=2, memory_policy=ALL_BRAM, channels_number=1
+generic_error: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=2, memory_policy=ALL_BRAM, channels_number=2
+generic_error: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=2, memory_policy=ALL_BRAM, channels_type=MEM_ACC_N1
+generic_error: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=4
+generic_error: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=4, memory_policy=ALL_BRAM, channels_number=1
+generic_error: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=4, memory_policy=ALL_BRAM, channels_number=2
+generic_error: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=4, memory_policy=ALL_BRAM, channels_type=MEM_ACC_N1
+pipeline_phi_conflict: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=1
+pipeline_phi_conflict: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=1, memory_policy=ALL_BRAM, channels_number=1
+pipeline_phi_conflict: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=1, memory_policy=ALL_BRAM, channels_number=2
+pipeline_phi_conflict: benchmark=fir, clock_period=5, pipeline=True, pipeline_ii=1, memory_policy=ALL_BRAM, channels_type=MEM_ACC_N1
+pipeline_phi_conflict: benchmark=fir, clock_period=8, pipeline=True, pipeline_ii=1
+pipeline_phi_conflict: benchmark=fir, clock_period=8, pipeline=True, pipeline_ii=1, memory_policy=ALL_BRAM, channels_number=1
+pipeline_phi_conflict: benchmark=fir, clock_period=8, pipeline=True, pipeline_ii=1, memory_policy=ALL_BRAM, channels_number=2
+pipeline_phi_conflict: benchmark=fir, clock_period=8, pipeline=True, pipeline_ii=1, memory_policy=ALL_BRAM, channels_type=MEM_ACC_N1
+pipeline_phi_conflict: benchmark=fir, pipeline=True, pipeline_ii=1, channels_type=MEM_ACC_11, channels_number=1

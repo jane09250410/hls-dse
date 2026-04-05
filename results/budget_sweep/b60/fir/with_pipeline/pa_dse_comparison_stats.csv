@@ -1,0 +1,5 @@
+strategy,total_configs,successful,failed,success_rate_pct,total_time_s,best_area,mean_area,best_latency,mean_latency,pareto_points,unique_qor_points,benchmark,initial_configs,static_blocked,static_suppressed,autophagy_suppressed,actual_runs,budget_saving_vs_full_pct
+Grid Search,60.0,10,50,16.7,1195.5,277.0,310.5,9.0,12.6,2,8,,,,,,,
+Random 30%,60.0,13,47,21.7,983.7,277.0,384.9,9.0,12.5,2,9,,,,,,,
+LHS 20%,48.0,11,37,22.9,805.7,277.0,337.8,9.0,12.6,1,6,,,,,,,
+PA-DSE,,40,20,66.7,1228.4,277.0,335.5,8.0,12.2,2,15,fir,240.0,80.0,120.0,18.0,60.0,75.0
