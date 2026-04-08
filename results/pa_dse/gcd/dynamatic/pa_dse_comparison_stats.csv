@@ -1,0 +1,5 @@
+strategy,total_evaluated,successful,failed,success_rate_pct,total_time_s,best_components,mean_components,best_buffers,mean_buffers,benchmark
+Grid Search,30,10,20,33.3,1479.5,43,43.0,4,4.0,gcd
+Random 30%,30,11,19,36.7,995.0,43,47.4,4,5.1,gcd
+LHS 20%,30,10,20,33.3,957.4,43,46.2,4,4.8,gcd
+PA-DSE,30,30,0,100.0,929.1,43,47.0,4,5.0,gcd

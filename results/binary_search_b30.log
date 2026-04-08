@@ -1,0 +1,297 @@
+============================================================
+PA-DSE comparison on benchmark: binary_search
+Source file: /home/cindy/dynamatic/integration-test/binary_search/binary_search.c
+Top function: binary_search
+Ablation mode: full
+============================================================
+Total design points: 144
+
+============================================================
+  Strategy: Grid Search (30 configs)
+============================================================
+  [1/30] Config 0: cp=3_buf=on-merges
+       -> OK (components=43, time=25.4s)
+  [2/30] Config 4: cp=3_buf=on-merges_sharing
+       -> OK (components=43, time=25.2s)
+  [3/30] Config 8: cp=3_buf=fpga20
+       -> FAILED (60.1s)
+  [4/30] Config 12: cp=3_buf=fpga20_sharing
+       -> FAILED (60.1s)
+  [5/30] Config 16: cp=3_buf=fpl22
+       -> FAILED (60.1s)
+  [6/30] Config 20: cp=3_buf=fpl22_sharing
+       -> FAILED (60.1s)
+  [7/30] Config 24: cp=4_buf=on-merges
+       -> OK (components=43, time=22.2s)
+  [8/30] Config 28: cp=4_buf=on-merges_sharing
+       -> OK (components=43, time=20.5s)
+  [9/30] Config 32: cp=4_buf=fpga20
+       -> FAILED (60.1s)
+  [10/30] Config 36: cp=4_buf=fpga20_sharing
+       -> FAILED (60.1s)
+  [11/30] Config 40: cp=4_buf=fpl22
+       -> FAILED (60.1s)
+  [12/30] Config 44: cp=4_buf=fpl22_sharing
+       -> FAILED (60.1s)
+  [13/30] Config 48: cp=5_buf=on-merges
+       -> OK (components=43, time=21.2s)
+  [14/30] Config 52: cp=5_buf=on-merges_sharing
+       -> OK (components=43, time=21.3s)
+  [15/30] Config 56: cp=5_buf=fpga20
+       -> FAILED (60.0s)
+  [16/30] Config 60: cp=5_buf=fpga20_sharing
+       -> FAILED (60.1s)
+  [17/30] Config 64: cp=5_buf=fpl22
+       -> FAILED (60.1s)
+  [18/30] Config 68: cp=5_buf=fpl22_sharing
+       -> FAILED (60.1s)
+  [19/30] Config 72: cp=6_buf=on-merges
+       -> OK (components=43, time=19.2s)
+  [20/30] Config 76: cp=6_buf=on-merges_sharing
+       -> OK (components=43, time=18.9s)
+  [21/30] Config 80: cp=6_buf=fpga20
+       -> FAILED (60.0s)
+  [22/30] Config 84: cp=6_buf=fpga20_sharing
+       -> FAILED (60.0s)
+  [23/30] Config 88: cp=6_buf=fpl22
+       -> FAILED (60.1s)
+  [24/30] Config 92: cp=6_buf=fpl22_sharing
+       -> FAILED (60.0s)
+  [25/30] Config 96: cp=8_buf=on-merges
+       -> OK (components=43, time=20.4s)
+  [26/30] Config 100: cp=8_buf=on-merges_sharing
+       -> OK (components=43, time=20.5s)
+  [27/30] Config 104: cp=8_buf=fpga20
+       -> OK (components=42, time=37.5s)
+  [28/30] Config 108: cp=8_buf=fpga20_sharing
+       -> OK (components=42, time=36.8s)
+  [29/30] Config 112: cp=8_buf=fpl22
+       -> FAILED (60.0s)
+  [30/30] Config 116: cp=8_buf=fpl22_sharing
+       -> FAILED (60.0s)
+Saved results/pa_dse/binary_search/dynamatic/Grid_Search_results.csv
+
+============================================================
+  Strategy: Random 30% (30 configs)
+============================================================
+  [1/30] Config 28: cp=4_buf=on-merges_sharing
+       -> OK (components=43, time=19.1s)
+  [2/30] Config 6: cp=3_buf=on-merges_sharing_no-lsq
+       -> OK (components=43, time=18.8s)
+  [3/30] Config 70: cp=5_buf=fpl22_sharing_no-lsq
+       -> FAILED (60.1s)
+  [4/30] Config 62: cp=5_buf=fpga20_sharing_no-lsq
+       -> FAILED (60.1s)
+  [5/30] Config 57: cp=5_buf=fpga20_ftd
+       -> FAILED (4.7s)
+  [6/30] Config 35: cp=4_buf=fpga20_no-lsq_ftd
+       -> FAILED (4.5s)
+  [7/30] Config 26: cp=4_buf=on-merges_no-lsq
+       -> OK (components=43, time=19.0s)
+  [8/30] Config 22: cp=3_buf=fpl22_sharing_no-lsq
+       -> FAILED (60.1s)
+  [9/30] Config 108: cp=8_buf=fpga20_sharing
+       -> OK (components=42, time=37.0s)
+  [10/30] Config 8: cp=3_buf=fpga20
+       -> FAILED (60.1s)
+  [11/30] Config 7: cp=3_buf=on-merges_sharing_no-lsq_ftd
+       -> OK (components=43, time=21.9s)
+  [12/30] Config 23: cp=3_buf=fpl22_sharing_no-lsq_ftd
+       -> FAILED (4.4s)
+  [13/30] Config 55: cp=5_buf=on-merges_sharing_no-lsq_ftd
+       -> OK (components=43, time=21.7s)
+  [14/30] Config 59: cp=5_buf=fpga20_no-lsq_ftd
+       -> FAILED (4.4s)
+  [15/30] Config 129: cp=10_buf=fpga20_ftd
+       -> FAILED (4.4s)
+  [16/30] Config 142: cp=10_buf=fpl22_sharing_no-lsq
+       -> FAILED (60.0s)
+  [17/30] Config 50: cp=5_buf=on-merges_no-lsq
+       -> OK (components=43, time=19.1s)
+  [18/30] Config 91: cp=6_buf=fpl22_no-lsq_ftd
+       -> FAILED (4.4s)
+  [19/30] Config 83: cp=6_buf=fpga20_no-lsq_ftd
+       -> FAILED (4.4s)
+  [20/30] Config 89: cp=6_buf=fpl22_ftd
+       -> FAILED (4.9s)
+  [21/30] Config 69: cp=5_buf=fpl22_sharing_ftd
+       -> FAILED (5.4s)
+  [22/30] Config 53: cp=5_buf=on-merges_sharing_ftd
+       -> OK (components=43, time=31.2s)
+  [23/30] Config 143: cp=10_buf=fpl22_sharing_no-lsq_ftd
+       -> FAILED (6.7s)
+  [24/30] Config 139: cp=10_buf=fpl22_no-lsq_ftd
+       -> FAILED (7.4s)
+  [25/30] Config 75: cp=6_buf=on-merges_no-lsq_ftd
+       -> OK (components=43, time=34.6s)
+  [26/30] Config 138: cp=10_buf=fpl22_no-lsq
+       -> FAILED (60.1s)
+  [27/30] Config 103: cp=8_buf=on-merges_sharing_no-lsq_ftd
+       -> OK (components=43, time=37.9s)
+  [28/30] Config 111: cp=8_buf=fpga20_sharing_no-lsq_ftd
+       -> FAILED (7.3s)
+  [29/30] Config 0: cp=3_buf=on-merges
+       -> OK (components=43, time=30.9s)
+  [30/30] Config 97: cp=8_buf=on-merges_ftd
+       -> OK (components=43, time=35.4s)
+Saved results/pa_dse/binary_search/dynamatic/Random_30%_results.csv
+
+============================================================
+  Strategy: LHS 20% (30 configs)
+============================================================
+  [1/30] Config 0: cp=3_buf=on-merges
+       -> OK (components=43, time=32.6s)
+  [2/30] Config 4: cp=3_buf=on-merges_sharing
+       -> OK (components=43, time=30.9s)
+  [3/30] Config 11: cp=3_buf=fpga20_no-lsq_ftd
+       -> FAILED (7.7s)
+  [4/30] Config 15: cp=3_buf=fpga20_sharing_no-lsq_ftd
+       -> FAILED (7.2s)
+  [5/30] Config 20: cp=3_buf=fpl22_sharing
+       -> FAILED (60.1s)
+  [6/30] Config 25: cp=4_buf=on-merges_ftd
+       -> OK (components=43, time=29.5s)
+  [7/30] Config 28: cp=4_buf=on-merges_sharing
+       -> OK (components=43, time=21.1s)
+  [8/30] Config 37: cp=4_buf=fpga20_sharing_ftd
+       -> FAILED (5.1s)
+  [9/30] Config 38: cp=4_buf=fpga20_sharing_no-lsq
+       -> FAILED (60.1s)
+  [10/30] Config 47: cp=4_buf=fpl22_sharing_no-lsq_ftd
+       -> FAILED (6.0s)
+  [11/30] Config 51: cp=5_buf=on-merges_no-lsq_ftd
+       -> OK (components=43, time=25.1s)
+  [12/30] Config 52: cp=5_buf=on-merges_sharing
+       -> OK (components=43, time=21.5s)
+  [13/30] Config 57: cp=5_buf=fpga20_ftd
+       -> FAILED (5.1s)
+  [14/30] Config 62: cp=5_buf=fpga20_sharing_no-lsq
+       -> FAILED (60.1s)
+  [15/30] Config 68: cp=5_buf=fpl22_sharing
+       -> FAILED (60.1s)
+  [16/30] Config 73: cp=6_buf=on-merges_ftd
+       -> OK (components=43, time=25.6s)
+  [17/30] Config 80: cp=6_buf=fpga20
+       -> FAILED (60.1s)
+  [18/30] Config 85: cp=6_buf=fpga20_sharing_ftd
+       -> FAILED (6.4s)
+  [19/30] Config 86: cp=6_buf=fpga20_sharing_no-lsq
+       -> FAILED (60.1s)
+  [20/30] Config 95: cp=6_buf=fpl22_sharing_no-lsq_ftd
+       -> FAILED (6.5s)
+  [21/30] Config 97: cp=8_buf=on-merges_ftd
+       -> OK (components=43, time=25.8s)
+  [22/30] Config 104: cp=8_buf=fpga20
+       -> OK (components=42, time=42.8s)
+  [23/30] Config 108: cp=8_buf=fpga20_sharing
+       -> OK (components=42, time=42.6s)
+  [24/30] Config 111: cp=8_buf=fpga20_sharing_no-lsq_ftd
+       -> FAILED (5.1s)
+  [25/30] Config 118: cp=8_buf=fpl22_sharing_no-lsq
+       -> FAILED (60.1s)
+  [26/30] Config 122: cp=10_buf=on-merges_no-lsq
+       -> OK (components=43, time=22.8s)
+  [27/30] Config 124: cp=10_buf=on-merges_sharing
+       -> OK (components=43, time=21.8s)
+  [28/30] Config 130: cp=10_buf=fpga20_no-lsq
+       -> OK (components=42, time=27.3s)
+  [29/30] Config 137: cp=10_buf=fpl22_ftd
+       -> FAILED (5.1s)
+  [30/30] Config 141: cp=10_buf=fpl22_sharing_ftd
+       -> FAILED (5.1s)
+Saved results/pa_dse/binary_search/dynamatic/LHS_20%_results.csv
+PA-DSE / binary_search
+  Initial configs:   144
+  Static blocked:    0
+  Static suppressed: 48
+  Active queue:      96
+  [1/30] Config 0: cp=3_buf=on-merges
+       -> OK (components=43, buffers=6, time=21.7s)
+  [2/30] Config 1: cp=3_buf=on-merges_ftd
+       -> OK (components=43, buffers=6, time=25.5s)
+  [3/30] Config 2: cp=3_buf=on-merges_no-lsq
+       -> OK (components=43, buffers=6, time=21.7s)
+  [4/30] Config 3: cp=3_buf=on-merges_no-lsq_ftd
+       -> OK (components=43, buffers=6, time=25.9s)
+  [5/30] Config 4: cp=3_buf=on-merges_sharing
+       -> OK (components=43, buffers=6, time=21.5s)
+  [6/30] Config 5: cp=3_buf=on-merges_sharing_ftd
+       -> OK (components=43, buffers=6, time=25.3s)
+  [7/30] Config 24: cp=4_buf=on-merges
+       -> OK (components=43, buffers=6, time=21.6s)
+  [8/30] Config 25: cp=4_buf=on-merges_ftd
+       -> OK (components=43, buffers=6, time=24.9s)
+  [9/30] Config 26: cp=4_buf=on-merges_no-lsq
+       -> OK (components=43, buffers=6, time=21.5s)
+  [10/30] Config 27: cp=4_buf=on-merges_no-lsq_ftd
+       -> OK (components=43, buffers=6, time=25.6s)
+  [11/30] Config 28: cp=4_buf=on-merges_sharing
+       -> OK (components=43, buffers=6, time=21.9s)
+  [12/30] Config 29: cp=4_buf=on-merges_sharing_ftd
+       -> OK (components=43, buffers=6, time=25.3s)
+  [13/30] Config 32: cp=4_buf=fpga20
+       -> FAILED (60.1s), error=timeout
+  [14/30] Config 33: cp=4_buf=fpga20_ftd
+       -> FAILED (6.4s), error=buffer_placement_failed
+  [15/30] Config 34: cp=4_buf=fpga20_no-lsq
+       -> FAILED (60.1s), error=timeout
+       -> AUTOPHAGY: learned pattern {'clock_period': 4, 'buffer_algorithm': 'fpga20', 'sharing': False, 'fast_token_delivery': False}
+       -> AUTOPHAGY: suppressed 0 future configs
+  [16/30] Config 35: cp=4_buf=fpga20_no-lsq_ftd
+       -> FAILED (6.3s), error=buffer_placement_failed
+       -> AUTOPHAGY: learned pattern {'clock_period': 4, 'buffer_algorithm': 'fpga20', 'sharing': False, 'fast_token_delivery': True}
+       -> AUTOPHAGY: suppressed 0 future configs
+  [17/30] Config 36: cp=4_buf=fpga20_sharing
+       -> FAILED (60.1s), error=timeout
+       -> AUTOPHAGY: learned pattern {'clock_period': 4, 'buffer_algorithm': 'fpga20', 'fast_token_delivery': False}
+       -> AUTOPHAGY: suppressed 1 future configs
+  [18/30] Config 37: cp=4_buf=fpga20_sharing_ftd
+       -> FAILED (6.4s), error=buffer_placement_failed
+       -> AUTOPHAGY: learned pattern {'clock_period': 4, 'buffer_algorithm': 'fpga20', 'fast_token_delivery': True}
+       -> AUTOPHAGY: suppressed 2 future configs
+  [19/30] Config 40: cp=4_buf=fpl22
+       -> FAILED (60.1s), error=timeout
+       -> AUTOPHAGY: learned pattern {'clock_period': 4, 'disable_lsq': False, 'fast_token_delivery': False}
+       -> AUTOPHAGY: suppressed 3 future configs
+  [20/30] Config 41: cp=4_buf=fpl22_ftd
+       -> FAILED (6.0s), error=buffer_placement_failed
+       -> AUTOPHAGY: learned pattern {'clock_period': 4, 'disable_lsq': False, 'fast_token_delivery': True}
+       -> AUTOPHAGY: suppressed 4 future configs
+  [21/30] Config 42: cp=4_buf=fpl22_no-lsq
+       -> FAILED (60.1s), error=timeout
+       -> AUTOPHAGY: learned pattern {'clock_period': 4, 'buffer_algorithm': 'fpl22', 'sharing': False, 'fast_token_delivery': False}
+       -> AUTOPHAGY: suppressed 4 future configs
+  [22/30] Config 43: cp=4_buf=fpl22_no-lsq_ftd
+       -> FAILED (6.1s), error=buffer_placement_failed
+       -> AUTOPHAGY: learned pattern {'clock_period': 4, 'buffer_algorithm': 'fpl22', 'sharing': False, 'fast_token_delivery': True}
+       -> AUTOPHAGY: suppressed 4 future configs
+  [23/30] Config 48: cp=5_buf=on-merges
+       -> OK (components=43, buffers=6, time=21.4s)
+  [24/30] Config 49: cp=5_buf=on-merges_ftd
+       -> OK (components=43, buffers=6, time=25.0s)
+  [25/30] Config 50: cp=5_buf=on-merges_no-lsq
+       -> OK (components=43, buffers=6, time=22.0s)
+  [26/30] Config 51: cp=5_buf=on-merges_no-lsq_ftd
+       -> OK (components=43, buffers=6, time=26.9s)
+  [27/30] Config 52: cp=5_buf=on-merges_sharing
+       -> OK (components=43, buffers=6, time=23.8s)
+  [28/30] Config 53: cp=5_buf=on-merges_sharing_ftd
+       -> OK (components=43, buffers=6, time=26.1s)
+  [29/30] Config 56: cp=5_buf=fpga20
+       -> FAILED (60.1s), error=timeout
+       -> AUTOPHAGY: learned pattern {'sharing': False, 'fast_token_delivery': False}
+       -> AUTOPHAGY: suppressed 27 future configs
+  [30/30] Config 57: cp=5_buf=fpga20_ftd
+       -> FAILED (7.0s), error=buffer_placement_failed
+       -> AUTOPHAGY: learned pattern {'sharing': False, 'fast_token_delivery': True}
+       -> AUTOPHAGY: suppressed 52 future configs
+Saved results/pa_dse/binary_search/dynamatic/PA_DSE_results.csv
+
+============================================================
+=== Summary ===
+       strategy   eval   succ   fail     SR%      time   best_comp   mean_comp
+    Grid Search     30     12     18    40.0    1370.0          42        42.8
+     Random 30%     30     12     18    40.0     750.0          42        42.9
+        LHS 20%     30     13     17    43.3     849.0          42        42.8
+         PA-DSE     30     18     12    60.0     826.1          43        43.0
+Saved results/pa_dse/binary_search/dynamatic/pa_dse_comparison_stats.csv

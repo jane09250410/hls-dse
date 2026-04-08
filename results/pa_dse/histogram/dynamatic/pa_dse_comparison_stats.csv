@@ -1,0 +1,5 @@
+strategy,total_evaluated,successful,failed,success_rate_pct,total_time_s,best_components,mean_components,best_buffers,mean_buffers,benchmark
+Grid Search,30,30,0,100.0,813.9,43,45.3,4,6.3,histogram
+Random 30%,30,27,3,90.0,848.6,42,43.9,4,6.1,histogram
+LHS 20%,30,28,2,93.3,801.5,42,44.4,4,6.2,histogram
+PA-DSE,30,28,2,93.3,755.8,42,44.1,4,5.9,histogram

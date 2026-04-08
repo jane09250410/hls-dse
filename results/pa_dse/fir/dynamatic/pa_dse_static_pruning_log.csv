@@ -1,0 +1,49 @@
+config_id,rule,severity,description
+6,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+7,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+8,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+9,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+10,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+11,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+12,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+13,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+14,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+15,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+16,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+17,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+18,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+19,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+20,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+21,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+22,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+23,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+30,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+31,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+38,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+39,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+46,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+47,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+54,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+55,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+62,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+63,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+70,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+71,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+78,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+79,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+86,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+87,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+94,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+95,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+102,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+103,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+110,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+111,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+118,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+119,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+126,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+127,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+134,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+135,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+142,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+143,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues

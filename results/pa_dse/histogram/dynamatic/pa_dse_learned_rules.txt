@@ -1,0 +1,1 @@
+timeout: {'clock_period': 4, 'buffer_algorithm': 'fpl22', 'sharing': False, 'disable_lsq': True} (support=2)

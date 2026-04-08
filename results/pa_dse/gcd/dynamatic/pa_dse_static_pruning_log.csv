@@ -1,0 +1,109 @@
+config_id,rule,severity,description
+6,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+7,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+8,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+9,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+10,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+11,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+12,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+13,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+14,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+15,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+16,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+17,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+18,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+19,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+20,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+21,R2_tight_clock_complex_buffer,suppress,Clock period <= 3ns with fpga20/fpl22 may cause MILP timeout
+22,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+23,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+30,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+31,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+32,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+33,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+34,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+35,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+36,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+37,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+38,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+39,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+40,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+41,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+42,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+43,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+44,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+45,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+46,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+47,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+54,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+55,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+56,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+57,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+58,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+59,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+60,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+61,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+62,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+63,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+64,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+65,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+66,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+67,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+68,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+69,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+70,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+71,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+78,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+79,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+80,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+81,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+82,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+83,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+84,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+85,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+86,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+87,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+88,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+89,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+90,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+91,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+92,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+93,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+94,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+95,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+102,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+103,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+104,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+105,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+106,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+107,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+108,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+109,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+110,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+111,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+112,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+113,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+114,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+115,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+116,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+117,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+118,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+119,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+126,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+127,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+128,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+129,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+130,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+131,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+132,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+133,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+134,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+135,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+136,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+137,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+138,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+139,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+140,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+141,R_CA1_while_loop_complex_buffer,suppress,While loops with complex buffer algorithms may cause MILP issues
+142,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues
+143,R1_lsq_sharing_conflict,suppress,disable_lsq with sharing may cause memory ordering issues

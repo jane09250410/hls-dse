@@ -1,0 +1,2 @@
+timeout: {'clock_period': 4, 'buffer_algorithm': 'fpl22', 'sharing': False, 'fast_token_delivery': False} (support=2)
+timeout: {'clock_period': 4, 'buffer_algorithm': 'fpl22', 'fast_token_delivery': False} (support=3)
