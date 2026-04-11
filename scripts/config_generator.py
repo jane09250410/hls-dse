@@ -7,7 +7,7 @@ def generate_bambu_configs(enable_pipeline=False):
     configs = []
     config_id = 0
 
-    clock_periods = [5, 8, 10, 15, 20]
+    clock_periods = [3, 5, 8, 10, 15, 20, 25]
     memory_policies = ['ALL_BRAM', 'NO_BRAM']
     channels_types = ['MEM_ACC_11', 'MEM_ACC_N1', 'MEM_ACC_NN']
     channels_numbers = [1, 2]
@@ -23,7 +23,7 @@ def generate_bambu_configs(enable_pipeline=False):
 
     # Pipeline configs (only if enabled)
     if enable_pipeline:
-        pipeline_iis = [1, 2, 4]
+        pipeline_iis = [1, 2, 4, 8]
         for cp, ii, mem, ch_type, ch_num in itertools.product(
             clock_periods, pipeline_iis, memory_policies,
             channels_types, channels_numbers

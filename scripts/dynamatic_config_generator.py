@@ -25,7 +25,7 @@ Config = Dict[str, Any]
 # Parameter Space Definition
 # ============================================================
 
-CLOCK_PERIODS = [3, 4, 5, 6, 8, 10]
+CLOCK_PERIODS = [2, 3, 4, 5, 6, 8, 10, 12]
 
 BUFFER_ALGORITHMS = ["on-merges", "fpga20", "fpl22"]
 
