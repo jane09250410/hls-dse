@@ -103,7 +103,7 @@ def run_single(
         t_end = time.time()
 
         # Extract QoR
-        area = _extract_float(r"Total\s+area\s*[=:]\s*([\d.]+)", output)
+        area = _extract_float(r"Total\s+estimated\s+area\s*[=:]\s*([\d.]+)", output)
         latency = _extract_int(r"Number\s+of\s+states\s*[=:]\s*(\d+)", output)
         error_type = None
         qor_value = None

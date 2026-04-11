@@ -45,7 +45,7 @@ def make_bambu_synth(src, top, results_base):
             )
             output = result.stdout + "\n" + result.stderr
             elapsed = time.time() - t0
-            success = result.returncode == 0 and "Total area" in output
+            success = result.returncode == 0 and "Total estimated area" in output
         except subprocess.TimeoutExpired:
             output = "TIMEOUT"
             elapsed = time.time() - t0
