@@ -25,7 +25,14 @@ from pa_dse import PADSE
 BENCHMARK_DEFAULTS = {
     "matmul": ("benchmarks/matmul/matmul.c", "matmul"),
     "fir": ("benchmarks/fir/fir.c", "fir"),
-    "vadd": ("benchmarks/vadd/vadd.c", "vazzzz
+    "vadd": ("benchmarks/vadd/vadd.c", "vadd"),
+    "histogram": ("benchmarks/histogram/histogram.c", "histogram"),
+    "dotprod": ("benchmarks/dotprod/dotprod.c", "dotprod"),
+    "stencil": ("benchmarks/stencil/stencil.c", "stencil"),
+    "matvec": ("benchmarks/matvec/matvec.c", "matvec"),
+    "atax": ("benchmarks/atax/atax.c", "atax"),
+    "gemm": ("benchmarks/gemm/gemm.c", "gemm"),
+    "spmv": ("benchmarks/spmv/spmv.c", "spmv"),
 }
 
 
@@ -35,8 +42,15 @@ def save_csv(rows, path):
     print(f"Saved {path}")
 
 
-def run_all(benchmark: str, src_file: str, top_func: str,
-            results_root: str, budget: int, enable_pipeline: bool):
+def run_all(
+    benchmark: str,
+    src_file: str,
+    top_func: str,
+    results_root: str,
+    budget: int,
+    enable_pipeline: bool,
+    ablation_mode: str = "full",
+):
     Path(results_root).mkdir(parents=True, exist_ok=True)
 
     configs = generate_bambu_configs(enable_pipeline=enable_pipeline)
@@ -71,6 +85,7 @@ def run_all(benchmark: str, src_file: str, top_func: str,
     print(f"Source file: {src_file}")
     print(f"Top function: {top_func}")
     print(f"Pipeline enabled in search space: {enable_pipeline}")
+    print(f"Ablation mode: {ablation_mode}")
     print(f"Total design points: {len(configs)}")
     print("=" * 60)
 
@@ -93,6 +108,7 @@ def run_all(benchmark: str, src_file: str, top_func: str,
         results_dir=os.path.join(results_root, "PA_DSE"),
         budget=budget,
         autophagy_threshold=2,
+        ablation_mode=ablation_mode,
     )
     pa_result = pa.explore(configs)
     all_stats.append(pa_result.stats)
@@ -122,12 +138,19 @@ def run_all(benchmark: str, src_file: str, top_func: str,
 
 def main():
     parser = argparse.ArgumentParser(description="Run PA-DSE and compare against baselines.")
-    parser.add_argument("--benchmark", type=str, default="matmul", choices=["matmul", "fir", "vadd"])
+    parser.add_argument("--benchmark", type=str, default="matmul", choices=["matmul", "fir", "vadd", "histogram"])
     parser.add_argument("--src", type=str, default=None)
     parser.add_argument("--top", type=str, default=None)
     parser.add_argument("--budget", type=int, default=20)
     parser.add_argument("--results-root", type=str, default="results/pa_dse")
     parser.add_argument("--enable-pipeline", action="store_true")
+    parser.add_argument(
+        "--ablation",
+        type=str,
+        default="full",
+        choices=["no_filter", "static_only", "full"],
+        help="Ablation mode: no_filter / static_only / full",
+    )
     args = parser.parse_args()
 
     if args.src is None or args.top is None:
@@ -140,6 +163,8 @@ def main():
         src_file, top_func = args.src, args.top
 
     mode_dir = "with_pipeline" if args.enable_pipeline else "no_pipeline"
+    if args.ablation != "full":
+        mode_dir = mode_dir + "_" + args.ablation
     results_root = os.path.join(args.results_root, args.benchmark, mode_dir)
 
     run_all(
@@ -149,6 +174,7 @@ def main():
         results_root=results_root,
         budget=args.budget,
         enable_pipeline=args.enable_pipeline,
+        ablation_mode=args.ablation,
     )
 
 
