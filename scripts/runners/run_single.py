@@ -102,16 +102,19 @@ def run_single(
         output, elapsed, success = synthesize_fn(config)
         t_end = time.time()
 
-        # Extract QoR
-        area = _extract_float(r"Total\s+estimated\s+area\s*[=:]\s*([\d.]+)", output)
-        latency = _extract_int(r"Number\s+of\s+states\s*[=:]\s*(\d+)", output)
+        # Extract QoR (tool-specific)
+        if tool == "bambu":
+            area = _extract_float(r"Total\s+estimated\s+area\s*[=:]\s*([\d.]+)", output)
+            latency = _extract_int(r"Number\s+of\s+states\s*[=:]\s*(\d+)", output)
+        else:  # dynamatic
+            area = _extract_float(r"components\s*=\s*(\d+)", output)       # component count as area proxy
+            latency = _extract_int(r"handshake_ops\s*=\s*(\d+)", output)   # handshake ops as latency proxy
         error_type = None
         qor_value = None
 
         if success:
             n_success += 1
-            qor_value = area if tool == "bambu" else _extract_float(
-                r"component[s]?\s*[=:]\s*(\d+)", output)
+            qor_value = area  # area for bambu, components for dynamatic
 
             if ttff is None:
                 ttff = t_end - logger._run_start
@@ -129,7 +132,11 @@ def run_single(
                 probes_succeeded += 1
         else:
             n_wasted += 1
-            error_type = extract_error_type(output)
+            if tool == "bambu":
+                error_type = extract_error_type(output)
+            else:
+                from run_dynamatic_single import classify_dynamatic_error
+                error_type = classify_dynamatic_error(output)
 
         # Step 5: update
         method.update(config, success, output, elapsed)

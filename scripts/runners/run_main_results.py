@@ -28,7 +28,47 @@ BAMBU = {
 }
 BAMBU_PRIMARY = [60]
 BAMBU_SWEEP   = [20, 40, 60, 80]
+
+DYNAMATIC_PATH = os.path.expanduser("~/dynamatic")
+DYNAMATIC = {
+    "gcd":           {"src": f"{DYNAMATIC_PATH}/integration-test/gcd/gcd.c",                     "top": "gcd"},
+    "matching":      {"src": f"{DYNAMATIC_PATH}/integration-test/matching/matching.c",             "top": "matching"},
+    "binary_search": {"src": f"{DYNAMATIC_PATH}/integration-test/binary_search/binary_search.c",   "top": "binary_search"},
+    "fir":           {"src": f"{DYNAMATIC_PATH}/integration-test/fir/fir.c",                       "top": "fir"},
+    "histogram":     {"src": f"{DYNAMATIC_PATH}/integration-test/histogram/histogram.c",           "top": "histogram"},
+}
+DYNAMATIC_PRIMARY = [30]
+DYNAMATIC_SWEEP   = [20, 30, 40, 60]
+
 N_SEEDS = 20
+
+
+def make_dynamatic_synth(src, top, results_base):
+    """Create a synthesis function for Dynamatic.
+
+    Wraps run_dynamatic_single() and encodes metrics into the output string
+    so that run_single.py can extract them with regex.
+    """
+    from run_dynamatic_single import run_dynamatic_single
+
+    def synthesize(config):
+        success, metrics, raw_output = run_dynamatic_single(
+            config=config,
+            src_file=os.path.abspath(src),
+            top_func=top,
+            timeout=120,
+        )
+        # Encode metrics into output string for run_single.py extraction
+        # run_single uses: component[s]? =: (\d+) for Dynamatic QoR
+        encoded = raw_output
+        if success:
+            nc = metrics.get("num_components", 0)
+            nb = metrics.get("num_buffers", 0)
+            nho = metrics.get("num_handshake_ops", 0)
+            encoded += f"\n[METRICS] components={nc} buffers={nb} handshake_ops={nho}"
+        elapsed = metrics.get("compile_time_s", 0.0)
+        return encoded, elapsed, success
+    return synthesize
 
 
 def make_bambu_synth(src, top, results_base):
@@ -114,19 +154,85 @@ def run_bambu_phase(benchmarks, budgets, logger, include_appendix):
                            ablation_config="N/A", tau=0, theta=0, n_min=0, p_probe=0)
 
 
+def run_dynamatic_phase(benchmarks, budgets, logger, include_appendix):
+    """Run all Dynamatic experiments for given budgets."""
+    from dynamatic_config_generator import generate_dynamatic_configs
+    configs = generate_dynamatic_configs()
+
+    for bname, binfo in benchmarks.items():
+        src, top = binfo["src"], binfo["top"]
+
+        for B in budgets:
+            base = f"results/experiments/dynamatic/{bname}/B{B}"
+            synth = make_dynamatic_synth(src, top, base)
+
+            # ── Main baselines (always) ─────────────────────────
+            for seed in range(N_SEEDS):
+                print(f"  Random / {bname} / B={B} / seed={seed}", flush=True)
+                m = RandomMethod(configs, bname, "dynamatic", B, seed=seed)
+                run_single(m, synth, logger, tool="dynamatic",
+                           ablation_config="N/A", tau=0, theta=0, n_min=0, p_probe=0)
+
+            for seed in range(N_SEEDS):
+                print(f"  Filtered_Random / {bname} / B={B} / seed={seed}", flush=True)
+                m = FilteredRandomMethod(configs, bname, "dynamatic", B,
+                                         seed=seed, source_path=src)
+                run_single(m, synth, logger, tool="dynamatic",
+                           ablation_config="N/A", tau=0, theta=0, n_min=0, p_probe=0)
+
+            print(f"  PA-DSE_L1 / {bname} / B={B}", flush=True)
+            m = PADSEMethod(configs, bname, "dynamatic", B,
+                            ablation_config="phago+Full",
+                            dynamic_mode="intersection", source_path=src)
+            run_single(m, synth, logger, tool="dynamatic",
+                       ablation_config="phago+Full(L1)")
+
+            print(f"  PA-DSE_Full / {bname} / B={B}", flush=True)
+            m = PADSEMethod(configs, bname, "dynamatic", B,
+                            ablation_config="phago+Full", source_path=src)
+            run_single(m, synth, logger, tool="dynamatic")
+
+            # ── Appendix baselines (phase 2 only) ──────────────
+            if include_appendix:
+                print(f"  Grid / {bname} / B={B}", flush=True)
+                m = GridMethod(configs, bname, "dynamatic", B)
+                run_single(m, synth, logger, tool="dynamatic",
+                           ablation_config="N/A", tau=0, theta=0, n_min=0, p_probe=0)
+
+                for seed in range(N_SEEDS):
+                    print(f"  LHS / {bname} / B={B} / seed={seed}", flush=True)
+                    m = LHSMethod(configs, bname, "dynamatic", B, seed=seed)
+                    run_single(m, synth, logger, tool="dynamatic",
+                               ablation_config="N/A", tau=0, theta=0, n_min=0, p_probe=0)
+
+                print(f"  Failure_Memo / {bname} / B={B}", flush=True)
+                m = FailureMemoMethod(configs, bname, "dynamatic", B)
+                run_single(m, synth, logger, tool="dynamatic",
+                           ablation_config="N/A", tau=0, theta=0, n_min=0, p_probe=0)
+
+
 def main():
     parser = argparse.ArgumentParser(description="E1: Main results")
     parser.add_argument("--phase", choices=["1", "2"], required=True)
+    parser.add_argument("--tool", choices=["bambu", "dynamatic", "both"], default="both")
     args = parser.parse_args()
 
     logger = ExperimentLogger()
 
     if args.phase == "1":
-        print("=== Phase 1: Primary budgets (B=60) — main baselines only ===")
-        run_bambu_phase(BAMBU, BAMBU_PRIMARY, logger, include_appendix=False)
+        if args.tool in ("bambu", "both"):
+            print("=== Phase 1: Bambu (B=60) ===", flush=True)
+            run_bambu_phase(BAMBU, BAMBU_PRIMARY, logger, include_appendix=False)
+        if args.tool in ("dynamatic", "both"):
+            print("=== Phase 1: Dynamatic (B=30) ===", flush=True)
+            run_dynamatic_phase(DYNAMATIC, DYNAMATIC_PRIMARY, logger, include_appendix=False)
     else:
-        print("=== Phase 2: Budget sweep (B=20,40,60,80) + appendix baselines ===")
-        run_bambu_phase(BAMBU, BAMBU_SWEEP, logger, include_appendix=True)
+        if args.tool in ("bambu", "both"):
+            print("=== Phase 2: Bambu sweep ===", flush=True)
+            run_bambu_phase(BAMBU, BAMBU_SWEEP, logger, include_appendix=True)
+        if args.tool in ("dynamatic", "both"):
+            print("=== Phase 2: Dynamatic sweep ===", flush=True)
+            run_dynamatic_phase(DYNAMATIC, DYNAMATIC_SWEEP, logger, include_appendix=True)
 
     print(f"Done. Logs → {logger.output_dir}")
 
