@@ -46,20 +46,29 @@ N_SEEDS = 20
 def make_dynamatic_synth(src, top, results_base):
     """Create a synthesis function for Dynamatic.
 
-    Wraps run_dynamatic_single() and encodes metrics into the output string
-    so that run_single.py can extract them with regex.
+    Each config gets its own temp directory with a copy of the source file,
+    so that Dynamatic's output directory (out/) does not conflict across
+    sequential evaluations.
     """
     from run_dynamatic_single import run_dynamatic_single
+    import shutil, tempfile
 
     def synthesize(config):
+        # Create isolated work directory per config
+        work_dir = os.path.join(results_base, f"cfg_{config['id']}")
+        os.makedirs(work_dir, exist_ok=True)
+
+        # Copy source file to work directory
+        src_abs = os.path.abspath(src)
+        src_copy = os.path.join(work_dir, os.path.basename(src_abs))
+        shutil.copy2(src_abs, src_copy)
+
         success, metrics, raw_output = run_dynamatic_single(
             config=config,
-            src_file=os.path.abspath(src),
+            src_file=src_copy,
             top_func=top,
             timeout=120,
         )
-        # Encode metrics into output string for run_single.py extraction
-        # run_single uses: component[s]? =: (\d+) for Dynamatic QoR
         encoded = raw_output
         if success:
             nc = metrics.get("num_components", 0)
