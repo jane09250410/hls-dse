@@ -16,3 +16,5 @@ out/
 panda-temp/
 test.xml
 synthesize_*.sh
+__pycache__/
+*.pyc

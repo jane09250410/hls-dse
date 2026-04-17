@@ -12,7 +12,7 @@ import argparse, os, subprocess, sys, time, tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from config_generator import generate_bambu_configs, config_to_bambu_cmd
-from logging.experiment_logger import ExperimentLogger
+from exp_logging.experiment_logger import ExperimentLogger
 from runners.run_single import run_single
 from methods.baseline_methods import (
     RandomMethod, FilteredRandomMethod, GridMethod, LHSMethod, FailureMemoMethod)

@@ -19,7 +19,7 @@ import re, time
 from typing import Callable, Optional, Tuple
 
 from methods.base import DSEMethod
-from logging.experiment_logger import ExperimentLogger
+from exp_logging.experiment_logger import ExperimentLogger
 from pattern_learner import extract_error_type
 
 

@@ -15,7 +15,7 @@ import argparse, os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from config_generator import generate_bambu_configs
-from logging.experiment_logger import ExperimentLogger
+from exp_logging.experiment_logger import ExperimentLogger
 from runners.run_main_results import make_bambu_synth
 from runners.run_single import run_single
 from methods.pa_dse_method import PADSEMethod

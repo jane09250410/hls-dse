@@ -1,0 +1,5 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+SimulatedAnnealing_vadd_B30_s0_3099163,SimulatedAnnealing,vadd,bambu,30,0,,N/A,0,0,0,0,30,0,30,0.0,area,,,,0,,72.516,0,0,,0,0,0,0.00,0.00,0.00
+GeneticAlgorithm_vadd_B30_s0_3171679,GeneticAlgorithm,vadd,bambu,30,0,,N/A,0,0,0,0,30,7,23,23.3,area,201.0,201.0,6,3,19.535,73.257,0,0,,0,0,0,0.00,0.00,0.00
+GP-BO_vadd_B30_s0_3244948,GP-BO,vadd,bambu,30,0,,N/A,0,0,0,0,30,25,5,83.3,area,201.0,201.0,5,6,4.922,77.043,0,0,,0,0,0,0.00,0.00,0.00
+RF_Classifier_vadd_B30_s0_3321991,RF_Classifier,vadd,bambu,30,0,,N/A,0,0,0,0,30,21,9,70.0,area,201.0,201.0,5,4,4.844,73.622,0,0,,0,0,0,0.00,0.00,0.00

@@ -1,0 +1,4 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+SimulatedAnnealing_vadd_B60_s0_2564468,SimulatedAnnealing,vadd,bambu,60,0,,N/A,0,0,0,0,60,0,60,0.0,area,,,,0,,1257.339,0,0,,0,0,0,0.00,0.00,0.00
+SimulatedAnnealing_vadd_B60_s1_3821819,SimulatedAnnealing,vadd,bambu,60,1,,N/A,0,0,0,0,60,0,60,0.0,area,,,,0,,1498.567,0,0,,0,0,0,0.00,0.00,0.00
+SimulatedAnnealing_vadd_B60_s2_5320399,SimulatedAnnealing,vadd,bambu,60,2,,N/A,0,0,0,0,60,46,14,76.7,area,201.0,201.0,5,8,38.248,2046.246,0,0,,0,0,0,0.00,0.00,0.00
