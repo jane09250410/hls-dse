@@ -1,0 +1,4 @@
+Learner: DFRL (full): 1F/29S, 0 patterns
+  Relevance: clock_period=0.40, buffer_algorithm=0.63, sharing=0.06, disable_lsq=0.07, fast_token_delivery=0.06
+SR=96.7% wasted=1 sigs=0 skipped=0
+Errors: {'milp_infeasible': 1}

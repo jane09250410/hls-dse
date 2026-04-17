@@ -1,0 +1,7 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+PA-DSE_phago+OFRS_vadd_B120_sNone_6669840,PA-DSE_phago+OFRS,vadd,bambu,120,,0,phago+OFRS,2,0.8,5,0.05,120,56,64,46.7,area,201.0,201.0,5,8,127.206,2275.835,0,0,,0,0,0,15.19,65.36,3747.37
+PA-DSE_phago+RPE_vadd_B120_sNone_8945682,PA-DSE_phago+RPE,vadd,bambu,120,,0,phago+RPE,2,0.8,5,0.05,69,56,13,81.2,area,201.0,201.0,5,8,152.300,1347.453,211,211,,1,1,0,19.51,69.48,0.24
+PA-DSE_phago+Full_vadd_B120_sNone_293139,PA-DSE_phago+Full,vadd,bambu,120,,0,phago+Full,2,0.8,5,0.05,67,56,11,83.6,area,201.0,201.0,5,8,127.595,1303.915,213,213,,1,1,0,38.45,111.57,2585.76
+PA-DSE_phago+OFRS_gcd_B120_sNone_1597101,PA-DSE_phago+OFRS,gcd,dynamatic,120,,0,phago+OFRS,2,0.8,5,0.05,120,92,28,76.7,component_count,43.0,43.0,539,9,100.650,4474.390,0,0,,0,0,0,8.01,52.24,1281.52
+PA-DSE_phago+RPE_gcd_B120_sNone_6071494,PA-DSE_phago+RPE,gcd,dynamatic,120,,0,phago+RPE,2,0.8,5,0.05,120,63,57,52.5,component_count,43.0,43.0,539,9,93.504,4074.077,23,23,,1,0,0,3.40,110.79,3.02
+PA-DSE_phago+Full_gcd_B120_sNone_145572,PA-DSE_phago+Full,gcd,dynamatic,120,,0,phago+Full,2,0.8,5,0.05,120,92,28,76.7,component_count,43.0,43.0,539,9,93.432,4458.006,0,0,,0,0,0,3.13,67.16,1291.34

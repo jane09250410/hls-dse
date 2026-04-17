@@ -1,0 +1,4 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+PA-DSE_phago+RPE_vadd_B60_sNone_6834080,PA-DSE_phago+RPE,vadd,bambu,60,,0,phago+RPE,2,0.8,5,0.05,60,47,13,78.3,area,201.0,201.0,5,8,167.763,1328.322,211,211,,1,1,0,16.80,120.68,0.28
+PA-DSE_phago+OFRS_vadd_B60_sNone_8162407,PA-DSE_phago+OFRS,vadd,bambu,60,,0,phago+OFRS,2,0.8,5,0.05,60,54,6,90.0,area,201.0,201.0,5,8,141.878,1298.216,0,0,,0,0,0,16.36,22.06,2880.30
+PA-DSE_phago+Full_vadd_B60_sNone_9460625,PA-DSE_phago+Full,vadd,bambu,60,,0,phago+Full,2,0.8,5,0.05,60,54,6,90.0,area,201.0,201.0,5,8,137.291,1187.050,0,0,,0,0,0,17.80,40.59,1964.81

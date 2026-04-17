@@ -1,0 +1,7 @@
+run_id,event,eval_step,signature_id,error_type,conditions,conf,n_fail,n_counter,subsumed_signature_id
+PA-DSE_phago+Full_matmul_B80_sNone_8799992,activated,67,83600,generic_error,"{""pipeline"": ""True""}",0.8000,8,0,
+PA-DSE_phago+Full_matmul_B80_sNone_8799992,updated,68,83600,generic_error,"{""pipeline"": ""True""}",0.8182,9,0,
+PA-DSE_phago+Full_matmul_B120_sNone_168527,activated,67,61392,generic_error,"{""pipeline"": ""True""}",0.8000,8,0,
+PA-DSE_phago+Full_matmul_B120_sNone_168527,updated,68,61392,generic_error,"{""pipeline"": ""True""}",0.8182,9,0,
+PA-DSE_phago+Full_matmul_B160_sNone_1561502,activated,67,62672,generic_error,"{""pipeline"": ""True""}",0.8000,8,0,
+PA-DSE_phago+Full_matmul_B160_sNone_1561502,updated,68,62672,generic_error,"{""pipeline"": ""True""}",0.8182,9,0,

@@ -68,7 +68,7 @@ def run_dynamatic_single(
 
     # Clean previous output
     if os.path.exists(out_dir):
-        shutil.rmtree(out_dir)
+        shutil.rmtree(out_dir, ignore_errors=True)
 
     # Generate Dynamatic script
     script_content = config_to_dynamatic_script(

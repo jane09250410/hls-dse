@@ -1,0 +1,4 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+Grid_offline_ref_gcd_B192_sNone_6669763,Grid_offline_ref,gcd,dynamatic,192,,,N/A,0,0,0,0,192,92,100,47.9,component_count,43.0,43.0,539,9,21.213,8103.983,0,0,,0,0,0,0.00,0.00,0.00
+Grid_offline_ref_binary_search_B192_sNone_4773750,Grid_offline_ref,binary_search,dynamatic,192,,,N/A,0,0,0,0,192,104,88,54.2,component_count,42.0,42.0,249,11,17.801,7021.608,0,0,,0,0,0,0.00,0.00,0.00
+Grid_offline_ref_matching_B192_sNone_1795362,Grid_offline_ref,matching,dynamatic,192,,,N/A,0,0,0,0,192,128,64,66.7,component_count,59.0,59.0,308,34,25.160,7782.441,0,0,,0,0,0,0.00,0.00,0.00

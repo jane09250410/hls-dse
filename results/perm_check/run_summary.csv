@@ -1,0 +1,6 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+PA-DSE_phago+Full_matmul_B60_sNone_3282356,PA-DSE_phago+Full,matmul,bambu,60,,0,phago+Full,2,0.8,5,0.05,60,54,6,90.0,area,429.0,429.0,9,20,129.103,1189.261,0,0,,0,0,0,22.36,39.22,1826.70
+PA-DSE_phago+Full_matmul_B60_sNone_4471624,PA-DSE_phago+Full,matmul,bambu,60,,1,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,429.0,429.0,9,20,84.067,1225.927,0,0,,0,0,0,28.98,55.30,2148.44
+PA-DSE_phago+Full_matmul_B60_sNone_5697555,PA-DSE_phago+Full,matmul,bambu,60,,2,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,429.0,429.0,9,20,18.743,1213.049,0,0,,0,0,0,28.55,38.37,1818.83
+PA-DSE_phago+Full_matmul_B60_sNone_6910608,PA-DSE_phago+Full,matmul,bambu,60,,3,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,429.0,429.0,9,20,17.746,1222.751,0,0,,0,0,0,31.94,40.34,2024.83
+PA-DSE_phago+Full_matmul_B60_sNone_8133363,PA-DSE_phago+Full,matmul,bambu,60,,4,phago+Full,2,0.8,5,0.05,60,55,5,91.7,area,429.0,429.0,9,20,116.729,1227.883,0,0,,0,0,0,36.18,47.26,1926.88

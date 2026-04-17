@@ -1,0 +1,9 @@
+Running gcd (192 evals)...
+gcd done
+Running binary_search (192 evals)...
+binary_search done
+Running matching (192 evals)...
+matching done
+gcd: 192 evals, 92 ok, 100 fail, infeas=52.1%
+binary_search: 192 evals, 104 ok, 88 fail, infeas=45.8%
+matching: 192 evals, 128 ok, 64 fail, infeas=33.3%

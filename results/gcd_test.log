@@ -1,0 +1,4 @@
+SR=26.7% success=8 wasted=22 sigs=0 skipped=0
+Errors: {'milp_infeasible': 1, 'hdl_export_failed': 2, 'compile_failed': 35, 'buffer_placement_failed': 2, 'timeout': 2}
+skip_log.csv: MISSING
+signature_log.csv: MISSING

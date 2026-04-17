@@ -1,0 +1,2 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+PA-DSE_phago+Full_fir_B5_sNone_4350662,PA-DSE_phago+Full,fir,dynamatic,5,,,phago+Full,2,0.8,5,0.05,5,5,0,100.0,component_count,38.0,38.0,122,2,19.830,79.258,0,0,,0,0,0,6.12,3.49,17.64

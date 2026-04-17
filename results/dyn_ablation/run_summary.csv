@@ -1,0 +1,7 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+PA-DSE_phago+RPE_matching_B60_sNone_8497710,PA-DSE_phago+RPE,matching,dynamatic,60,,0,phago+RPE,2,0.8,5,0.05,60,36,24,60.0,component_count,59.0,59.0,308,21,93.297,2337.742,0,0,,0,0,0,1.92,58.65,1.41
+PA-DSE_phago+OFRS_matching_B60_sNone_835456,PA-DSE_phago+OFRS,matching,dynamatic,60,,0,phago+OFRS,2,0.8,5,0.05,60,57,3,95.0,component_count,59.0,59.0,308,31,93.137,3555.060,0,0,,0,0,0,3.17,29.16,666.85
+PA-DSE_phago+Full_matching_B60_sNone_4390518,PA-DSE_phago+Full,matching,dynamatic,60,,0,phago+Full,2,0.8,5,0.05,60,57,3,95.0,component_count,59.0,59.0,308,31,93.103,3565.995,0,0,,0,0,0,3.00,38.73,670.08
+PA-DSE_phago+RPE_gcd_B60_sNone_7956515,PA-DSE_phago+RPE,gcd,dynamatic,60,,0,phago+RPE,2,0.8,5,0.05,60,26,34,43.3,component_count,43.0,43.0,539,9,93.349,2488.376,23,23,,1,0,0,2.68,70.76,1.18
+PA-DSE_phago+OFRS_gcd_B60_sNone_444894,PA-DSE_phago+OFRS,gcd,dynamatic,60,,0,phago+OFRS,2,0.8,5,0.05,60,52,8,86.7,component_count,43.0,43.0,545,7,92.956,2983.775,0,0,,0,0,0,3.84,34.11,708.23
+PA-DSE_phago+Full_gcd_B60_sNone_3428672,PA-DSE_phago+Full,gcd,dynamatic,60,,0,phago+Full,2,0.8,5,0.05,60,52,8,86.7,component_count,43.0,43.0,545,7,93.737,2924.604,0,0,,0,0,0,2.87,42.47,739.05

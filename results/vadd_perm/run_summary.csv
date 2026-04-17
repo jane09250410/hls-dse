@@ -1,0 +1,11 @@
+run_id,strategy,benchmark,tool,budget,seed,queue_permutation_id,ablation_config,tau,theta,n_min,p_probe,total_evals,successful_evals,wasted_calls,sr_pct,best_qor_name,best_qor_value,best_area,best_latency,uqor,ttff_s,total_wall_clock_s,total_skipped,false_skips_pending,false_skips_verified,signatures_learned,probes_triggered,probes_succeeded,overhead_phago_ms,overhead_rpe_ms,overhead_ofrs_ms
+PA-DSE_phago+Full_vadd_B60_sNone_7632379,PA-DSE_phago+Full,vadd,bambu,60,,0,phago+Full,2,0.8,5,0.05,60,54,6,90.0,area,201.0,201.0,5,8,149.088,1332.258,0,0,,0,0,0,25.76,54.43,3640.21
+PA-DSE_phago+Full_vadd_B60_sNone_8964645,PA-DSE_phago+Full,vadd,bambu,60,,1,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,201.0,201.0,5,8,90.158,1351.301,0,0,,0,0,0,57.88,58.47,3438.83
+PA-DSE_phago+Full_vadd_B60_sNone_315963,PA-DSE_phago+Full,vadd,bambu,60,,2,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,201.0,201.0,5,8,24.032,1554.589,0,0,,0,0,0,34.33,74.70,4284.42
+PA-DSE_phago+Full_vadd_B60_sNone_1870556,PA-DSE_phago+Full,vadd,bambu,60,,3,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,201.0,201.0,5,8,34.270,1742.514,0,0,,0,0,0,110.64,90.81,5039.13
+PA-DSE_phago+Full_vadd_B60_sNone_1971813,PA-DSE_phago+Full,vadd,bambu,60,,0,phago+Full,2,0.8,5,0.05,60,54,6,90.0,area,201.0,201.0,5,8,222.780,1722.394,0,0,,0,0,0,63.74,138.92,5298.86
+PA-DSE_phago+Full_vadd_B60_sNone_3613075,PA-DSE_phago+Full,vadd,bambu,60,,4,phago+Full,2,0.8,5,0.05,60,55,5,91.7,area,201.0,201.0,5,8,189.631,1644.836,0,0,,0,0,0,27.29,70.84,5294.53
+PA-DSE_phago+Full_vadd_B60_sNone_3694211,PA-DSE_phago+Full,vadd,bambu,60,,1,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,201.0,201.0,5,8,140.022,1662.251,0,0,,0,0,0,111.87,88.72,4529.08
+PA-DSE_phago+Full_vadd_B60_sNone_5356465,PA-DSE_phago+Full,vadd,bambu,60,,2,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,201.0,201.0,5,8,25.156,1380.100,0,0,,0,0,0,62.20,75.54,3556.31
+PA-DSE_phago+Full_vadd_B60_sNone_6736566,PA-DSE_phago+Full,vadd,bambu,60,,3,phago+Full,2,0.8,5,0.05,60,56,4,93.3,area,201.0,201.0,5,8,23.874,1334.649,0,0,,0,0,0,34.99,45.71,3600.58
+PA-DSE_phago+Full_vadd_B60_sNone_8071218,PA-DSE_phago+Full,vadd,bambu,60,,4,phago+Full,2,0.8,5,0.05,60,55,5,91.7,area,201.0,201.0,5,8,129.035,1330.000,0,0,,0,0,0,23.11,52.98,3274.92

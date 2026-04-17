@@ -1,0 +1,6 @@
+    matching    phago+RPE SR= 60.0% wasted= 24 sigs=0 skipped=  0
+    matching   phago+OFRS SR= 95.0% wasted=  3 sigs=0 skipped=  0
+    matching   phago+Full SR= 95.0% wasted=  3 sigs=0 skipped=  0
+         gcd    phago+RPE SR= 43.3% wasted= 34 sigs=1 skipped= 23
+         gcd   phago+OFRS SR= 86.7% wasted=  8 sigs=0 skipped=  0
+         gcd   phago+Full SR= 86.7% wasted=  8 sigs=0 skipped=  0
