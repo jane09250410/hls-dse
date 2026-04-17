@@ -61,7 +61,11 @@ def make_dynamatic_synth(src, top, results_base):
         # Copy source file to work directory
         src_abs = os.path.abspath(src)
         src_copy = os.path.join(work_dir, os.path.basename(src_abs))
-        shutil.copy2(src_abs, src_copy)
+        src_dir_path = os.path.dirname(src_abs)
+        for f in os.listdir(src_dir_path):
+            full = os.path.join(src_dir_path, f)
+            if os.path.isfile(full):
+                shutil.copy2(full, work_dir)
 
         success, metrics, raw_output = run_dynamatic_single(
             config=config,
