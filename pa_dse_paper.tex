@@ -24,19 +24,18 @@
 \newcommand{\std}[1]{{\scriptsize $\pm$#1}}
 
 % --------------------------------------------------------
-% Title (anonymous for review)
+% Title (anonymous, no journal-specific decorations)
 % --------------------------------------------------------
 \title{PA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis via Hierarchical Evidence-Bounded Pruning}
 
-\author{Anonymous Authors%
-\thanks{Submitted for blind review. Author information withheld.}%
-}
+\author{Anonymous Authors}
 
-\markboth{IEEE Transactions on XXX, Vol.~X, No.~Y, 2026}%
-{Anonymous \MakeLowercase{\textit{et al.}}: PA-DSE: Feasibility-Aware HLS DSE}
+% Suppress IEEE Trans headers/footers (journal name, volume, author running head)
+\pagestyle{plain}
 
 \begin{document}
 \maketitle
+\thispagestyle{plain}
 
 \begin{abstract}
 High-Level Synthesis (HLS) design-space exploration (DSE) is often bottlenecked by synthesis failures: on our Bambu suite, uniform-random sampling wastes $85\%$ of a 60-call budget on infeasible configurations. Prior work either ignores the failure signal (classical optimizers) or predicts it with offline-trained surrogates (learned classifiers), each with known limitations in interpretability and warm-up cost.
