@@ -53,6 +53,14 @@ def load_and_process(main_path, perms_path, max_step):
     perms["strategy"] = "PA-DSE"
     df = pd.concat([main, perms], ignore_index=True)
 
+    # 4-bench Dynamatic filter (paper §IV.A): exclude fir/histogram on Dynamatic
+    if "dynamatic" in main_path.lower():
+        from plot_style import DYNAMATIC_BENCHMARKS
+        before = len(df)
+        df = df[df["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
+        print(f"  [filter] Dynamatic: {before} -> {len(df)} rows")
+
+
     # For each (strategy, run_id), compute cumulative feasibles vs eval_step
     # eval_log has one row per synthesis call with 'success' boolean
     df["success"] = df["success"].astype(int) if "success" in df.columns else (df["outcome"] == "success").astype(int)

@@ -3,6 +3,12 @@
 Import at the top of every figure script:
     from plot_style import setup, COLORS, METHOD_ORDER, save_fig
     setup()
+
+Benchmark filtering:
+    fir and histogram are EXCLUDED from Dynamatic (SR=100% for all methods,
+    no discriminative signal). The paper (§IV.A) reports Dynamatic on 4
+    benchmarks only. Any script aggregating Dynamatic data MUST filter to
+    DYNAMATIC_BENCHMARKS or call filter_dynamatic(df).
 """
 
 import matplotlib.pyplot as plt
@@ -23,8 +29,42 @@ COLORS = {
     "PA-DSE":           "#C1272D",  # red (highlight)
 }
 
-BENCHMARK_ORDER = ["matmul", "vadd", "fir", "histogram",
-                   "atax", "bicg", "gemm", "gesummv"]
+# ======================= Benchmark whitelists =======================
+# Bambu: 8 benchmarks, all retained.
+BAMBU_BENCHMARKS = ["matmul", "vadd", "fir", "histogram",
+                    "atax", "bicg", "gemm", "gesummv"]
+
+# Dynamatic: 4 benchmarks. fir, histogram EXCLUDED (SR=100% for all methods,
+# no discriminative signal). Paper (§IV.A) reports on these 4 only.
+DYNAMATIC_BENCHMARKS = ["gcd", "matching", "binary_search", "kernel_2mm"]
+
+# Backward-compatibility alias: old scripts used BENCHMARK_ORDER for Bambu.
+BENCHMARK_ORDER = BAMBU_BENCHMARKS
+
+
+# ======================= Filter helpers =======================
+def filter_bambu(df, col="benchmark", verbose=True):
+    """Keep only Bambu benchmarks (noop in practice; present for symmetry)."""
+    before = len(df)
+    df = df[df[col].isin(BAMBU_BENCHMARKS)].copy()
+    if verbose and before != len(df):
+        print(f"  [filter_bambu] {before} -> {len(df)} rows")
+    return df
+
+
+def filter_dynamatic(df, col="benchmark", verbose=True):
+    """Keep only the 4 discriminative Dynamatic benchmarks.
+
+    Applies the paper's §IV.A filter: drops fir and histogram, which produce
+    SR=100% for every method on Dynamatic. Call this on every Dynamatic
+    aggregation so numbers match Table III.
+    """
+    before = len(df)
+    df = df[df[col].isin(DYNAMATIC_BENCHMARKS)].copy()
+    if verbose:
+        print(f"  [filter_dynamatic] {before} -> {len(df)} rows "
+              f"(kept: {DYNAMATIC_BENCHMARKS})")
+    return df
 
 
 # ======================= Matplotlib setup =======================

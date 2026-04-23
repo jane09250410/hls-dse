@@ -1,21 +1,51 @@
 """Figure 1 (v2): Bambu main results — bar chart + distribution box plot.
 
+Reads SAME source as Table II (compute_paper_tables.py):
+  - results/master/bambu_main/run_summary.csv      (baselines; PA-DSE rows dropped)
+  - results/rerun/bambu_pa_dse_perms/run_summary.csv (PA-DSE perms, 80 runs = 10 perm x 8 bench)
+
 Panel (a): Overall mean SR (%) with std error bars.
 Panel (b): Per-method SR distribution across all runs (boxplot + strip).
 
-Input:  results/analysis/bambu_main_summary.csv
 Output: paper_figures/out/fig1_bambu_main.{pdf,png}
 """
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 import matplotlib.pyplot as plt
-from plot_style import setup, COLORS, METHOD_ORDER, ANALYSIS_DIR, save_fig
+from plot_style import setup, COLORS, METHOD_ORDER, save_fig
 
 setup()
 
-df = pd.read_csv(ANALYSIS_DIR / "bambu_main_summary.csv")
+# ============================================================
+# DATA — identical to compute_paper_tables.py so figure and
+# Table II are guaranteed to agree.
+# ============================================================
+ROOT = Path("/Users/zhangxinyu/Desktop/hls/results")
+
+BASELINE_MAP = {
+    "Random":             "Random",
+    "Filtered_Random":    "Filtered_Random",
+    "SimulatedAnnealing": "SA",
+    "GeneticAlgorithm":   "GA",
+    "GP-BO":              "GP-BO",
+    "RF_Classifier":      "RF",
+}
+
+main = pd.read_csv(ROOT / "master/bambu_main/run_summary.csv")
+perms = pd.read_csv(ROOT / "rerun/bambu_pa_dse_perms/run_summary.csv")
+
+# Drop any PA-DSE rows from master so we use perms as the authoritative PA-DSE source.
+main = main[~main["strategy"].str.contains("PA-DSE")].copy()
+main["strategy"] = main["strategy"].map(BASELINE_MAP).fillna(main["strategy"])
+perms = perms.copy()
+perms["strategy"] = "PA-DSE"
+
+df = pd.concat([main, perms], ignore_index=True)
+df = df.rename(columns={"strategy": "method"})
 print(f"Loaded {len(df)} runs")
+print(df.groupby("method").size().to_string())
 
 # Overall stats
 overall = df.groupby("method")["sr_pct"].agg(["mean", "std", "count"]).reindex(METHOD_ORDER)
@@ -38,7 +68,7 @@ ax1.barh(y_pos, means, xerr=stds, color=bar_colors,
 for i, (m, s) in enumerate(zip(means, stds)):
     color = "#C1272D" if METHOD_ORDER[i] == "PA-DSE" else "black"
     weight = "bold" if METHOD_ORDER[i] == "PA-DSE" else "normal"
-    ax1.text(m + s + 2, i, f"{m:.1f}±{s:.1f}",
+    ax1.text(m + s + 2, i, f"{m:.1f}\u00B1{s:.1f}",
              va="center", ha="left", fontsize=8.5,
              color=color, fontweight=weight)
 
@@ -56,7 +86,6 @@ for label in ax1.get_yticklabels():
         label.set_fontweight("bold")
 
 # ============ Panel (b): distribution boxplot ============
-# Prepare data: list of SR values per method
 data = [df[df["method"] == m]["sr_pct"].values for m in METHOD_ORDER]
 
 bp = ax2.boxplot(data, vert=True, widths=0.55,

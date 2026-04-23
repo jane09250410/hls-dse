@@ -2,11 +2,12 @@
 
 Two-panel figure for Dynamatic evaluation:
   (a) Overall SR comparison: bar chart with error bars, 7 methods
-  (b) Per-benchmark boxplot — ONLY 4 benchmarks with method differences
+  (b) Per-benchmark boxplot - 4 benchmarks
 
-Data sources:
-  - master/dynamatic_main/run_summary.csv (6 baselines × 6 bench × 10 seeds)
-  - rerun/dynamatic_pa_dse_perms/run_summary.csv (PA-DSE 10 perms × 6 bench)
+IMPORTANT: fir and histogram achieve SR=100% for ALL methods on Dynamatic,
+so they carry no discriminative signal. The paper (Sec. IV.A) evaluates
+Dynamatic on 4 benchmarks only: gcd, matching, binary_search, kernel_2mm.
+We apply this filter here so all numbers agree with Table III.
 """
 
 import numpy as np
@@ -18,7 +19,9 @@ ROOT = Path("/Users/zhangxinyu/Desktop/hls/results")
 OUT  = Path("/Users/zhangxinyu/Desktop/hls/paper_figures/out")
 OUT.mkdir(parents=True, exist_ok=True)
 
-# ==================== Style ====================
+# Dynamatic 4-benchmark evaluation set (fir/histogram excluded)
+DYNAMATIC_BENCHMARKS = ["gcd", "matching", "binary_search", "kernel_2mm"]
+
 plt.rcParams.update({
     "font.family": "serif",
     "font.serif": ["Times", "Times New Roman", "DejaVu Serif"],
@@ -38,14 +41,10 @@ plt.rcParams.update({
 dyn_main  = pd.read_csv(ROOT / "master/dynamatic_main/run_summary.csv")
 dyn_perms = pd.read_csv(ROOT / "rerun/dynamatic_pa_dse_perms/run_summary.csv")
 
-# Drop the n=1 PA-DSE_phago+Full rows in dyn_main (use perms data instead)
 dyn_main_clean = dyn_main[~dyn_main["strategy"].str.contains("PA-DSE")].copy()
-
-# Rename PA-DSE perms strategy for clarity
 dyn_perms_clean = dyn_perms.copy()
 dyn_perms_clean["strategy"] = "PA-DSE"
 
-# Simplify baseline names
 RENAME = {
     "Random":             "Random",
     "Filtered_Random":    "FilteredRandom",
@@ -56,15 +55,16 @@ RENAME = {
 }
 dyn_main_clean["strategy"] = dyn_main_clean["strategy"].map(RENAME).fillna(dyn_main_clean["strategy"])
 
-# Combine
 df = pd.concat([dyn_main_clean, dyn_perms_clean], ignore_index=True)
+
+# Filter to 4 benchmarks
+before = len(df)
+df = df[df["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
+print(f"[filter] Dynamatic 4 benchmarks: {before} -> {len(df)} rows")
 
 # ==================== Method order + colors ====================
 METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
-
-# For panel (b): only benchmarks where methods differ
-BENCH_ORDER_PANEL_B = ["gcd", "matching", "binary_search", "kernel_2mm"]
-BENCH_ORDER_ALL     = ["gcd", "matching", "binary_search", "kernel_2mm"]
+BENCH_ORDER_PANEL_B = DYNAMATIC_BENCHMARKS
 
 COLORS = {
     "Random":         "#8B8B8B",
@@ -80,9 +80,11 @@ COLORS = {
 fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2),
                                 gridspec_kw={"width_ratios": [1, 1.4]})
 
-# ---------- Panel (a): overall SR bar + errorbar (ALL 6 benchmarks) ----------
+# Panel (a)
 summary = df.groupby("strategy")["sr_pct"].agg(["mean", "std", "count"]).reset_index()
 summary = summary.set_index("strategy").loc[METHOD_ORDER].reset_index()
+print("\n=== Panel (a) values ===")
+print(summary.round(2).to_string(index=False))
 
 x = np.arange(len(METHOD_ORDER))
 bars = axL.bar(
@@ -93,15 +95,13 @@ bars = axL.bar(
     capsize=3, error_kw={"elinewidth": 0.8, "ecolor": "#333"},
 )
 
-# Annotate ALL bars (PA-DSE highlighted in red bold, others in dark gray)
 for i, method in enumerate(METHOD_ORDER):
     row = summary[summary["strategy"] == method].iloc[0]
     m = row["mean"]
     s = row["std"]
-    # Position label above the error bar (m + s), with small offset
     y_pos = m + s + 2
     if method == "PA-DSE":
-        axL.text(i, y_pos, f"{m:.1f}%",
+        axL.text(i, y_pos, f"{m:.1f}",
                  ha="center", fontsize=9, fontweight="bold",
                  color=COLORS["PA-DSE"])
     else:
@@ -115,7 +115,7 @@ axL.set_ylim(0, 115)
 axL.set_title("(a) Overall success rate (4 benchmarks)")
 axL.grid(axis="y", alpha=0.3)
 
-# ---------- Panel (b): per-benchmark boxplot (4 DIFFERENTIATING benchmarks only) ----------
+# Panel (b)
 n_methods = len(METHOD_ORDER)
 n_bench   = len(BENCH_ORDER_PANEL_B)
 width = 0.11
@@ -152,38 +152,31 @@ axR.set_xticks(group_centers)
 axR.set_xticklabels(BENCH_ORDER_PANEL_B, rotation=15, ha="right")
 axR.set_ylabel("Success Rate (%)")
 axR.set_ylim(0, 105)
-axR.set_title("(b) Per-benchmark distribution (4 benchmarks with method differences)")
+axR.set_title("(b) Per-benchmark distribution (4 benchmarks)")
 axR.grid(axis="y", alpha=0.3)
 
-# Note about excluded benchmarks
-
-# Legend
 from matplotlib.patches import Patch
 legend_handles = [Patch(facecolor=COLORS[m], edgecolor="black", label=m)
                   for m in METHOD_ORDER]
 axR.legend(handles=legend_handles, loc="lower left", ncol=2,
            fontsize=8, framealpha=0.95)
 
-# ==================== Save ====================
 plt.tight_layout()
 plt.savefig(OUT / "fig_dynamatic_main.pdf", bbox_inches="tight")
 plt.savefig(OUT / "fig_dynamatic_main.png", bbox_inches="tight", dpi=300)
-print(f"\n✅ Saved: {OUT}/fig_dynamatic_main.pdf (and .png)")
+print(f"\nSaved: {OUT}/fig_dynamatic_main.pdf")
 
 plt.show()
 
-# ==================== Print paper-ready table ====================
+# Print table
 print("\n" + "=" * 80)
-print("PAPER-READY TABLE (Dynamatic Main Results, all 6 benchmarks)")
+print("PAPER-READY TABLE (Dynamatic Main Results, 4 benchmarks)")
 print("=" * 80)
-print(f"{'Method':<15s} {'Mean':>8s} {'Std':>8s} {'n':>6s}  Per-benchmark SR")
-print(f"{'':<15s} {'':<8s} {'':<8s} {'':<6s}  {' '.join([f'{b:>9s}' for b in BENCH_ORDER_ALL])}")
-print("-" * 100)
+print(f"{'Method':<15s} {'Mean':>8s} {'Std':>8s} {'n':>6s}")
+print("-" * 45)
 for m in METHOD_ORDER:
     sub = df[df["strategy"] == m]
     mean = sub["sr_pct"].mean()
     std  = sub["sr_pct"].std()
     n    = len(sub)
-    per_b = sub.groupby("benchmark")["sr_pct"].mean().round(1).to_dict()
-    per_b_str = " ".join([f"{per_b.get(b, 0):>9.1f}" for b in BENCH_ORDER_ALL])
-    print(f"{m:<15s} {mean:>7.2f}  {std:>7.2f} {n:>6d}  {per_b_str}")
+    print(f"{m:<15s} {mean:>7.2f}  {std:>7.2f} {n:>6d}")

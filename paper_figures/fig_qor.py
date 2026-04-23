@@ -36,6 +36,14 @@ def load_successes(main_path, perms_path):
     perms = perms.copy()
     perms["strategy"] = "PA-DSE"
     df = pd.concat([main, perms], ignore_index=True)
+
+    # 4-bench Dynamatic filter (paper §IV.A): exclude fir/histogram on Dynamatic
+    if "dynamatic" in main_path.lower():
+        from plot_style import DYNAMATIC_BENCHMARKS
+        before = len(df)
+        df = df[df["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
+        print(f"  [filter] Dynamatic: {before} -> {len(df)} rows")
+
     if "success" in df.columns:
         df = df[df["success"] == True].copy()
     elif "outcome" in df.columns:

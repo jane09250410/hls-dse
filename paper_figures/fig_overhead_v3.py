@@ -1,12 +1,14 @@
 """Figure: Overhead Analysis — v7.
 
-Changes from v6:
-  - Panel (a) is now a LINE chart (circle/square markers on log scale)
-    instead of grouped bars. The slope visually conveys the orders-of-magnitude
-    gap between algorithmic overhead and HLS synthesis cost, which is the
-    central message of the panel.
-  - Panel (b) shifted LEFT (wider right margin, xlim extended) so the right-
-    side italic annotation "total X.XX ms/iter" is no longer clipped.
+Panel (a) line chart on log scale showing orders-of-magnitude gap
+between algorithmic overhead and HLS synthesis cost.
+Panel (b) stacked bar showing layer composition within algo overhead.
+
+IMPORTANT: Dynamatic numbers use ONLY the 4 evaluation benchmarks
+(gcd, matching, binary_search, kernel_2mm). fir/histogram are excluded
+because they achieve SR=100% for all methods and are not part of the
+paper's Dynamatic evaluation. Including them would underestimate
+synthesis time and inflate the algo:synth ratio.
 """
 import numpy as np
 import pandas as pd
@@ -17,12 +19,21 @@ ROOT = Path("/Users/zhangxinyu/Desktop/hls/results")
 OUT  = Path("/Users/zhangxinyu/Desktop/hls/paper_figures/out")
 OUT.mkdir(parents=True, exist_ok=True)
 
-# ===== Journal palette (NPG / seaborn-deep) =====
-C_BAMBU  = "#3C5488"   # deep navy
-C_DYNAM  = "#E64B35"   # vermilion
+# Benchmark filters
+BAMBU_BENCHMARKS = [
+    "matmul", "vadd", "fir", "histogram",
+    "atax", "bicg", "gemm", "gesummv",
+]
+DYNAMATIC_BENCHMARKS = [
+    "gcd", "matching", "binary_search", "kernel_2mm",
+]
+
+# ===== Journal palette =====
+C_BAMBU  = "#3C5488"
+C_DYNAM  = "#E64B35"
 C_SCF    = "#3C5488"
-C_RPE    = "#F39B7F"   # peach / amber
-C_OFRS   = "#00A087"   # teal
+C_RPE    = "#F39B7F"
+C_OFRS   = "#00A087"
 C_AXIS   = "#222222"
 C_GRID   = "#CCCCCC"
 
@@ -55,6 +66,14 @@ plt.rcParams.update({
 # ===== Load data =====
 bam = pd.read_csv(ROOT / "rerun/bambu_pa_dse_perms/run_summary.csv")
 dyn = pd.read_csv(ROOT / "rerun/dynamatic_pa_dse_perms/run_summary.csv")
+
+# Filter to evaluation benchmark sets
+before_b, before_d = len(bam), len(dyn)
+bam = bam[bam["benchmark"].isin(BAMBU_BENCHMARKS)].copy()
+dyn = dyn[dyn["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
+print(f"[filter] Bambu: {before_b} -> {len(bam)} rows")
+print(f"[filter] Dynamatic: {before_d} -> {len(dyn)} rows "
+      f"(fir/histogram excluded, SR=100% for all methods)")
 
 def compute_per_iter(df):
     scf_pi  = (df["overhead_phago_ms"] / df["total_evals"]).mean()
@@ -106,10 +125,7 @@ axA.set_axisbelow(True)
 for s in ("top", "right"):
     axA.spines[s].set_visible(False)
 
-# Bambu labels ABOVE marker, Dynamatic labels BELOW marker
-# so they don't collide when the two series are close.
 for xi, bam_val, dyn_val in zip(x, bam_values, dyn_values):
-    # Higher series' label goes ABOVE its marker, lower goes BELOW.
     if bam_val >= dyn_val:
         bam_dy, dyn_dy = 10, -13
     else:
@@ -152,7 +168,6 @@ for i, tool in enumerate(tools):
              ha="center", va="center", color="white",
              fontsize=9, fontweight="bold")
 
-    # Bambu (top row) -> callouts above; Dynamatic (bottom) -> below.
     if tool == "Bambu":
         y_text     = y[i] - bar_h / 2 - 0.32
         y_bar_edge = y[i] - bar_h / 2
@@ -182,7 +197,7 @@ for i, tool in enumerate(tools):
 axB.set_yticks(y)
 axB.set_yticklabels(tools)
 axB.set_ylim(1.8, -0.8)
-axB.set_xlim(0, 130)                           # widened so "total X.XX ms/iter" fits
+axB.set_xlim(0, 130)
 axB.set_xticks([0, 20, 40, 60, 80, 100])
 axB.set_xticklabels(["0", "20", "40", "60", "80", "100"])
 axB.set_xlabel("Share of algorithmic overhead (%)", labelpad=6)
@@ -197,14 +212,12 @@ axB.tick_params(axis="y", length=0, pad=4)
 
 plt.savefig(OUT / "fig_overhead.pdf", bbox_inches="tight")
 plt.savefig(OUT / "fig_overhead.png", bbox_inches="tight", dpi=300)
-print(f"✅ Saved: {OUT}/fig_overhead.pdf")
+print(f"\nSaved: {OUT}/fig_overhead.pdf")
 plt.show()
 
 # ===== Summary =====
 print("\n" + "=" * 70)
 print("SUMMARY")
 print("=" * 70)
-print(f"""
-Bambu     : PA-DSE overhead {bam_t['algo_total']:.2f}ms | synthesis {bam_t['synthesis']:.0f}ms | ratio 1:{bam_t['synthesis']/bam_t['algo_total']:.0f}
-Dynamatic : PA-DSE overhead {dyn_t['algo_total']:.2f}ms | synthesis {dyn_t['synthesis']:.0f}ms | ratio 1:{dyn_t['synthesis']/dyn_t['algo_total']:.0f}
-""")
+print(f"Bambu     : PA-DSE overhead {bam_t['algo_total']:.2f}ms | synthesis {bam_t['synthesis']:.0f}ms | ratio 1:{bam_t['synthesis']/bam_t['algo_total']:.0f}")
+print(f"Dynamatic : PA-DSE overhead {dyn_t['algo_total']:.2f}ms | synthesis {dyn_t['synthesis']:.0f}ms | ratio 1:{dyn_t['synthesis']/dyn_t['algo_total']:.0f}")
