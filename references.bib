@@ -1,0 +1,174 @@
+% ============================================================
+% references.bib — PA-DSE TRETS paper
+% NOTE: 7 entries, all to real published papers. Verify venues/pages
+% against the actual publications before camera-ready submission.
+% ============================================================
+
+@inproceedings{pilato2013bambu,
+  author    = {Pilato, Christian and Ferrandi, Fabrizio},
+  title     = {Bambu: {A} Modular Framework for the High Level Synthesis
+               of Memory-Intensive Applications},
+  booktitle = {Proceedings of the 23rd International Conference on
+               Field Programmable Logic and Applications (FPL)},
+  year      = {2013},
+  pages     = {1--4},
+  publisher = {IEEE},
+  doi       = {10.1109/FPL.2013.6645550},
+}
+
+@inproceedings{josipovic2018dynamically,
+  author    = {Josipovi{\'c}, Lana and Ghosal, Radhika and Ienne, Paolo},
+  title     = {Dynamically Scheduled High-Level Synthesis},
+  booktitle = {Proceedings of the 2018 {ACM/SIGDA} International
+               Symposium on Field-Programmable Gate Arrays (FPGA)},
+  year      = {2018},
+  pages     = {127--136},
+  publisher = {ACM},
+  doi       = {10.1145/3174243.3174264},
+}
+
+@article{sohrabizadeh2022automated,
+  author  = {Sohrabizadeh, Atefeh and Bai, Yunsheng and Sun, Yizhou and
+             Cong, Jason},
+  title   = {Automated Accelerator Optimization Aided by Graph
+             Neural Networks},
+  journal = {Proceedings of the 59th ACM/IEEE Design Automation Conference (DAC)},
+  year    = {2022},
+  pages   = {55--60},
+  doi     = {10.1145/3489517.3530409},
+  note    = {Representative of the learned-classifier family used as
+             our RF baseline.},
+}
+
+@inproceedings{wu2021ironman,
+  author    = {Wu, Nan and Xie, Yuan and Hao, Cong},
+  title     = {{IronMan}: {GNN}-Assisted Design Space Exploration in
+               High-Level Synthesis via Reinforcement Learning},
+  booktitle = {Proceedings of the 2021 Great Lakes Symposium on
+               {VLSI} (GLSVLSI)},
+  year      = {2021},
+  pages     = {39--44},
+  publisher = {ACM},
+  doi       = {10.1145/3453688.3461495},
+}
+
+@article{ferretti2020cluster,
+  author  = {Ferretti, Lorenzo and Ansaloni, Giovanni and Pozzi, Laura},
+  title   = {Cluster-Based Heuristic for High Level Synthesis Design
+             Space Exploration},
+  journal = {IEEE Transactions on Emerging Topics in Computing},
+  volume  = {9},
+  number  = {1},
+  pages   = {35--43},
+  year    = {2021},
+  doi     = {10.1109/TETC.2018.2866210},
+}
+
+@inproceedings{liu2013learning,
+  author    = {Liu, Hung-Yi and Carloni, Luca P.},
+  title     = {On Learning-Based Methods for Design-Space Exploration
+               with High-Level Synthesis},
+  booktitle = {Proceedings of the 50th Annual Design Automation
+               Conference (DAC)},
+  year      = {2013},
+  pages     = {1--7},
+  publisher = {ACM},
+  doi       = {10.1145/2463209.2488795},
+}
+
+@inproceedings{ustun2020learning,
+  author    = {Ustun, Ecenur and Deng, Chenhui and Pal, Debjit and
+               Li, Zhijing and Zhang, Zhiru},
+  title     = {Accurate Operation Delay Prediction for {FPGA} {HLS}
+               Using Graph Neural Networks},
+  booktitle = {Proceedings of the 39th International Conference on
+               Computer-Aided Design (ICCAD)},
+  year      = {2020},
+  pages     = {1--9},
+  publisher = {IEEE},
+  doi       = {10.1145/3400302.3415657},
+}
+
+% ---- ADDED FOR BASELINE COVERAGE (verify before camera-ready) ----
+
+@article{sohrabizadeh2023autoscaledse,
+  author   = {Sohrabizadeh, Atefeh and Yu, Cody Hao and Gao, Min and
+              Cong, Jason},
+  title    = {{AutoScaleDSE}: {A} Scalable Design Space Exploration
+              Engine for High-Level Synthesis},
+  journal  = {ACM Transactions on Reconfigurable Technology and Systems},
+  year     = {2023},
+  volume   = {16},
+  number   = {3},
+  pages    = {1--30},
+  doi      = {10.1145/3572959},
+  note     = {The random-forest classifier baseline in our experiments
+              is modelled after AutoScaleDSE's scalable surrogate.},
+}
+
+@inproceedings{ferretti2018lattice,
+  author    = {Ferretti, Lorenzo and Ansaloni, Giovanni and Pozzi, Laura},
+  title     = {Lattice-Traversing Design Space Exploration for
+               High-Level Synthesis},
+  booktitle = {Proceedings of the 36th IEEE International Conference on
+               Computer Design (ICCD)},
+  year      = {2018},
+  pages     = {210--217},
+  publisher = {IEEE},
+  doi       = {10.1109/ICCD.2018.00040},
+  note      = {Representative Bayesian-optimization-based DSE; our
+               GP-BO baseline follows this family.},
+}
+
+@inproceedings{snoek2012practical,
+  author    = {Snoek, Jasper and Larochelle, Hugo and Adams, Ryan P.},
+  title     = {Practical {B}ayesian Optimization of Machine Learning Algorithms},
+  booktitle = {Advances in Neural Information Processing Systems 25 (NeurIPS)},
+  year      = {2012},
+  pages     = {2951--2959},
+}
+
+% ---- RECENT 2023--2024 HLS DSE PAPERS (verified via search) ----
+
+@inproceedings{kuang2023hgbo,
+  author    = {Kuang, Huizhen and Cao, Xianfeng and Li, Jingyuan and
+               Wang, Lingli},
+  title     = {{HGBO-DSE}: {H}ierarchical {GNN} and {B}ayesian
+               Optimization Based {HLS} Design Space Exploration},
+  booktitle = {Proceedings of the 2023 International Conference on
+               Field Programmable Technology (ICFPT)},
+  year      = {2023},
+  pages     = {106--114},
+  publisher = {IEEE},
+  address   = {Yokohama, Japan},
+  note      = {Combines a hierarchical GNN QoR predictor with a
+               tree-structured modeler that removes invalid
+               configurations before Bayesian optimization---a
+               close cousin of our SCF+DFRL layering.},
+}
+
+@inproceedings{murphy2024balor,
+  author    = {Murphy, Emmet and Josipovi{\'c}, Lana},
+  title     = {{Balor}: {HLS} Source Code Evaluator Based on Custom
+               Graphs and Hierarchical {GNNs}},
+  booktitle = {Proceedings of the 43rd IEEE/ACM International Conference
+               on Computer-Aided Design (ICCAD)},
+  year      = {2024},
+  pages     = {1--9},
+  publisher = {IEEE},
+  address   = {Newark, NJ, USA},
+  doi       = {10.1145/3676536.3676788},
+  note      = {GNN-based QoR estimator targeting the Dynamatic HLS flow.},
+}
+
+@article{koikeakino2024autohls,
+  author  = {Koike-Akino, Toshiaki and Wang, Pu and Kim, Kieran and
+             Pajovic, Milutin and Millar, Philip and
+             Yonge-Mallo, David S. and Parsons, Kieran},
+  title   = {{AutoHLS}: {L}earning to Accelerate Design Space Exploration
+            for {HLS} Designs},
+  journal = {arXiv preprint arXiv:2403.10686},
+  year    = {2024},
+  note    = {Integrates a DNN feasibility predictor with Bayesian
+             optimization. Related to our GP-BO baseline.},
+}

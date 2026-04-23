@@ -1,6 +1,6 @@
 HLS_output/
 bambu_results/
-out/
+cfg_*/out/
 *.o
 *.out
 *.vcd
@@ -18,3 +18,31 @@ test.xml
 synthesize_*.sh
 __pycache__/
 *.pyc
+
+# ========== added for paper + hls-dse repo ==========
+# LaTeX build artifacts (keep .tex, .bib, .pdf only)
+*.aux
+*.log
+*.bbl
+*.blg
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Sensitive / huge files — NEVER push
+*.lic
+gurobi.lic
+*.tar.gz
+*.tgz
+results.tar.gz
+
+# Backups from rename scripts
+*.bak
+*.csv.bak
+*.py.bak
+
+# Editor / IDE state
+.DS_Store
+.idea/
+texput.log
