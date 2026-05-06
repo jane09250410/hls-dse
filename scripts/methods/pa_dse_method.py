@@ -52,6 +52,11 @@ class PADSEMethod(DSEMethod):
                  seed=None, queue_permutation_id=None,
                  source_path=None,
                  dynamic_mode="full",   # "full" or "intersection" for L1
+                 # ── Categorical-coverage extension (CC) ────────────────
+                 # Forwarded to OFRS. beta_cov=0 reproduces vanilla PA-DSE.
+                 # The method_name is also extended ("+CC") when active so
+                 # logs distinguish the variant.
+                 beta_cov=0.0, n_cov=2,
                  **kwargs):
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)
         assert ablation_config in VALID_CONFIGS, \
@@ -65,6 +70,8 @@ class PADSEMethod(DSEMethod):
         self.queue_permutation_id = queue_permutation_id
         self.source_path = source_path
         self.dynamic_mode = dynamic_mode
+        self.beta_cov = beta_cov
+        self.n_cov = n_cov
 
         use_phago, rpe_mode, ofrs_mode = ABLATION_MAP[ablation_config]
         self._use_phago = use_phago
@@ -89,6 +96,7 @@ class PADSEMethod(DSEMethod):
             tau=tau, rpe_min_confidence=theta,
             min_support=n_min, enable_pairwise=False,
             mode=dfrl_mode,
+            beta_cov=beta_cov, n_cov=n_cov,
         ) if need_dfrl else None
 
         self._sig_buffer: List[SignatureEvent] = []
@@ -100,7 +108,8 @@ class PADSEMethod(DSEMethod):
     def method_name(self) -> str:
         if self.dynamic_mode == "intersection":
             return "PA-DSE_L1"
-        return f"PA-DSE_{self.ablation_config}"
+        suffix = "+CC" if self.beta_cov > 0.0 else ""
+        return f"PA-DSE_{self.ablation_config}{suffix}"
 
     def initialize(self) -> List[Config]:
         t0 = time.perf_counter()

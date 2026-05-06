@@ -1,117 +1,143 @@
-# PA-DSE: Feasibility-Aware HLS Design Space Exploration
+# PA-DSE: Feasibility-Aware Design-Space Exploration for HLS
 
-A feasibility-aware Design Space Exploration (DSE) framework for High-Level
-Synthesis, built around a single design principle: **action strength must
-not exceed evidence strength**. PA-DSE targets two structurally different
-HLS backends — PandA-Bambu (statically-scheduled) and Dynamatic
-(dynamically-scheduled) — and consistently achieves higher success rate
-with fewer wasted synthesis calls than classical optimisers or learned
-surrogate baselines.
+Implementation and reproduction package for the paper **"PA-DSE: Feasibility-Aware
+Design Space Exploration for High-Level Synthesis via Hierarchical
+Evidence-Bounded Pruning"**.
 
-## Paper
+## What's in this repo
 
-The full manuscript is available in this repository as
-[`pa_dse_paper.pdf`](pa_dse_paper.pdf) (single-file LaTeX source:
-[`pa_dse_paper.tex`](pa_dse_paper.tex) with bibliography
-[`references.bib`](references.bib)).
+| Path | Contents |
+|---|---|
+| `pa_dse_paper.tex` | LaTeX source of the paper |
+| `references.bib` | Bibliography |
+| `paper_figures/` | Figure-generation scripts and aggregated tables |
+| `scripts/` | DSE algorithms, baselines, runners, logging |
+| `benchmarks/` | Bambu C kernels (8 benchmarks) |
+| `run_all.sh` | One-shot reproduction of every table and figure |
 
-To rebuild the PDF:
+Dynamatic benchmarks (`gcd`, `matching`, `binary_search`, `kernel_2mm`) are read from
+`~/dynamatic/integration-test/<name>/<name>.c` — you must have the Dynamatic toolchain
+installed and the path set up (see paper §IV-A).
 
-```bash
-pdflatex pa_dse_paper
-bibtex   pa_dse_paper
-pdflatex pa_dse_paper
-pdflatex pa_dse_paper
-```
+## Algorithm
 
-## Method overview
+PA-DSE has two layers organized around the *evidence hierarchy* principle —
+action strength must not exceed evidence strength.
 
-PA-DSE has two layers:
+**Layer 1 — SCF (Static Constraint Filter).** Tool-documented incompatibility rules
+permanently remove configurations before exploration begins.
 
-- **Layer 1 — Static Constraint Filter (SCF)**: permanently removes
-  configurations matching tool-documented incompatibility rules (e.g.\
-  Bambu's `MEM_ACC_11` with `channels_number > 1`). Zero false-prune.
-- **Layer 2 — Dynamic Failure Risk Learner (DFRL)**: learns online during
-  a single run. Two sub-components:
-  - **RPE (Recurrent Pattern Extractor)** — extracts typed failure
-    signatures from observed errors and hard-skips matching configs.
-  - **OFRS (Online Failure Risk Scorer)** — reorders the remaining queue
-    by a smoothed per-dimension risk score.
+**Layer 2 — DFRL (Dynamic Failure Risk Learning).** Online learning during a
+single run.
+  - **RPE (Recurrent Pattern Extractor).** After repeated same-type failures,
+    extracts a typed signature; matching configs are hard-skipped (with a probe
+    rate keeping signatures honest).
+  - **OFRS (Online Failure Risk Scorer).** Per-dimension risk model that reorders
+    the queue, never skips.
+  - **OFRS-CC (Categorical-Coverage extension).** A coverage bonus subtracted
+    from OFRS's risk score that prioritises (dim, value) pairs OFRS has
+    observed fewer than `n_cov` times. This addresses a deficiency observed
+    when SCF is unavailable: a single early failure can cause OFRS to abandon
+    an entire categorical sub-space. CC is controlled by `β_cov` (default 0.2);
+    `β_cov = 0` reproduces the original PA-DSE.
 
-Each component's action class (permanent block / hard skip / reorder) is
-strictly bounded by the strength of the evidence it has access to.
+The full algorithm is `scripts/methods/pa_dse_method.py`; OFRS lives in
+`scripts/dynamic_failure_learner.py`.
 
-## Tools & benchmarks
-
-- **PandA-Bambu v0.9.8** — 420-config design space, 8 benchmarks:
-  `matmul`, `vadd`, `fir`, `histogram`, `atax`, `bicg`, `gemm`, `gesummv`
-- **Dynamatic v2.0.0** — 192-config design space, 4 benchmarks:
-  `gcd`, `matching`, `binary_search`, `kernel_2mm`
-
-## Baselines compared
-
-Random, Filtered-Random, Simulated Annealing (SA), Genetic Algorithm
-(GA), Gaussian-Process Bayesian Optimization (GP-BO), Random-Forest
-feasibility classifier (RF, modelled after AutoScaleDSE).
-
-## Project structure
-
-```
-hls-dse/
-├── pa_dse_paper.tex          # Single-file manuscript (double-column)
-├── pa_dse_paper.pdf          # Compiled paper
-├── references.bib            # Bibliography (13 entries)
-├── benchmarks/               # HLS benchmark source code (C)
-│   ├── matmul/, vadd/, fir/, histogram/
-│   └── atax/, bicg/, gemm/, gesummv/
-├── scripts/                  # Experiment automation
-│   ├── methods/              #   PA-DSE method, baselines
-│   ├── runners/              #   Bambu / Dynamatic runners
-│   ├── exp_logging/          #   Per-run CSV logging
-│   └── analysis/             #   Post-processing
-├── results/                  # Raw run summaries (per experiment)
-├── tests/                    # Unit and integration tests
-├── paper_figures/            # Figure-generation scripts
-│   ├── compute_paper_tables.py         # Produces Tables 2–5 CSVs
-│   ├── fig1_main_results_v2.py         # Fig 2: Bambu main comparison
-│   ├── fig_dynamatic_main_v2.py        # Fig 3: Dynamatic main
-│   ├── fig_cost.py                     # Fig 4: wasted calls + TTFF
-│   ├── fig_perbench_heatmap.py         # Fig 5: per-benchmark SR
-│   ├── fig_convergence.py              # Fig 6: cumulative feasibles
-│   ├── fig_qor.py                      # Fig 7: QoR coverage
-│   ├── fig_ablation_bar.py             # Fig 8: 8-way ablation
-│   ├── fig_overhead_v3.py              # Fig 9: overhead breakdown
-│   └── out/                            # Rendered PDFs / PNGs / tables
-└── diagnose.sh               # Environment check
-```
-
-## Reproducing the paper figures
+## Reproducing the paper
 
 ```bash
-cd paper_figures
-python3 compute_paper_tables.py   # Generates table_*.csv
-python3 fig1_main_results_v2.py
-python3 fig_dynamatic_main_v2.py
-python3 fig_cost.py
-python3 fig_perbench_heatmap.py
-python3 fig_convergence.py
-python3 fig_qor.py
-python3 fig_ablation_bar.py
-python3 fig_overhead_v3.py
+# One command, runs everything (~8–12 h on Azure D4s_v5)
+bash run_all.sh
 ```
 
-All figures land in `paper_figures/out/` as both `.pdf` (for LaTeX) and
-`.png` (for quick inspection). See individual scripts for the expected
-input paths under `results/`.
+Or step-by-step:
 
-## Requirements
+```bash
+# Main results (Tables II / III)
+python3 scripts/runners/run_main_results.py --tool both --variant cc
 
-- Python 3.10+ with `numpy`, `pandas`, `matplotlib`, `scipy`,
-  `scikit-learn`
-- Gurobi (for GP-BO and RF baseline ILP solves; licence not included)
-- PandA-Bambu v0.9.8 and/or Dynamatic v2.0.0 for re-running experiments
-- TeX Live 2025+ with the `IEEEtran` class for rebuilding the paper
+# Component ablation (Table IV)
+python3 scripts/runners/run_ablation.py --tool both --beta-cov 0.2
 
-## Author
+# Aggregate raw run_summary.csv → paper tables
+python3 paper_figures/compute_paper_tables.py
 
-**Xinyu Zhang** (Cindy) — Politecnico di Milano, DEIB
+# Regenerate figures
+python3 paper_figures/fig1_main_results_v2.py
+python3 paper_figures/fig_dynamatic_main_v2.py
+# …etc, one script per figure
+```
+
+### Variants
+
+`--variant` selects which PA-DSE configuration to run:
+
+| Flag | Meaning |
+|---|---|
+| `vanilla` | β_cov = 0 (original PA-DSE) |
+| `cc` | β_cov = 0.2, n_cov = 2 (PA-DSE-CC; paper default) |
+| `both` | run both back-to-back |
+
+To sweep `β_cov`, override the default:
+```bash
+python3 scripts/runners/run_main_results.py --tool dynamatic \
+        --variant cc --beta-cov 0.3 --n-cov 2
+```
+
+## Hyperparameters
+
+The paper freezes one set of hyperparameters across all (tool, benchmark) cells:
+
+| Parameter | Value | Where set |
+|---|---|---|
+| τ (RPE min failure support) | 2 | `PADSEMethod(tau=2)` |
+| θ (RPE confidence threshold) | 0.8 | `PADSEMethod(theta=0.8)` |
+| n_min (OFRS cold-start) | 5 | `PADSEMethod(n_min=5)` |
+| p_probe (probe rate) | 0.05 | `PADSEMethod(p_probe=0.05)` |
+| β_cov (CC weight) | 0.2 | `PADSEMethod(beta_cov=0.2)` |
+| n_cov (CC observation budget) | 2 | `PADSEMethod(n_cov=2)` |
+
+Defaults are not tuned per-benchmark or per-tool. Sensitivity analyses for τ,
+θ, β_cov are reported in §V of the paper.
+
+## Hardware / Software
+
+- Azure Standard D4s_v5 (4 vCPUs, 15 GB RAM, Ubuntu 24.04)
+- Python 3.12, pandas, numpy, scikit-learn (for the RF baseline), GPy (for GP-BO)
+- PandA-Bambu 0.9.8
+- Dynamatic 2.0 with Gurobi 12.0 (academic license)
+
+## Layout details
+
+```
+scripts/
+├── dynamic_failure_learner.py  — RPE + OFRS (with CC extension)
+├── pattern_learner.py          — error-type extraction
+├── feasibility_filter.py       — SCF (Layer 1)
+├── config_generator.py         — Bambu config space (420 points)
+├── dynamatic_config_generator.py — Dynamatic config space (192 points)
+├── methods/
+│   ├── base.py                 — DSEMethod base interface
+│   ├── pa_dse_method.py        — PA-DSE (8 ablation configs + CC switch)
+│   ├── baseline_methods.py     — Random, Filtered, Grid, LHS
+│   └── advanced_baselines.py   — SA, GA, GP-BO, RF
+├── runners/
+│   ├── run_single.py           — atomic (method, benchmark, budget) loop
+│   ├── run_main_results.py     — drives Tables II / III
+│   ├── run_ablation.py         — drives Table IV
+│   └── run_experiments.py      — utility wrapper
+└── exp_logging/
+    └── experiment_logger.py    — CSV log writers
+```
+
+## Citation
+
+```bibtex
+@article{padse2026,
+  title  = {PA-DSE: Feasibility-Aware Design Space Exploration for
+            High-Level Synthesis via Hierarchical Evidence-Bounded Pruning},
+  author = {Anonymous},
+  year   = {2026},
+}
+```

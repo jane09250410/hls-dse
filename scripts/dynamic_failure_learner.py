@@ -92,11 +92,18 @@ class LearnedPattern:
 class OnlineFailureRiskScorer:
 
     def __init__(self, prior_alpha: float = 1.0, prior_beta: float = 1.0,
-                 min_support: int = 5, enable_pairwise: bool = False):
+                 min_support: int = 5, enable_pairwise: bool = False,
+                 # ── Categorical-coverage extension (CC) ─────────────────
+                 # beta_cov = 0 reproduces the original (vanilla) OFRS exactly.
+                 # n_cov is the per-(dim,value) observation budget below which
+                 # a coverage bonus is granted.
+                 beta_cov: float = 0.0, n_cov: int = 2):
         self.prior_alpha = prior_alpha
         self.prior_beta = prior_beta
         self.min_support = min_support
         self.enable_pairwise = enable_pairwise
+        self.beta_cov = beta_cov
+        self.n_cov = n_cov
 
         self._counts: Dict[str, Dict[str, Dict[str, int]]] = defaultdict(
             lambda: defaultdict(lambda: {"fail": 0, "success": 0})
@@ -143,6 +150,43 @@ class OnlineFailureRiskScorer:
         phis = [self.phi(dim, v) for v in vals]
         return max(phis) - min(phis) if len(phis) > 1 else 0.0
 
+    def coverage_score(self, config: Config, param_keys: List[str]) -> float:
+        """Categorical coverage bonus in [0, 1].
+
+        For each parameter dimension d with value v in this config, compute
+        under-exploration u(d,v) = max(0, 1 - obs(d,v)/n_cov). The dimension's
+        contribution is u(d,v) weighted by relevance(d), focusing the bonus
+        on dimensions OFRS has identified as discriminative. When no
+        dimension has yet accumulated relevance (early in a run), fall back
+        to an unweighted mean so CC can still operate during the first few
+        evaluations — that is when categorical-coverage matters most,
+        because OFRS has not yet had time to entrench preferences.
+
+        A config whose every (dim, value) has been observed ≥ n_cov times
+        scores 0; a config exercising a never-observed value scores close
+        to 1.
+        """
+        if self.n_cov <= 0:
+            return 0.0
+
+        items = []
+        for d in param_keys:
+            v = str(config.get(d, ""))
+            if not v:
+                continue
+            c = self._counts[d][v]
+            obs = c["fail"] + c["success"]
+            u = max(0.0, 1.0 - obs / self.n_cov)
+            items.append((u, self.relevance(d)))
+
+        if not items:
+            return 0.0
+
+        total_rel = sum(r for _, r in items)
+        if total_rel > 1e-9:
+            return sum(u * r for u, r in items) / total_rel
+        return sum(u for u, _ in items) / len(items)
+
     def risk_score(self, config: Config, param_keys: List[str],
                    pair_keys: List[Tuple[str, str]]) -> float:
         numerator = 0.0
@@ -160,10 +204,17 @@ class OnlineFailureRiskScorer:
         if denominator < 1e-9:
             total = self._total_fail + self._total_success
             if total == 0:
-                return 0.5
-            return self._total_fail / total
+                base = 0.5
+            else:
+                base = self._total_fail / total
+        else:
+            base = numerator / denominator
 
-        return numerator / denominator
+        # CC extension: subtract coverage bonus so under-explored configs
+        # rank earlier. When beta_cov=0 this is a no-op (vanilla OFRS).
+        if self.beta_cov > 0.0:
+            base = base - self.beta_cov * self.coverage_score(config, param_keys)
+        return base
 
     def risk_decomposition(self, config: Config,
                            param_keys: List[str]) -> List[Tuple[str, str, float, float]]:
@@ -198,6 +249,9 @@ class DynamicFailureRiskLearner:
         enable_pairwise: bool = False,
         mode: str = "full",
         threshold: int = 2,
+        # CC extension passed through to OFRS:
+        beta_cov: float = 0.0,
+        n_cov: int = 2,
     ) -> None:
         self.tau = tau or threshold
         self.rpe_min_confidence = rpe_min_confidence
@@ -206,6 +260,8 @@ class DynamicFailureRiskLearner:
         self.scorer = OnlineFailureRiskScorer(
             min_support=min_support,
             enable_pairwise=enable_pairwise,
+            beta_cov=beta_cov,
+            n_cov=n_cov,
         )
         self.failure_log: List[FailureRecord] = []
         self.success_log: List[Config] = []
