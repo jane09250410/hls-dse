@@ -125,7 +125,6 @@ def default_static_rules() -> List[Rule]:
             bool(c.get("pipeline")) and has_if_inside_loop(s)
         )
     ))
-
     return rules
 
 

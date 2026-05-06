@@ -44,7 +44,7 @@ def cmd_probe(args):
             synth = make_bambu_synth(bi["src"], bi["top"],
                                      f"results/experiments/probe/{bname}/p{pp}")
             m = PADSEMethod(configs, bname, "bambu", bi["B"],
-                            ablation_config="phago+Full",
+                            ablation_config="SCF+DFRL",
                             p_probe=pp, source_path=bi["src"])
             run_single(m, synth, logger, tool="bambu", p_probe=pp)
 
@@ -69,7 +69,7 @@ def cmd_sensitivity(args):
                 f"results/experiments/sensitivity/{bname}/{args.param}_{val}")
             kwargs = {grid["key"]: val}
             m = PADSEMethod(configs, bname, "bambu", bi["B"],
-                            ablation_config="phago+Full",
+                            ablation_config="SCF+DFRL",
                             source_path=bi["src"], **kwargs)
             run_single(m, synth, logger, tool="bambu", **kwargs)
 
@@ -87,7 +87,7 @@ def cmd_robustness(args):
             synth = make_bambu_synth(bi["src"], bi["top"],
                 f"results/experiments/robustness/{bname}/perm{perm}")
             m = PADSEMethod(configs, bname, "bambu", bi["B"],
-                            ablation_config="phago+Full",
+                            ablation_config="SCF+DFRL",
                             source_path=bi["src"],
                             queue_permutation_id=perm)
             run_single(m, synth, logger, tool="bambu",

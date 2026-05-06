@@ -3,14 +3,14 @@
 pa_dse_method.py — Unified PA-DSE method for all 8 ablation configurations.
 
 Config map:
-  no-filter          phago=off  rpe=off      ofrs=off
-  phago-only         phago=on   rpe=off      ofrs=off
-  phago+RPE          phago=on   rpe=skip     ofrs=off
-  phago+OFRS         phago=on   rpe=off      ofrs=rank
-  phago+Full         phago=on   rpe=skip     ofrs=rank   [recommended]
-  DFRL-only          phago=off  rpe=skip     ofrs=rank
-  phago+RPE-reorder  phago=on   rpe=reorder  ofrs=off    [hierarchy test]
-  phago+OFRS-skip    phago=on   rpe=off      ofrs=skip   [hierarchy test]
+  no-filter        scf=off  rpe=off      ofrs=off
+  SCF-only         scf=on   rpe=off      ofrs=off
+  SCF+RPE          scf=on   rpe=skip     ofrs=off
+  SCF+OFRS         scf=on   rpe=off      ofrs=rank
+  SCF+DFRL         scf=on   rpe=skip     ofrs=rank   [recommended]
+  DFRL-only        scf=off  rpe=skip     ofrs=rank
+  SCF+RPE-reorder  scf=on   rpe=reorder  ofrs=off    [hierarchy test]
+  SCF+OFRS-skip    scf=on   rpe=off      ofrs=skip   [hierarchy test]
 
 Calls DynamicFailureRiskLearner API exactly as defined in
 dynamic_failure_learner.py (should_skip, rank_priority, risk_score,
@@ -27,35 +27,35 @@ from feasibility_filter import phagocytosis, default_static_rules
 # ── Valid configs ───────────────────────────────────────────────
 
 VALID_CONFIGS = frozenset({
-    "no-filter", "phago-only", "phago+RPE", "phago+OFRS",
-    "phago+Full", "DFRL-only", "phago+RPE-reorder", "phago+OFRS-skip",
+    "no-filter", "SCF-only", "SCF+RPE", "SCF+OFRS",
+    "SCF+DFRL", "DFRL-only", "SCF+RPE-reorder", "SCF+OFRS-skip",
 })
 
 ABLATION_MAP = {
-    # config_name:       (use_phago, rpe_mode,  ofrs_mode)
-    "no-filter":         (False,     "off",     "off"),
-    "phago-only":        (True,      "off",     "off"),
-    "phago+RPE":         (True,      "skip",    "off"),
-    "phago+OFRS":        (True,      "off",     "rank"),
-    "phago+Full":        (True,      "skip",    "rank"),
-    "DFRL-only":         (False,     "skip",    "rank"),
-    "phago+RPE-reorder": (True,      "reorder", "off"),
-    "phago+OFRS-skip":   (True,      "off",     "skip"),
+    # config_name:     (use_scf, rpe_mode,  ofrs_mode)
+    "no-filter":       (False,   "off",     "off"),
+    "SCF-only":        (True,    "off",     "off"),
+    "SCF+RPE":         (True,    "skip",    "off"),
+    "SCF+OFRS":        (True,    "off",     "rank"),
+    "SCF+DFRL":        (True,    "skip",    "rank"),
+    "DFRL-only":       (False,   "skip",    "rank"),
+    "SCF+RPE-reorder": (True,    "reorder", "off"),
+    "SCF+OFRS-skip":   (True,    "off",     "skip"),
 }
 
 
 class PADSEMethod(DSEMethod):
 
     def __init__(self, configs, benchmark_name, tool, budget, *,
-                 ablation_config="phago+Full",
+                 ablation_config="SCF+DFRL",
                  tau=2, theta=0.8, n_min=5, p_probe=0.05,
                  seed=None, queue_permutation_id=None,
                  source_path=None,
                  dynamic_mode="full",   # "full" or "intersection" for L1
                  # ── Categorical-coverage extension (CC) ────────────────
                  # Forwarded to OFRS. beta_cov=0 reproduces vanilla PA-DSE.
-                 # The method_name is also extended ("+CC") when active so
-                 # logs distinguish the variant.
+                 # method_name appends "+CC" when active so logs distinguish
+                 # the variant.
                  beta_cov=0.0, n_cov=2,
                  **kwargs):
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)

@@ -73,7 +73,7 @@ class ExperimentLogger:
 
     def start_run(self, *, strategy, benchmark, tool, budget,
                   seed=None, queue_permutation_id=None,
-                  ablation_config="phago+Full",
+                  ablation_config="SCF+DFRL",
                   tau=2, theta=0.8, n_min=5, p_probe=0.05):
         ts = int(time.time()*1000) % 10_000_000
         self.run_id = f"{strategy}_{benchmark}_B{budget}_s{seed}_{ts}"

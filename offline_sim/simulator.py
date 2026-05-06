@@ -242,7 +242,7 @@ def run_padse_offline(
     tool: str = "dynamatic",
     budget: int = 30,
     queue_permutation_id: int = 0,
-    ablation_config: str = "phago+Full",
+    ablation_config: str = "SCF+DFRL",
     tau: int = 2,
     theta: float = 0.8,
     n_min: int = 5,

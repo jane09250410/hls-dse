@@ -29,7 +29,7 @@ def run_single(
     logger: ExperimentLogger,
     *,
     tool: str,
-    ablation_config: str = "phago+Full",
+    ablation_config: str = "SCF+DFRL",
     tau: int = 2,
     theta: float = 0.8,
     n_min: int = 5,
