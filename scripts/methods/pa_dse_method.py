@@ -57,6 +57,25 @@ class PADSEMethod(DSEMethod):
                  # method_name appends "+CC" when active so logs distinguish
                  # the variant.
                  beta_cov=0.0, n_cov=2,
+                 # ── Late-Stage QoR Diversification (LSQD) ─────────────
+                 # When enabled (lsqd=True), in the late budget phase
+                 # (frac >= lsqd_start_frac), every lsqd_period steps the
+                 # algorithm picks the queue config maximally distant in
+                 # parameter space from already-evaluated configs (Hamming
+                 # distance), instead of popping the OFRS-lowest-risk head.
+                 # This pushes coverage of OFRS-deferred regions and
+                 # reduces best_lat / best_area / UQoR variance across runs.
+                 # method_name appends "+LSQD" when enabled.
+                 lsqd=False, lsqd_start_frac=0.6, lsqd_period=5,
+                 # ── QoR-Saturation Extension (QSE) ────────────────────
+                 # Penalty added to OFRS risk_score for (dim, value) regions
+                 # already QoR-saturated: many successes but few unique
+                 # (area, latency) outputs. Pushes the queue toward
+                 # under-explored QoR regions, improving best_lat/area/UQoR
+                 # without losing the SR/wasted advantage of vanilla OFRS.
+                 # gamma_qsat=0 reproduces vanilla. method_name appends
+                 # "+QSE" when active.
+                 gamma_qsat=0.0, qsat_min_succ=4,
                  **kwargs):
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)
         assert ablation_config in VALID_CONFIGS, \
@@ -97,18 +116,39 @@ class PADSEMethod(DSEMethod):
             min_support=n_min, enable_pairwise=False,
             mode=dfrl_mode,
             beta_cov=beta_cov, n_cov=n_cov,
+            gamma_qsat=gamma_qsat, qsat_min_succ=qsat_min_succ,
         ) if need_dfrl else None
+
+        # Save QSE flag for method_name suffix
+        self._qse_active = (gamma_qsat > 0.0)
+        self._tool = tool
 
         self._sig_buffer: List[SignatureEvent] = []
         self._overhead = {"phago": 0.0, "rpe": 0.0, "ofrs": 0.0}
         self._rng = random.Random(seed if seed is not None else 42)
         self._probe_flags = set()  # config ids marked as probe
 
+        # ── LSQD state ──
+        self._lsqd = bool(lsqd)
+        self._lsqd_start_frac = float(lsqd_start_frac)
+        self._lsqd_period = int(lsqd_period)
+        # Track parameter dicts of already-evaluated configs (success or not),
+        # used as the reference set for LSQD novelty computation.
+        self._evaluated_param_dicts: List[dict] = []
+        # Step counter for LSQD periodicity.
+        self._step_for_lsqd = 0
+
     @property
     def method_name(self) -> str:
         if self.dynamic_mode == "intersection":
             return "PA-DSE_L1"
-        suffix = "+CC" if self.beta_cov > 0.0 else ""
+        suffix = ""
+        if self.beta_cov > 0.0:
+            suffix += "+CC"
+        if self._lsqd:
+            suffix += "+LSQD"
+        if self._qse_active:
+            suffix += "+QSE"
         return f"PA-DSE_{self.ablation_config}{suffix}"
 
     def initialize(self) -> List[Config]:
@@ -196,11 +236,70 @@ class PADSEMethod(DSEMethod):
         return queue
 
     def select_next(self, queue):
-        cfg = queue.pop(0)
-        cid = int(cfg.get("id", -1))
-        action = "probe" if cid in self._probe_flags else "evaluate"
-        self._probe_flags.discard(cid)
+        """
+        Select the next config to evaluate.
+
+        Default: pop queue[0] (which is OFRS-lowest-risk after apply_reorder).
+
+        LSQD: in the late budget phase (>= lsqd_start_frac), every
+        lsqd_period steps and only when the queue still has alternatives,
+        pick the config maximally distant in parameter space from the
+        already-evaluated set. This forces coverage of OFRS-deferred
+        regions, reducing best_lat / best_area / UQoR variance across runs.
+        """
+        self._step_for_lsqd += 1
+
+        # Decide whether this step is an LSQD diversification step
+        do_lsqd = (
+            self._lsqd
+            and len(queue) >= 2
+            and len(self._evaluated_param_dicts) >= self.n_min   # need a reference set
+            and self._step_for_lsqd / max(1, self.budget) >= self._lsqd_start_frac
+            and (self._step_for_lsqd % self._lsqd_period) == 0
+        )
+
+        if do_lsqd:
+            # Pick queue index maximizing min-Hamming-distance to evaluated set
+            ref = self._evaluated_param_dicts
+            best_idx, best_d = 0, -1
+            for i, c in enumerate(queue):
+                d = self._min_hamming(c, ref)
+                if d > best_d:
+                    best_d, best_idx = d, i
+            cfg = queue.pop(best_idx)
+            cid = int(cfg.get("id", -1))
+            action = "lsqd"
+            self._probe_flags.discard(cid)
+        else:
+            cfg = queue.pop(0)
+            cid = int(cfg.get("id", -1))
+            action = "probe" if cid in self._probe_flags else "evaluate"
+            self._probe_flags.discard(cid)
+
+        # Track for LSQD novelty (record all evaluated, success or not)
+        self._evaluated_param_dicts.append(
+            {k: v for k, v in cfg.items()
+             if not k.startswith("_") and k != "id"}
+        )
         return cfg, action
+
+    @staticmethod
+    def _min_hamming(c, ref_list):
+        """Min Hamming distance between c and any d in ref_list, over
+        the parameter dict (id and underscore-prefixed keys excluded)."""
+        c_items = {k: v for k, v in c.items()
+                   if not k.startswith("_") and k != "id"}
+        if not ref_list:
+            return len(c_items)
+        best = None
+        for d in ref_list:
+            keys = set(c_items) | set(d)
+            dist = sum(1 for k in keys if c_items.get(k) != d.get(k))
+            if best is None or dist < best:
+                best = dist
+                if best == 0:
+                    return 0
+        return best if best is not None else len(c_items)
 
     def update(self, config, success, output, synthesis_time):
         if not self._dfrl_active or self.learner is None:
@@ -208,7 +307,8 @@ class PADSEMethod(DSEMethod):
         t0 = time.perf_counter()
 
         if success:
-            self.learner.add_success(config, self.benchmark_name)
+            qor = self._extract_qor(output)
+            self.learner.add_success(config, self.benchmark_name, qor=qor)
         else:
             old_ids = {id(p) for p in self.learner.learned_patterns}
             pattern = self.learner.add_failure(
@@ -255,6 +355,27 @@ class PADSEMethod(DSEMethod):
         for pat in self.learner.learned_patterns:
             if pat.matches(config, self.benchmark_name):
                 return pat
+        return None
+
+    def _extract_qor(self, output):
+        """Extract (area, latency) from synthesis output.
+        Returns (area, latency) or None if not extractable.
+        Mirrors the regexes in run_single.py.
+        """
+        if not output:
+            return None
+        import re
+        if self._tool == "bambu":
+            am = re.search(r"Total\s+estimated\s+area\s*[=:]\s*([\d.]+)", output, re.IGNORECASE)
+            lm = re.search(r"Number\s+of\s+states\s*[=:]\s*(\d+)", output, re.IGNORECASE)
+        else:  # dynamatic
+            am = re.search(r"components\s*=\s*(\d+)", output, re.IGNORECASE)
+            lm = re.search(r"handshake_ops\s*=\s*(\d+)", output, re.IGNORECASE)
+        if am and lm:
+            try:
+                return (float(am.group(1)), float(lm.group(1)))
+            except Exception:
+                return None
         return None
 
     def _count_counterexamples(self, pattern):

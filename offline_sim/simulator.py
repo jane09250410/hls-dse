@@ -247,10 +247,17 @@ def run_padse_offline(
     theta: float = 0.8,
     n_min: int = 5,
     p_probe: float = 0.05,
-    # NEW (CC extension); ignored if PADSEMethod doesn't support them
+    # CC extension
     beta_cov: float = 0.0,
     n_cov: int = 2,
     use_cc: bool = False,
+    # LSQD extension
+    lsqd: bool = False,
+    lsqd_start_frac: float = 0.6,
+    lsqd_period: int = 5,
+    # QSE extension
+    gamma_qsat: float = 0.0,
+    qsat_min_succ: int = 4,
 ):
     """Run one PA-DSE offline simulation (Bambu or Dynamatic)."""
     from methods.pa_dse_method import PADSEMethod
@@ -258,7 +265,6 @@ def run_padse_offline(
     if tool == "bambu":
         from config_generator import generate_bambu_configs
         configs = generate_bambu_configs(enable_pipeline=True)
-        # SCF on Bambu uses source-based heuristics — point at the actual benchmark
         src = str(REPO_ROOT / "benchmarks" / benchmark / f"{benchmark}.c")
     else:
         configs = generate_dynamatic_configs()
@@ -274,6 +280,13 @@ def run_padse_offline(
     if use_cc:
         kwargs["beta_cov"] = beta_cov
         kwargs["n_cov"] = n_cov
+    if lsqd:
+        kwargs["lsqd"] = True
+        kwargs["lsqd_start_frac"] = lsqd_start_frac
+        kwargs["lsqd_period"] = lsqd_period
+    if gamma_qsat > 0.0:
+        kwargs["gamma_qsat"] = gamma_qsat
+        kwargs["qsat_min_succ"] = qsat_min_succ
 
     method = PADSEMethod(configs, benchmark, tool, budget, **kwargs)
     return simulate_run(method, oracle, benchmark)

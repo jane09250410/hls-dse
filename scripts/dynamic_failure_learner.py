@@ -97,13 +97,23 @@ class OnlineFailureRiskScorer:
                  # beta_cov = 0 reproduces the original (vanilla) OFRS exactly.
                  # n_cov is the per-(dim,value) observation budget below which
                  # a coverage bonus is granted.
-                 beta_cov: float = 0.0, n_cov: int = 2):
+                 beta_cov: float = 0.0, n_cov: int = 2,
+                 # ── QoR-saturation extension (QSE) ──────────────────────
+                 # When a (dim, value) accumulates many successes but few
+                 # unique (area, latency) outputs, it is QoR-saturated:
+                 # further evaluations there cannot improve best_lat /
+                 # best_area / UQoR. QSE adds a penalty to that (dim, value)
+                 # in risk score, deferring further evaluation in favour of
+                 # under-explored regions. gamma_qsat=0 reproduces vanilla.
+                 gamma_qsat: float = 0.0, qsat_min_succ: int = 4):
         self.prior_alpha = prior_alpha
         self.prior_beta = prior_beta
         self.min_support = min_support
         self.enable_pairwise = enable_pairwise
         self.beta_cov = beta_cov
         self.n_cov = n_cov
+        self.gamma_qsat = gamma_qsat
+        self.qsat_min_succ = qsat_min_succ
 
         self._counts: Dict[str, Dict[str, Dict[str, int]]] = defaultdict(
             lambda: defaultdict(lambda: {"fail": 0, "success": 0})
@@ -111,11 +121,18 @@ class OnlineFailureRiskScorer:
         self._pair_counts: Dict[Tuple[str,str], Dict[Tuple[str,str], Dict[str,int]]] = defaultdict(
             lambda: defaultdict(lambda: {"fail": 0, "success": 0})
         )
+        # QoR points per (dim, value) — used to compute saturation
+        # _qor_points[d][v] is a set of (area, latency) tuples observed
+        self._qor_points: Dict[str, Dict[str, set]] = defaultdict(
+            lambda: defaultdict(set)
+        )
         self._total_fail = 0
         self._total_success = 0
 
     def update(self, config: Config, failed: bool,
-               param_keys: List[str], pair_keys: List[Tuple[str, str]]) -> None:
+               param_keys: List[str], pair_keys: List[Tuple[str, str]],
+               qor: Optional[Tuple[float, float]] = None) -> None:
+        """Update OFRS counts. qor=(area, latency) if known and success."""
         outcome = "fail" if failed else "success"
         if failed:
             self._total_fail += 1
@@ -126,6 +143,10 @@ class OnlineFailureRiskScorer:
             v = str(config.get(d, ""))
             if v:
                 self._counts[d][v][outcome] += 1
+                # QoR saturation tracking: only record on success with valid qor
+                if not failed and qor is not None and qor[0] is not None and qor[1] is not None:
+                    self._qor_points[d][v].add((round(float(qor[0]), 4),
+                                                round(float(qor[1]), 4)))
 
         if self.enable_pairwise:
             for d1, d2 in pair_keys:
@@ -187,6 +208,49 @@ class OnlineFailureRiskScorer:
             return sum(u * r for u, r in items) / total_rel
         return sum(u for u, _ in items) / len(items)
 
+    def qor_saturation(self, config: Config, param_keys: List[str]) -> float:
+        """QoR-saturation score in [0, 1] for this config.
+
+        For each parameter dimension d with value v, the saturation s(d,v)
+        measures how few unique QoR points have been observed relative to
+        the number of successes. If (d=v) has many successes but only one
+        unique (area, latency) point, that region is QoR-saturated and
+        further evaluation cannot improve best_lat/best_area/UQoR.
+
+        s(d, v) = 1 - (unique_qor / max(qsat_min_succ, n_success))
+                 if n_success >= qsat_min_succ, else 0
+
+        The config's saturation is the relevance-weighted average across
+        its dimensions, mirroring how risk_score combines dimensions.
+
+        gamma_qsat = 0 disables this entirely.
+        """
+        if self.gamma_qsat <= 0.0:
+            return 0.0
+
+        items = []
+        for d in param_keys:
+            v = str(config.get(d, ""))
+            if not v:
+                continue
+            n_succ = self._counts[d][v]["success"]
+            if n_succ < self.qsat_min_succ:
+                continue
+            n_unique = len(self._qor_points[d][v])
+            if n_unique == 0:
+                continue
+            # Saturation: high if many successes but few unique points
+            s = 1.0 - (n_unique / float(n_succ))
+            s = max(0.0, min(1.0, s))
+            items.append((s, self.relevance(d)))
+
+        if not items:
+            return 0.0
+        total_rel = sum(r for _, r in items)
+        if total_rel > 1e-9:
+            return sum(s * r for s, r in items) / total_rel
+        return sum(s for s, _ in items) / len(items)
+
     def risk_score(self, config: Config, param_keys: List[str],
                    pair_keys: List[Tuple[str, str]]) -> float:
         numerator = 0.0
@@ -214,6 +278,10 @@ class OnlineFailureRiskScorer:
         # rank earlier. When beta_cov=0 this is a no-op (vanilla OFRS).
         if self.beta_cov > 0.0:
             base = base - self.beta_cov * self.coverage_score(config, param_keys)
+        # QSE extension: ADD saturation penalty so QoR-saturated regions
+        # get higher risk and are deferred. gamma_qsat=0 -> no-op.
+        if self.gamma_qsat > 0.0:
+            base = base + self.gamma_qsat * self.qor_saturation(config, param_keys)
         return base
 
     def risk_decomposition(self, config: Config,
@@ -252,6 +320,9 @@ class DynamicFailureRiskLearner:
         # CC extension passed through to OFRS:
         beta_cov: float = 0.0,
         n_cov: int = 2,
+        # QSE extension passed through to OFRS:
+        gamma_qsat: float = 0.0,
+        qsat_min_succ: int = 4,
     ) -> None:
         self.tau = tau or threshold
         self.rpe_min_confidence = rpe_min_confidence
@@ -262,6 +333,8 @@ class DynamicFailureRiskLearner:
             enable_pairwise=enable_pairwise,
             beta_cov=beta_cov,
             n_cov=n_cov,
+            gamma_qsat=gamma_qsat,
+            qsat_min_succ=qsat_min_succ,
         )
         self.failure_log: List[FailureRecord] = []
         self.success_log: List[Config] = []
@@ -292,11 +365,14 @@ class DynamicFailureRiskLearner:
         return None
 
     def add_success(self, config: Config,
-                    benchmark_name: Optional[str] = None) -> None:
+                    benchmark_name: Optional[str] = None,
+                    qor: Optional[Tuple[float, float]] = None) -> None:
+        """Record a success. qor=(area, latency) if known, used by QSE."""
         self._ensure_keys(config)
         self.success_log.append(config)
         self.scorer.update(config, failed=False,
-                           param_keys=self._param_keys, pair_keys=self._pair_keys)
+                           param_keys=self._param_keys, pair_keys=self._pair_keys,
+                           qor=qor)
 
     def should_skip(self, config: Config,
                     benchmark_name: Optional[str] = None) -> bool:
