@@ -149,6 +149,10 @@ class OnlineFailureRiskScorer:
         self._qor_cloud: List[Tuple[float, float]] = []
         # QoR axis scales for normalization (computed lazily from the cloud)
         self._qor_scale_cache: Optional[Tuple[float, float]] = None
+        # UQoR plateau tracking: history of |unique points| at each step
+        # Used by the gate: if |unique| has not grown in last K steps,
+        # QoR-aware extensions deactivate (the QoR space is exhausted).
+        self._uqor_history: List[int] = []
         self._total_fail = 0
         self._total_success = 0
 
@@ -185,6 +189,21 @@ class OnlineFailureRiskScorer:
                 v2 = str(config.get(d2, ""))
                 if v1 and v2:
                     self._pair_counts[(d1, d2)][(v1, v2)][outcome] += 1
+
+        # Update UQoR plateau history (count of distinct points in cloud)
+        n_unique = len(set(self._qor_cloud)) if self._qor_cloud else 0
+        self._uqor_history.append(n_unique)
+
+    def _uqor_plateau(self, k: int = 5) -> bool:
+        """Return True if |unique QoR points| has not grown in the last k
+        observations. When True, QSE/QSD deactivate: the QoR space appears
+        exhausted under the current exploration trajectory, and further
+        diversification will only push toward fail-prone configs.
+        """
+        h = self._uqor_history
+        if len(h) < k + 1:
+            return False
+        return h[-1] == h[-k - 1]
 
     def phi(self, dim: str, val: str) -> float:
         c = self._counts[dim][val]
@@ -257,6 +276,14 @@ class OnlineFailureRiskScorer:
         gamma_qsat = 0 disables this entirely.
         """
         if self.gamma_qsat <= 0.0:
+            return 0.0
+        # UQoR plateau gate: if |unique QoR| has not grown in last 5 evals,
+        # the QoR space appears exhausted; deactivate so the algorithm does
+        # not push toward fail-prone regions in pursuit of nonexistent
+        # diversity. This is benchmark-agnostic: gcd/matching/binary_search
+        # continue to grow unique QoR throughout the budget, kernel_2mm
+        # plateaus quickly because its QoR space has only ~12 unique points.
+        if self._uqor_plateau(k=5):
             return 0.0
 
         items = []
@@ -353,6 +380,10 @@ class OnlineFailureRiskScorer:
         delta_qsd <= 0 disables this entirely.
         """
         if self.delta_qsd <= 0.0:
+            return 0.0
+        # UQoR plateau gate: same rationale as QSE. When |unique QoR| has
+        # not grown in 5 evals, deactivate.
+        if self._uqor_plateau(k=5):
             return 0.0
         if not self._qor_cloud or len(self._qor_cloud) < self.qsd_min_succ:
             return 0.0
