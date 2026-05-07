@@ -112,7 +112,16 @@ class OnlineFailureRiskScorer:
                  # close to already-visited QoR points. delta_qsd=0 disables.
                  # Predicted QoR is the relevance-weighted mean per-dimension
                  # observed (area, latency) for c's parameter values.
-                 delta_qsd: float = 0.0, qsd_min_succ: int = 3):
+                 delta_qsd: float = 0.0, qsd_min_succ: int = 3,
+                 # ── QoR-Attractor extension (QAT) ───────────────────────
+                 # Bonus (negative penalty) for candidate configs whose
+                 # parameter values have historically produced LOW latency
+                 # or area. This pulls the queue toward the lat-min/area-min
+                 # cluster once it has been discovered, increasing the
+                 # probability of finding the global lat-min within budget.
+                 # alpha_attract = 0 disables. Activates only after at
+                 # least qat_min_succ successes have been observed.
+                 alpha_attract: float = 0.0, qat_min_succ: int = 4):
         self.prior_alpha = prior_alpha
         self.prior_beta = prior_beta
         self.min_support = min_support
@@ -123,6 +132,8 @@ class OnlineFailureRiskScorer:
         self.qsat_min_succ = qsat_min_succ
         self.delta_qsd = delta_qsd
         self.qsd_min_succ = qsd_min_succ
+        self.alpha_attract = alpha_attract
+        self.qat_min_succ = qat_min_succ
 
         self._counts: Dict[str, Dict[str, Dict[str, int]]] = defaultdict(
             lambda: defaultdict(lambda: {"fail": 0, "success": 0})
@@ -153,6 +164,17 @@ class OnlineFailureRiskScorer:
         # Used by the gate: if |unique| has not grown in last K steps,
         # QoR-aware extensions deactivate (the QoR space is exhausted).
         self._uqor_history: List[int] = []
+        # Per-(dim, value) min observed latency and area (used by QAT
+        # to attract candidates toward low-lat/low-area regions)
+        self._qor_min_lat: Dict[str, Dict[str, float]] = defaultdict(
+            lambda: defaultdict(lambda: float("inf"))
+        )
+        self._qor_min_area: Dict[str, Dict[str, float]] = defaultdict(
+            lambda: defaultdict(lambda: float("inf"))
+        )
+        # Running global mins (across all visited successes)
+        self._global_min_lat: float = float("inf")
+        self._global_min_area: float = float("inf")
         self._total_fail = 0
         self._total_success = 0
 
@@ -172,6 +194,10 @@ class OnlineFailureRiskScorer:
             qa, ql = float(qor[0]), float(qor[1])
             self._qor_cloud.append((qa, ql))
             self._qor_scale_cache = None  # invalidate
+            if qa < self._global_min_area:
+                self._global_min_area = qa
+            if ql < self._global_min_lat:
+                self._global_min_lat = ql
 
         for d in param_keys:
             v = str(config.get(d, ""))
@@ -182,6 +208,10 @@ class OnlineFailureRiskScorer:
                     sa, sl = self._qor_sum[d][v]
                     self._qor_sum[d][v] = (sa + qa, sl + ql)
                     self._qor_n[d][v] += 1
+                    if qa < self._qor_min_area[d][v]:
+                        self._qor_min_area[d][v] = qa
+                    if ql < self._qor_min_lat[d][v]:
+                        self._qor_min_lat[d][v] = ql
 
         if self.enable_pairwise:
             for d1, d2 in pair_keys:
@@ -278,11 +308,8 @@ class OnlineFailureRiskScorer:
         if self.gamma_qsat <= 0.0:
             return 0.0
         # UQoR plateau gate: if |unique QoR| has not grown in last 5 evals,
-        # the QoR space appears exhausted; deactivate so the algorithm does
-        # not push toward fail-prone regions in pursuit of nonexistent
-        # diversity. This is benchmark-agnostic: gcd/matching/binary_search
-        # continue to grow unique QoR throughout the budget, kernel_2mm
-        # plateaus quickly because its QoR space has only ~12 unique points.
+        # the QoR space appears exhausted; deactivate to prevent useless
+        # diversification that pushes toward fail-prone regions.
         if self._uqor_plateau(k=5):
             return 0.0
 
@@ -455,7 +482,63 @@ class OnlineFailureRiskScorer:
         # delta_qsd=0 -> no-op.
         if self.delta_qsd > 0.0:
             base = base + self.delta_qsd * self.qor_density_penalty(config, param_keys)
+        # QAT extension: SUBTRACT attractor bonus so configs with novel
+        # parameter values get advanced. ONLY applied when base risk is
+        # already moderate-to-low (< 0.6) -- this prevents pulling
+        # high-risk configs forward and protects SR.
+        # alpha_attract=0 -> no-op.
+        if self.alpha_attract > 0.0 and base < 0.6:
+            base = base - self.alpha_attract * self.qor_attractor(config, param_keys)
         return base
+
+    def qor_attractor(self, config: Config, param_keys: List[str]) -> float:
+        """Dim-value-novelty bonus in [0, 1] for this config.
+
+        For each dimension d with value v, novelty(d, v) measures how few
+        successful evaluations this (d, v) pair has accumulated. Configs
+        whose values are under-represented in the success log get a bonus.
+
+        Concretely:
+            novelty(d, v) = max(0, 1 - n_succ(d, v) / N_target)
+        where N_target = qat_min_succ. So:
+        - n_succ(d, v) = 0 → novelty = 1.0   (never seen successfully)
+        - n_succ(d, v) = N_target → novelty = 0.0 (saturated)
+
+        The config-level bonus is the relevance-weighted mean across
+        dims. This pulls under-explored (d, v) values forward in the
+        queue.
+
+        IMPORTANT: this bonus is ONLY applied when the config's base risk
+        is moderate-to-low (< 0.6). High-base-risk configs are not boosted
+        regardless of novelty, since pulling them forward would drop SR.
+        This keeps QAT inside the "low-risk + novel" regime, preserving
+        SR while broadening QoR coverage.
+
+        alpha_attract = 0 disables this entirely.
+        """
+        if self.alpha_attract <= 0.0:
+            return 0.0
+        if self._total_success < self.qat_min_succ:
+            return 0.0
+
+        items = []
+        for d in param_keys:
+            v = str(config.get(d, ""))
+            if not v:
+                continue
+            n_succ = self._counts[d][v]["success"]
+            # Novelty: 1 if never seen successfully, decays linearly to 0
+            # when n_succ reaches qat_min_succ.
+            novelty = max(0.0, 1.0 - n_succ / float(self.qat_min_succ))
+            items.append((novelty, self.relevance(d)))
+
+        if not items:
+            return 0.0
+        total_rel = sum(r for _, r in items)
+        if total_rel > 1e-9:
+            return sum(s * r for s, r in items) / total_rel
+        return sum(s for s, _ in items) / len(items)
+
 
     def risk_decomposition(self, config: Config,
                            param_keys: List[str]) -> List[Tuple[str, str, float, float]]:
@@ -499,6 +582,9 @@ class DynamicFailureRiskLearner:
         # QSD extension passed through to OFRS:
         delta_qsd: float = 0.0,
         qsd_min_succ: int = 3,
+        # QAT extension passed through to OFRS:
+        alpha_attract: float = 0.0,
+        qat_min_succ: int = 4,
     ) -> None:
         self.tau = tau or threshold
         self.rpe_min_confidence = rpe_min_confidence
@@ -513,6 +599,8 @@ class DynamicFailureRiskLearner:
             qsat_min_succ=qsat_min_succ,
             delta_qsd=delta_qsd,
             qsd_min_succ=qsd_min_succ,
+            alpha_attract=alpha_attract,
+            qat_min_succ=qat_min_succ,
         )
         self.failure_log: List[FailureRecord] = []
         self.success_log: List[Config] = []

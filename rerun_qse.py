@@ -58,10 +58,12 @@ ABLATIONS = ['no-filter', 'SCF-only', 'SCF+RPE', 'SCF+OFRS',
              'SCF+DFRL', 'DFRL-only', 'SCF+RPE-reorder', 'SCF+OFRS-skip']
 
 # ── Frozen hyperparameters ─────────────────────────────
-GAMMA_QSAT = 0.30
+GAMMA_QSAT = 0.0     # QSE disabled in final design (it traded too much SR)
 QSAT_MIN_SUCC = 4
-DELTA_QSD = 0.10
+DELTA_QSD = 0.10     # QSD adds UQoR-targeted dispersion
 QSD_MIN_SUCC = 3
+ALPHA_ATTRACT = 0.30 # QAT promotes novel low-risk configs (the key win)
+QAT_MIN_SUCC = 4
 
 
 def log(msg):
@@ -131,7 +133,10 @@ def stage_bambu_main():
                                 gamma_qsat=GAMMA_QSAT,
                                 qsat_min_succ=QSAT_MIN_SUCC,
                                 delta_qsd=DELTA_QSD,
-                                qsd_min_succ=QSD_MIN_SUCC)
+                                qsd_min_succ=QSD_MIN_SUCC,
+                                alpha_attract=ALPHA_ATTRACT,
+                                qat_min_succ=QAT_MIN_SUCC
+                                )
                 safe_run(m, synth, logger, 'bambu',
                          ablation_config='SCF+DFRL',
                          queue_permutation_id=pid)
@@ -171,7 +176,10 @@ def stage_dynamatic_main():
                                 gamma_qsat=GAMMA_QSAT,
                                 qsat_min_succ=QSAT_MIN_SUCC,
                                 delta_qsd=DELTA_QSD,
-                                qsd_min_succ=QSD_MIN_SUCC)
+                                qsd_min_succ=QSD_MIN_SUCC,
+                                alpha_attract=ALPHA_ATTRACT,
+                                qat_min_succ=QAT_MIN_SUCC
+                                )
                 safe_run(m, synth, logger, 'dynamatic',
                          ablation_config='SCF+DFRL',
                          queue_permutation_id=pid)
@@ -210,7 +218,10 @@ def stage_ablation():
                                     gamma_qsat=GAMMA_QSAT,
                                     qsat_min_succ=QSAT_MIN_SUCC,
                                     delta_qsd=DELTA_QSD,
-                                    qsd_min_succ=QSD_MIN_SUCC)
+                                qsd_min_succ=QSD_MIN_SUCC,
+                                alpha_attract=ALPHA_ATTRACT,
+                                qat_min_succ=QAT_MIN_SUCC
+                                    )
                     safe_run(m, synth, logger, 'bambu',
                              ablation_config=abl,
                              queue_permutation_id=pid)
@@ -237,7 +248,10 @@ def stage_ablation():
                                     gamma_qsat=GAMMA_QSAT,
                                     qsat_min_succ=QSAT_MIN_SUCC,
                                     delta_qsd=DELTA_QSD,
-                                    qsd_min_succ=QSD_MIN_SUCC)
+                                qsd_min_succ=QSD_MIN_SUCC,
+                                alpha_attract=ALPHA_ATTRACT,
+                                qat_min_succ=QAT_MIN_SUCC
+                                    )
                     safe_run(m, synth, logger, 'dynamatic',
                              ablation_config=abl,
                              queue_permutation_id=pid)

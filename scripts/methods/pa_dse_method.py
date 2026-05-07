@@ -85,6 +85,13 @@ class PADSEMethod(DSEMethod):
                  # Targets UQoR specifically. delta_qsd=0 disables.
                  # method_name appends "+QSD" when active.
                  delta_qsd=0.0, qsd_min_succ=3,
+                 # ── QoR-Attractor extension (QAT) ───────────────────
+                 # Bonus (negative penalty) for candidate configs whose
+                 # parameter values have historically produced LOW lat or
+                 # area. Pulls queue toward best-lat / best-area cluster
+                 # once it has been discovered. alpha_attract=0 disables.
+                 # method_name appends "+QAT" when active.
+                 alpha_attract=0.0, qat_min_succ=4,
                  **kwargs):
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)
         assert ablation_config in VALID_CONFIGS, \
@@ -127,11 +134,13 @@ class PADSEMethod(DSEMethod):
             beta_cov=beta_cov, n_cov=n_cov,
             gamma_qsat=gamma_qsat, qsat_min_succ=qsat_min_succ,
             delta_qsd=delta_qsd, qsd_min_succ=qsd_min_succ,
+            alpha_attract=alpha_attract, qat_min_succ=qat_min_succ,
         ) if need_dfrl else None
 
         # Save extension flags for method_name suffix
         self._qse_active = (gamma_qsat > 0.0)
         self._qsd_active = (delta_qsd > 0.0)
+        self._qat_active = (alpha_attract > 0.0)
         self._tool = tool
 
         self._sig_buffer: List[SignatureEvent] = []
@@ -162,6 +171,8 @@ class PADSEMethod(DSEMethod):
             suffix += "+QSE"
         if self._qsd_active:
             suffix += "+QSD"
+        if self._qat_active:
+            suffix += "+QAT"
         return f"PA-DSE_{self.ablation_config}{suffix}"
 
     def initialize(self) -> List[Config]:
