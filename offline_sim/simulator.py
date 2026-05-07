@@ -258,6 +258,9 @@ def run_padse_offline(
     # QSE extension
     gamma_qsat: float = 0.0,
     qsat_min_succ: int = 4,
+    # QSD extension
+    delta_qsd: float = 0.0,
+    qsd_min_succ: int = 3,
 ):
     """Run one PA-DSE offline simulation (Bambu or Dynamatic)."""
     from methods.pa_dse_method import PADSEMethod
@@ -287,6 +290,9 @@ def run_padse_offline(
     if gamma_qsat > 0.0:
         kwargs["gamma_qsat"] = gamma_qsat
         kwargs["qsat_min_succ"] = qsat_min_succ
+    if delta_qsd > 0.0:
+        kwargs["delta_qsd"] = delta_qsd
+        kwargs["qsd_min_succ"] = qsd_min_succ
 
     method = PADSEMethod(configs, benchmark, tool, budget, **kwargs)
     return simulate_run(method, oracle, benchmark)

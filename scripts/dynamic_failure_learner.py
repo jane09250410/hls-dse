@@ -18,6 +18,7 @@ Design rules:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 from collections import defaultdict
@@ -105,7 +106,13 @@ class OnlineFailureRiskScorer:
                  # best_area / UQoR. QSE adds a penalty to that (dim, value)
                  # in risk score, deferring further evaluation in favour of
                  # under-explored regions. gamma_qsat=0 reproduces vanilla.
-                 gamma_qsat: float = 0.0, qsat_min_succ: int = 4):
+                 gamma_qsat: float = 0.0, qsat_min_succ: int = 4,
+                 # ── QoR-space Diversification (QSD) ─────────────────────
+                 # Penalty for candidate configs whose *predicted* QoR is
+                 # close to already-visited QoR points. delta_qsd=0 disables.
+                 # Predicted QoR is the relevance-weighted mean per-dimension
+                 # observed (area, latency) for c's parameter values.
+                 delta_qsd: float = 0.0, qsd_min_succ: int = 3):
         self.prior_alpha = prior_alpha
         self.prior_beta = prior_beta
         self.min_support = min_support
@@ -114,6 +121,8 @@ class OnlineFailureRiskScorer:
         self.n_cov = n_cov
         self.gamma_qsat = gamma_qsat
         self.qsat_min_succ = qsat_min_succ
+        self.delta_qsd = delta_qsd
+        self.qsd_min_succ = qsd_min_succ
 
         self._counts: Dict[str, Dict[str, Dict[str, int]]] = defaultdict(
             lambda: defaultdict(lambda: {"fail": 0, "success": 0})
@@ -126,6 +135,20 @@ class OnlineFailureRiskScorer:
         self._qor_points: Dict[str, Dict[str, set]] = defaultdict(
             lambda: defaultdict(set)
         )
+        # Per-(dim, value) running mean of (area, latency) for successes,
+        # used to predict a candidate config's expected QoR.
+        # _qor_sum[d][v] = (sum_area, sum_lat); _qor_n[d][v] = n_succ
+        self._qor_sum: Dict[str, Dict[str, Tuple[float, float]]] = defaultdict(
+            lambda: defaultdict(lambda: (0.0, 0.0))
+        )
+        self._qor_n: Dict[str, Dict[str, int]] = defaultdict(
+            lambda: defaultdict(int)
+        )
+        # Global cloud of all visited successful (area, latency) tuples
+        # (with multiplicity = number of times this point was visited).
+        self._qor_cloud: List[Tuple[float, float]] = []
+        # QoR axis scales for normalization (computed lazily from the cloud)
+        self._qor_scale_cache: Optional[Tuple[float, float]] = None
         self._total_fail = 0
         self._total_success = 0
 
@@ -139,14 +162,22 @@ class OnlineFailureRiskScorer:
         else:
             self._total_success += 1
 
+        valid_qor = (not failed and qor is not None
+                     and qor[0] is not None and qor[1] is not None)
+        if valid_qor:
+            qa, ql = float(qor[0]), float(qor[1])
+            self._qor_cloud.append((qa, ql))
+            self._qor_scale_cache = None  # invalidate
+
         for d in param_keys:
             v = str(config.get(d, ""))
             if v:
                 self._counts[d][v][outcome] += 1
-                # QoR saturation tracking: only record on success with valid qor
-                if not failed and qor is not None and qor[0] is not None and qor[1] is not None:
-                    self._qor_points[d][v].add((round(float(qor[0]), 4),
-                                                round(float(qor[1]), 4)))
+                if valid_qor:
+                    self._qor_points[d][v].add((round(qa, 4), round(ql, 4)))
+                    sa, sl = self._qor_sum[d][v]
+                    self._qor_sum[d][v] = (sa + qa, sl + ql)
+                    self._qor_n[d][v] += 1
 
         if self.enable_pairwise:
             for d1, d2 in pair_keys:
@@ -251,6 +282,111 @@ class OnlineFailureRiskScorer:
             return sum(s * r for s, r in items) / total_rel
         return sum(s for s, _ in items) / len(items)
 
+    def _qor_scale(self) -> Tuple[float, float]:
+        """Median absolute deviation of (area, latency) over the cloud,
+        used to normalize distances. Computed lazily and cached."""
+        if self._qor_scale_cache is not None:
+            return self._qor_scale_cache
+        if not self._qor_cloud:
+            self._qor_scale_cache = (1.0, 1.0)
+            return self._qor_scale_cache
+        areas = [a for a, _ in self._qor_cloud]
+        lats  = [l for _, l in self._qor_cloud]
+        # Use range as scale; clamp to avoid div-by-zero
+        sa = max(1e-6, max(areas) - min(areas))
+        sl = max(1e-6, max(lats)  - min(lats))
+        self._qor_scale_cache = (sa, sl)
+        return self._qor_scale_cache
+
+    def _predict_qor(self, config: Config, param_keys: List[str]
+                     ) -> Optional[Tuple[float, float]]:
+        """Predict (area, latency) of an unevaluated config c as the
+        relevance-weighted average of per-(dim, value) running means.
+
+        Returns None if too little data to predict. We require at least
+        qsd_min_succ observations across the contributing dimensions.
+        """
+        num_a, num_l, denom = 0.0, 0.0, 0.0
+        n_obs_total = 0
+        for d in param_keys:
+            v = str(config.get(d, ""))
+            if not v:
+                continue
+            n = self._qor_n[d].get(v, 0)
+            if n < 1:
+                continue
+            n_obs_total += n
+            sa, sl = self._qor_sum[d][v]
+            ma, ml = sa / n, sl / n
+            w = self.relevance(d)
+            if w <= 1e-9:
+                continue
+            num_a += w * ma
+            num_l += w * ml
+            denom += w
+        if denom < 1e-9 or n_obs_total < self.qsd_min_succ:
+            return None
+        return (num_a / denom, num_l / denom)
+
+    def qor_density_penalty(self, config: Config, param_keys: List[str]
+                            ) -> float:
+        """Parameter-space dispersion penalty in [0, 1].
+
+        When the global QoR cloud is saturated (most successful evaluations
+        produce few unique points relative to total successes), the algorithm
+        is in a 'rut'. QSD adds a penalty proportional to how SIMILAR a
+        candidate config's parameter values are to those of recently
+        successful evaluations.
+
+        Specifically:
+        - Compute global saturation S = 1 - (|cloud|_unique / |cloud|)
+        - For each dim d (with relevance weight w_d), compute the density
+          of (d, c[d]) -- how many of the recent successes had this same
+          (d, value).
+        - Return S * (relevance-weighted mean of dim density).
+
+        Effect: when not saturated globally, QSD is silent. Once the cloud
+        gets stuck (many successes -> few unique QoR), QSD pushes the queue
+        toward parameter values seen LESS often in recent successes,
+        enabling exploration to break out of the rut.
+
+        delta_qsd <= 0 disables this entirely.
+        """
+        if self.delta_qsd <= 0.0:
+            return 0.0
+        if not self._qor_cloud or len(self._qor_cloud) < self.qsd_min_succ:
+            return 0.0
+        # Global saturation gate
+        n_total = len(self._qor_cloud)
+        n_unique = len(set(self._qor_cloud))
+        global_sat = 1.0 - (n_unique / float(n_total))
+        # Below 0.3 saturation = healthy diversity, no need to push
+        if global_sat < 0.3:
+            return 0.0
+
+        # Per-dim density of c's values among recent successes
+        items = []
+        for d in param_keys:
+            v = str(config.get(d, ""))
+            if not v:
+                continue
+            n_succ_d_v = self._counts[d][v]["success"]
+            n_succ_total = sum(self._counts[d][vv]["success"] for vv in self._counts[d])
+            if n_succ_total < self.qsd_min_succ:
+                continue
+            density = n_succ_d_v / float(n_succ_total)
+            items.append((density, self.relevance(d)))
+
+        if not items:
+            return 0.0
+        total_rel = sum(r for _, r in items)
+        if total_rel > 1e-9:
+            avg_density = sum(d * r for d, r in items) / total_rel
+        else:
+            avg_density = sum(d for d, _ in items) / len(items)
+        # Combine: scale density penalty by global saturation
+        return global_sat * avg_density
+
     def risk_score(self, config: Config, param_keys: List[str],
                    pair_keys: List[Tuple[str, str]]) -> float:
         numerator = 0.0
@@ -282,6 +418,12 @@ class OnlineFailureRiskScorer:
         # get higher risk and are deferred. gamma_qsat=0 -> no-op.
         if self.gamma_qsat > 0.0:
             base = base + self.gamma_qsat * self.qor_saturation(config, param_keys)
+        # QSD extension: ADD density penalty so configs predicted to land
+        # in dense regions of QoR-space are deferred in favor of those
+        # predicted to land in sparse / unexplored regions.
+        # delta_qsd=0 -> no-op.
+        if self.delta_qsd > 0.0:
+            base = base + self.delta_qsd * self.qor_density_penalty(config, param_keys)
         return base
 
     def risk_decomposition(self, config: Config,
@@ -323,6 +465,9 @@ class DynamicFailureRiskLearner:
         # QSE extension passed through to OFRS:
         gamma_qsat: float = 0.0,
         qsat_min_succ: int = 4,
+        # QSD extension passed through to OFRS:
+        delta_qsd: float = 0.0,
+        qsd_min_succ: int = 3,
     ) -> None:
         self.tau = tau or threshold
         self.rpe_min_confidence = rpe_min_confidence
@@ -335,6 +480,8 @@ class DynamicFailureRiskLearner:
             n_cov=n_cov,
             gamma_qsat=gamma_qsat,
             qsat_min_succ=qsat_min_succ,
+            delta_qsd=delta_qsd,
+            qsd_min_succ=qsd_min_succ,
         )
         self.failure_log: List[FailureRecord] = []
         self.success_log: List[Config] = []

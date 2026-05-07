@@ -76,6 +76,15 @@ class PADSEMethod(DSEMethod):
                  # gamma_qsat=0 reproduces vanilla. method_name appends
                  # "+QSE" when active.
                  gamma_qsat=0.0, qsat_min_succ=4,
+                 # ── QoR-Space Diversification (QSD) ───────────────────
+                 # Penalty added to risk_score based on the predicted
+                 # (area, latency) of a candidate's PROXIMITY to the
+                 # already-visited cloud. Configs predicted to land in
+                 # dense regions of QoR-space are deferred; configs
+                 # predicted to land in sparse regions are advanced.
+                 # Targets UQoR specifically. delta_qsd=0 disables.
+                 # method_name appends "+QSD" when active.
+                 delta_qsd=0.0, qsd_min_succ=3,
                  **kwargs):
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)
         assert ablation_config in VALID_CONFIGS, \
@@ -117,10 +126,12 @@ class PADSEMethod(DSEMethod):
             mode=dfrl_mode,
             beta_cov=beta_cov, n_cov=n_cov,
             gamma_qsat=gamma_qsat, qsat_min_succ=qsat_min_succ,
+            delta_qsd=delta_qsd, qsd_min_succ=qsd_min_succ,
         ) if need_dfrl else None
 
-        # Save QSE flag for method_name suffix
+        # Save extension flags for method_name suffix
         self._qse_active = (gamma_qsat > 0.0)
+        self._qsd_active = (delta_qsd > 0.0)
         self._tool = tool
 
         self._sig_buffer: List[SignatureEvent] = []
@@ -149,6 +160,8 @@ class PADSEMethod(DSEMethod):
             suffix += "+LSQD"
         if self._qse_active:
             suffix += "+QSE"
+        if self._qsd_active:
+            suffix += "+QSD"
         return f"PA-DSE_{self.ablation_config}{suffix}"
 
     def initialize(self) -> List[Config]:
