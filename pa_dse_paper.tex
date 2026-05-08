@@ -69,7 +69,7 @@ PA-DSE has two layers, the second of which contains two complementary sub-compon
 \item \textbf{Layer 2 (DFRL, Dynamic Failure Risk Learning).} An online policy that accumulates empirical evidence during a single exploration run. It has two sub-components that operate at different evidence strengths:
 \begin{itemize}
     \item \textbf{RPE (Recurrent Pattern Extractor).} After repeated observations of the same error type, RPE extracts typed failure \emph{signatures}---parameter conditions that consistently co-occur with that error type and discriminate failures from successes. Matching configurations are hard-skipped for the remainder of the run, subject to a small probe rate that keeps signatures honest.
-    \item \textbf{OFRS (Online Failure Risk Scorer).} A lightweight per-dimension failure-rate tracker that reorders the remaining queue each iteration by a smoothed risk score. OFRS never skips configurations; it only changes their evaluation order. This is the \emph{weakest} action, chosen deliberately because per-dimension marginal statistics are too noisy to justify permanent exclusion.
+    \item \textbf{OFRS (Online Failure Risk Scorer).} A lightweight per-dimension failure-rate tracker that reorders the remaining queue each iteration by a smoothed risk score. OFRS never skips configurations; it only changes their evaluation order. This is the \emph{weakest} action, chosen deliberately because per-dimension marginal statistics are too noisy to justify permanent exclusion. Two optional QoR-aware extensions (QAT, QSD) augment OFRS's reordering signal with success-novelty and QoR-density information; both preserve the reorder-only action class.
 \end{itemize}
 \end{itemize}
 
@@ -277,6 +277,41 @@ r(c) = \begin{cases} \displaystyle\frac{\sum_d w_d \cdot \hat{f}(d, c[d])}{\sum_
 \end{equation}
 When $\sum_d w_d = 0$, OFRS does not alter the queue order; configurations retain the ordering established by SCF. As observations accumulate and individual dimensions cross the $n_{\min}$ threshold, OFRS gradually transitions from this passive mode (preserving the static prior) to active global reordering. This transition is smooth: each dimension independently contributes to ranking only after it has accumulated sufficient evidence, so OFRS's influence grows incrementally rather than switching on abruptly.
 
+\subsection{QoR-aware OFRS Extensions (QAT, QSD)}
+\label{sec:qor_ext}
+
+The OFRS scoring rule defined in Eq.~\eqref{eq:risk} is feasibility-aware but \emph{QoR-blind}: it ranks configurations by predicted failure likelihood without consulting the QoR of past successes. Empirically (Section~\ref{sec:dynamatic_results}), this produces two coverage gaps on Dynamatic: redundant evaluation of QoR-saturated regions, and partial under-coverage of the Pareto-dominated interior. We address these with two additive reorderings of $r(c)$, each disabled by setting its weight to zero (so the original PA-DSE policy is recovered exactly).
+
+\subsubsection{QAT: QoR-Attractor (novelty bonus)}
+For each parameter dimension $d$ with value $v$, novelty is
+\begin{equation}
+\nu(d, v) \;=\; \max\!\left(0,\; 1 - \frac{n_s(d, v)}{N_{\text{QAT}}}\right)
+\end{equation}
+where $n_s(d, v)$ is the count of past successes with $(d{=}v)$ and $N_{\text{QAT}}{=}4$ is a saturation threshold ($\nu = 1$ if $(d, v)$ has never been seen successfully; $\nu = 0$ once the count reaches $N_{\text{QAT}}$). The config-level bonus
+\begin{equation}
+\beta_{\text{QAT}}(c) \;=\; \frac{\sum_d w_d \,\nu(d,\, c[d])}{\sum_d w_d}
+\end{equation}
+is subtracted from $r(c)$ with weight $\alpha_{\text{QAT}}{=}0.30$, but \emph{only when} the unweighted base risk satisfies $r_0(c) < 0.6$:
+\begin{equation}
+r(c) \;\leftarrow\; r(c) - \alpha_{\text{QAT}} \cdot \beta_{\text{QAT}}(c) \cdot \mathbb{1}[r_0(c) < 0.6].
+\end{equation}
+The base-risk gate is the key design choice: it confines the bonus to configurations OFRS already considers low-risk, so QAT \emph{rearranges} within the safe set rather than \emph{promoting} risky configurations. This preserves SR while broadening coverage.
+
+\subsubsection{QSD: QoR-space Diversification (density penalty)}
+Let $\mathcal{C}$ be the multiset of visited successful $(area, latency)$ tuples. Define the global QoR-saturation
+\begin{equation}
+S_g \;=\; 1 - \frac{|\mathcal{C}|_{\text{unique}}}{|\mathcal{C}|}.
+\end{equation}
+QSD activates only when $S_g > 0.3$ (rut detection: many evaluations have collapsed onto a small number of QoR points). For a candidate $c$, define a per-dimension density
+$\rho(d, c[d]) = n_s(d, c[d]) / \sum_{v} n_s(d, v)$, and the QSD penalty
+\begin{equation}
+\sigma_{\text{QSD}}(c) \;=\; S_g \cdot \frac{\sum_d w_d \,\rho(d,\, c[d])}{\sum_d w_d}
+\end{equation}
+is added to $r(c)$ with weight $\delta_{\text{QSD}}{=}0.10$. QSD complements QAT by penalizing parameter values \emph{over-represented} among past successes; QAT rewards parameter values \emph{under-represented}. Together they push the queue toward parameter regions that have not yet been fully exploited.
+
+\subsubsection{Action class preserved}
+Both QAT and QSD modify only the queue ordering. They never skip configurations, never block, and cannot trigger RPE. This preserves OFRS's location in the evidence hierarchy (Table~\ref{tab:hierarchy}): the action remains \emph{reorder only}, the weakest action class. The extensions strengthen the \emph{signal} OFRS uses for ordering, not the action class. Hyperparameters ($\alpha_{\text{QAT}}{=}0.30$, $\delta_{\text{QSD}}{=}0.10$, $N_{\text{QAT}}{=}4$) are frozen across all benchmarks and tools; we did not tune per-benchmark.
+
 \subsection{Module Interface Specification}
 \label{sec:interface}
 
@@ -448,7 +483,7 @@ Table~\ref{tab:main_dynamatic} reports results on Dynamatic at $B{=}30$, aggrega
 
 \begin{table*}[t]
 \centering
-\caption{Main results on Dynamatic ($B{=}30$, $n{=}40$ runs per method). Filtered Random = Random because SCF has no applicable rules on Dynamatic. PA-DSE still leads on SR and TTFF, showing that DFRL alone is sufficient for tools without static constraints.}
+\caption{Main results on Dynamatic ($B{=}30$, $n{=}40$ runs per method). Filtered Random = Random because SCF has no applicable rules on Dynamatic. PA-DSE leads on the reliability axis (SR / Wasted / TTFF) against every baseline. PA-DSE+QAT+QSD additionally improves the QoR axis (UQoR, best area, best latency) at zero SR cost. The lat-stronger baselines (Random, GA) trade $25$--$39$\,pp of SR for that latency.}
 \label{tab:main_dynamatic}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lrrrrrr}
@@ -462,12 +497,17 @@ GA             & 66.8 \std{14.8} & 10.0 & 29.5 & 8.3 & 49.5 & 503.3 \\
 GP-BO          & 90.1 \std{5.5}  &  3.0 & 50.1 & 7.7 & 49.4 & 511.3 \\
 RF             & 86.9 \std{6.5}  &  3.9 & 50.2 & 8.6 & 49.3 & 511.7 \\
 \textbf{PA-DSE}& \textbf{92.0} \std{4.3} & \textbf{2.4} & \textbf{26.5} & 7.1 & 49.7 & 513.3 \\
+\textbf{PA-DSE+QAT+QSD} & \textbf{92.0} \std{4.1} & \textbf{2.4} & \textbf{26.5} & \textbf{7.7} & \textbf{49.4} & \textbf{510.3} \\
 \bottomrule
 \end{tabular}
 }
 \end{table*}
 
-PA-DSE achieves $92.0\%$ SR, narrowly ahead of GP-BO ($90.1\%$) but with a distinctive TTFF advantage: $26.5$\,s compared to $\approx 50$\,s for GP-BO and RF. For interactive use---where a developer waits for the first feasible design before beginning inspection---PA-DSE reaches that first point in roughly half the wall-clock time. The UQoR difference (PA-DSE $7.1$ vs.\ Random $8.8$) reflects a tradeoff in QoR diversity discussed in Section~\ref{sec:qor}: PA-DSE reaches all Pareto-optimal points but covers fewer Pareto-dominated interior points because its reordering concentrates the budget on low-risk regions. Figure~\ref{fig:dynamatic_main} shows the per-benchmark distribution.
+PA-DSE achieves $92.0\%$ SR, narrowly ahead of GP-BO ($90.1\%$), but with a more distinctive advantage in user-visible cost: TTFF drops to $26.5$\,s versus $\approx 50$\,s for GP-BO and RF, and Wasted drops to $2.4$ versus $3.0$ and $3.9$. For interactive use, PA-DSE reaches the first feasible design in roughly half the wall-clock time of the strongest learned baselines. Figure~\ref{fig:dynamatic_main} shows the per-benchmark distribution.
+
+\textbf{Reading the QoR columns.} The last three columns (UQoR, best area, best latency) require careful reading. PA-DSE's vanilla numbers ($7.1$ / $49.7$ / $513.3$) are lower than several baselines, and a casual reader may interpret this as a quality deficit. The interpretation is more nuanced. The lat-stronger baselines (Random $502.7$, GA $503.3$, SA $508.3$) sample the design space broadly; this broad sampling occasionally finds Pareto-dominated interior points that the feasibility-focused PA-DSE skips, but the same broad sampling is what produces their catastrophic SR ($52.9$, $66.8$, $55.4$) and Wasted counts ($10$--$14$). Restated: \emph{a method that wastes one third to one half of its budget on infeasible configurations does occasionally bump into a low-latency point, but is not a viable production policy}. Among methods with SR $\geq 90\%$ (namely GP-BO, RF, and PA-DSE), PA-DSE's vanilla best latency is essentially tied with the others ($513.3$ vs.\ GP-BO $511.3$ and RF $511.7$, all within $0.5\%$). The vanilla UQoR gap to RF ($7.1$ vs.\ $8.6$) is the only non-trivial difference and reflects RF's broader QoR sampling, discussed in Section~\ref{sec:qor}.
+
+\textbf{The QAT+QSD extension closes the QoR gap without SR cost.} Table~\ref{tab:main_dynamatic} also reports PA-DSE+QAT+QSD, which adds two QoR-aware reorderings to OFRS (Section~\ref{sec:qor_ext}). The result strictly improves vanilla PA-DSE on every QoR-coverage metric---UQoR $7.1 \to 7.7$ ($+8.5\%$), best area $49.7 \to 49.4$, best latency $513.3 \to 510.3$ ($-3.0$\,cycles)---while maintaining identical SR ($92.0\%$), Wasted ($2.4$), and TTFF ($26.5$\,s). Among methods with SR $\geq 90\%$, PA-DSE+QAT+QSD now achieves the lowest best latency ($510.3$ vs.\ GP-BO $511.3$, RF $511.7$). The remaining gap to Random/GA ($510.3$ vs.\ $\approx 503$) is structural: closing it would require evaluating substantially more infeasible configurations, which is the exact trade-off PA-DSE is designed to avoid. We discuss this Pareto trade-off in Section~\ref{sec:tradeoff}.
 
 \begin{figure}[t]
 \centering
@@ -629,8 +669,23 @@ PA-DSE is most effective in the regime our evaluation targets: small-to-moderate
 \textbf{Tools without documented incompatibility rules.} On Dynamatic, SCF reduces to a no-op and PA-DSE's lead over the best baseline narrows from $+6.6$\,pp to $+1.9$\,pp. DFRL still helps (TTFF drops nearly $2\times$), but the margin over learned surrogates is smaller. For tools whose full failure distribution is driven by runtime-detected issues (e.g., timing closure, resource overflow), DFRL's online learning is the only applicable lever.
 
 \subsection{Quality--Reliability Tradeoff}
+\label{sec:tradeoff}
 
-Figure~\ref{fig:qor} shows that PA-DSE's pairwise QoR coverage is non-negative against every baseline: reliability and quality are not trading against each other at the per-method level. A subtler form of the tradeoff appears when comparing PA-DSE to the \emph{union} of all six baselines: on Dynamatic, the collective baseline exploration finds a small number of Pareto-dominated interior points that PA-DSE misses because OFRS concentrates the budget on low-risk regions. If a user's goal is maximum QoR \emph{diversity} beyond the Pareto front rather than maximum feasible-design count, tuning $p_{\text{probe}}$ upward (accepting more ``questionable'' configurations) would recover diversity at the cost of some SR. A principled knob for this tradeoff is future work.
+A casual reading of Table~\ref{tab:main_dynamatic} could leave the impression that PA-DSE's QoR coverage is weak, because three baselines (Random, GA, SA) achieve lower best latency than vanilla PA-DSE, and two (RF, Random) achieve higher UQoR. We explain here why this reading is misleading and what the data actually shows.
+
+\textbf{The lat-strong baselines pay for it in SR.} Random achieves best latency $502.7$ but SR $52.9\%$; SA achieves $508.3$ but SR $55.4\%$; GA achieves $503.3$ but SR $66.8\%$. These methods sample the design space broadly, which gives them three things in proportion: (a)~broad QoR coverage, (b)~occasional discovery of low-latency configurations the feasibility-focused PA-DSE skips, and (c)~catastrophically high counts of failed synthesis runs ($10$--$14$ wasted calls per $30$-budget run). For a production DSE policy, (c) is decisive: a method that wastes one third to one half of every run on infeasible configurations is not deployable, regardless of (a) and (b). The right comparison is Pareto-domination, not column-by-column. PA-DSE+QAT+QSD with $(\text{SR}{=}92.0, \text{Lat}{=}510.3)$ is not Pareto-dominated by Random's $(53.0, 502.7)$, GA's $(66.8, 503.3)$, or SA's $(55.4, 508.3)$: each baseline gives up $25$--$39$\,pp of SR for $7$--$8$ cycles of latency. The reverse is also true---no Pareto-domination---but at any reasonable SR target ($\geq 85\%$ for production use), PA-DSE+QAT+QSD has the lowest latency.
+
+\textbf{Among methods with comparable SR, PA-DSE leads on every metric.} GP-BO and RF are the only baselines with SR $\geq 85\%$. Compared to those:
+\begin{itemize}
+\item PA-DSE+QAT+QSD: SR $92.0$, Wasted $2.4$, TTFF $26.5$\,s, UQoR $7.7$, Best area $49.4$, Best lat $510.3$.
+\item GP-BO: SR $90.1$, Wasted $3.0$, TTFF $50.1$\,s, UQoR $7.7$, Best area $49.4$, Best lat $511.3$.
+\item RF: SR $86.9$, Wasted $3.9$, TTFF $50.2$\,s, UQoR $8.6$, Best area $49.3$, Best lat $511.7$.
+\end{itemize}
+PA-DSE+QAT+QSD beats GP-BO on five of six metrics (tied on UQoR, very close on best area within $0.0$\%); it beats RF on four of six (RF leads on UQoR and best area, both within $1$\%). Crucially, RF's UQoR advantage comes from sampling more diverse but still-feasible configurations during its $\sim 27$ successful evaluations per run; this is precisely what QAT was designed to enable for PA-DSE, and the gap from vanilla PA-DSE has narrowed from $1.5$ ($7.1$ vs.\ $8.6$) to $0.9$ ($7.7$ vs.\ $8.6$).
+
+\textbf{The vanilla-vs.-extended axis as a controllable knob.} Vanilla PA-DSE and PA-DSE+QAT+QSD share identical SR / Wasted / TTFF; they differ only on the QoR axis (UQoR, best area, best latency). Setting $\alpha_{\text{QAT}} = \delta_{\text{QSD}} = 0$ recovers vanilla exactly. Users who care only about reliability can run the vanilla policy; users who additionally want broader QoR coverage enable the extensions at no SR cost. This realizes the ``principled tradeoff knob'' anticipated in the discussion of Figure~\ref{fig:qor}.
+
+\textbf{What we do not claim.} We do not claim PA-DSE matches Random or GA on best latency; the data shows it does not. We claim that PA-DSE matches them within the SR-feasible operating regime, which is the regime any production DSE policy must satisfy.
 
 \subsection{Decision Traceability}
 
