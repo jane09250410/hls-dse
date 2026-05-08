@@ -32,7 +32,7 @@ RENAME = {
     "GP-BO": "GP-BO",
     "RF_Classifier": "RF",
 }
-ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
+ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE", "PA-DSE+QAT+QSD"]
 COLORS = {
     "Random":         "#B0B0B0",
     "FilteredRandom": "#808080",
@@ -41,17 +41,23 @@ COLORS = {
     "GP-BO":          "#2A9D8F",
     "RF":             "#264653",
     "PA-DSE":         "#C1272D",
+    "PA-DSE+QAT+QSD": "#7B0E12",
 }
 
 
-def load_and_process(main_path, perms_path, max_step):
+def load_and_process(main_path, perms_path, max_step, qat_qsd_path=None):
     main = pd.read_csv(ROOT / main_path)
     perms = pd.read_csv(ROOT / perms_path)
     main = main[~main["strategy"].str.contains("PA-DSE")].copy()
     main["strategy"] = main["strategy"].map(RENAME).fillna(main["strategy"])
     perms = perms.copy()
     perms["strategy"] = "PA-DSE"
-    df = pd.concat([main, perms], ignore_index=True)
+    frames = [main, perms]
+    if qat_qsd_path is not None and (ROOT / qat_qsd_path).exists():
+        qat = pd.read_csv(ROOT / qat_qsd_path).copy()
+        qat["strategy"] = "PA-DSE+QAT+QSD"
+        frames.append(qat)
+    df = pd.concat(frames, ignore_index=True)
 
     # 4-bench Dynamatic filter (paper §IV.A): exclude fir/histogram on Dynamatic
     if "dynamatic" in main_path.lower():
@@ -117,6 +123,7 @@ bam_curves = load_and_process(
     "master/bambu_main/eval_log.csv",
     "rerun/bambu_pa_dse_perms/eval_log.csv",
     max_step=60,
+    qat_qsd_path="qse/bambu_main/eval_log.csv",
 )
 plot_curves(axL, bam_curves, 60, "(a) Bambu convergence (B=60)")
 axL.legend(loc="upper left", frameon=False, ncol=2, fontsize=8.5)
@@ -126,6 +133,7 @@ dyn_curves = load_and_process(
     "master/dynamatic_main/eval_log.csv",
     "rerun/dynamatic_pa_dse_perms/eval_log.csv",
     max_step=30,
+    qat_qsd_path="qse/dynamatic_main/eval_log.csv",
 )
 plot_curves(axR, dyn_curves, 30, "(b) Dynamatic convergence (B=30, 4 benchmarks)")
 axR.legend(loc="upper left", frameon=False, ncol=2, fontsize=8.5)

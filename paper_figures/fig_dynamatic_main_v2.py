@@ -45,6 +45,14 @@ dyn_main_clean = dyn_main[~dyn_main["strategy"].str.contains("PA-DSE")].copy()
 dyn_perms_clean = dyn_perms.copy()
 dyn_perms_clean["strategy"] = "PA-DSE"
 
+# Optional: PA-DSE+QAT+QSD data (results/qse/dynamatic_main/)
+qat_path = ROOT / "qse/dynamatic_main/run_summary.csv"
+if qat_path.exists():
+    dyn_qat = pd.read_csv(qat_path).copy()
+    dyn_qat["strategy"] = "PA-DSE+QAT+QSD"
+else:
+    dyn_qat = pd.DataFrame()
+
 RENAME = {
     "Random":             "Random",
     "Filtered_Random":    "FilteredRandom",
@@ -55,7 +63,10 @@ RENAME = {
 }
 dyn_main_clean["strategy"] = dyn_main_clean["strategy"].map(RENAME).fillna(dyn_main_clean["strategy"])
 
-df = pd.concat([dyn_main_clean, dyn_perms_clean], ignore_index=True)
+frames = [dyn_main_clean, dyn_perms_clean]
+if len(dyn_qat) > 0:
+    frames.append(dyn_qat)
+df = pd.concat(frames, ignore_index=True)
 
 # Filter to 4 benchmarks
 before = len(df)
@@ -63,7 +74,7 @@ df = df[df["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
 print(f"[filter] Dynamatic 4 benchmarks: {before} -> {len(df)} rows")
 
 # ==================== Method order + colors ====================
-METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
+METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE", "PA-DSE+QAT+QSD"]
 BENCH_ORDER_PANEL_B = DYNAMATIC_BENCHMARKS
 
 COLORS = {
@@ -74,7 +85,11 @@ COLORS = {
     "GP-BO":          "#F28E2B",
     "RF":             "#E15759",
     "PA-DSE":         "#C1272D",
+    "PA-DSE+QAT+QSD": "#7B0E12",
 }
+
+# Filter METHOD_ORDER to only methods that have data
+METHOD_ORDER = [m for m in METHOD_ORDER if m in df["strategy"].unique()]
 
 # ==================== Create figure ====================
 fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2),
@@ -100,10 +115,10 @@ for i, method in enumerate(METHOD_ORDER):
     m = row["mean"]
     s = row["std"]
     y_pos = m + s + 2
-    if method == "PA-DSE":
+    if method in ("PA-DSE", "PA-DSE+QAT+QSD"):
         axL.text(i, y_pos, f"{m:.1f}",
                  ha="center", fontsize=9, fontweight="bold",
-                 color=COLORS["PA-DSE"])
+                 color=COLORS[method])
     else:
         axL.text(i, y_pos, f"{m:.1f}",
                  ha="center", fontsize=8, color="#333")

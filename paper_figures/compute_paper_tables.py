@@ -34,10 +34,10 @@ BASELINE_MAP = {
 }
 
 METRICS_MAIN = ["sr_pct", "wasted_calls", "ttff_s", "uqor", "best_area", "best_latency"]
-METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
+METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE", "PA-DSE+QAT+QSD"]
 
 
-def main_table(main_path, perms_path, bench_filter):
+def main_table(main_path, perms_path, bench_filter, qat_qsd_path=None):
     main = pd.read_csv(ROOT / main_path)
     perms = pd.read_csv(ROOT / perms_path)
 
@@ -52,7 +52,16 @@ def main_table(main_path, perms_path, bench_filter):
     main["strategy"] = main["strategy"].map(BASELINE_MAP).fillna(main["strategy"])
     perms["strategy"] = "PA-DSE"
 
-    df = pd.concat([main, perms], ignore_index=True)
+    extra = []
+    if qat_qsd_path is not None and (ROOT / qat_qsd_path).exists():
+        qat = pd.read_csv(ROOT / qat_qsd_path)
+        qat = qat[qat["benchmark"].isin(bench_filter)].copy()
+        if len(qat) > 0:
+            qat["strategy"] = "PA-DSE+QAT+QSD"
+            extra.append(qat)
+            print(f"  [extra] QAT+QSD: {len(qat)} rows from {qat_qsd_path}")
+
+    df = pd.concat([main, perms] + extra, ignore_index=True)
 
     rows = []
     for m in METHOD_ORDER:
@@ -79,6 +88,7 @@ bambu_tbl, bambu_all = main_table(
     "master/bambu_main/run_summary.csv",
     "rerun/bambu_pa_dse_perms/run_summary.csv",
     BAMBU_BENCHMARKS,
+    qat_qsd_path="qse/bambu_main/run_summary.csv",
 )
 bambu_tbl.to_csv(OUT / "table_main_bambu.csv", index=False)
 print(bambu_tbl.round(2).to_string(index=False))
@@ -91,6 +101,7 @@ dyn_tbl, dyn_all = main_table(
     "master/dynamatic_main/run_summary.csv",
     "rerun/dynamatic_pa_dse_perms/run_summary.csv",
     DYNAMATIC_BENCHMARKS,
+    qat_qsd_path="qse/dynamatic_main/run_summary.csv",
 )
 dyn_tbl.to_csv(OUT / "table_main_dynamatic.csv", index=False)
 print(dyn_tbl.round(2).to_string(index=False))
