@@ -520,13 +520,6 @@ class OnlineFailureRiskScorer:
             return 0.0
         if self._total_success < self.qat_min_succ:
             return 0.0
-        # UQoR plateau gate: when |unique QoR| has not grown in last 5
-        # evals, the QoR space appears exhausted; QAT deactivates so
-        # the algorithm does not divert budget away from the established
-        # best-lat / best-area cluster. Critical for benchmarks like
-        # kernel_2mm with very small unique-QoR cardinality (~12 points).
-        if self._uqor_plateau(k=5):
-            return 0.0
 
         items = []
         for d in param_keys:
