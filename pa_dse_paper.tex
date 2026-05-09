@@ -426,7 +426,7 @@ All baselines share the same $\mathcal{C}$, the same synthesis interface, and th
     \item \textbf{TTFF (s)}: wall-clock time to first feasible design, relevant for interactive use.
     \item \textbf{UQoR}: number of unique Pareto-eligible QoR points (distinct (area, latency) pairs) discovered.
     \item \textbf{Best area, best latency}: minima observed across successful configurations in the run.
-    \item \textbf{Algorithmic overhead}: per-iteration time spent in each PA-DSE layer (\texttt{overhead\_phago\_ms}, \texttt{overhead\_rpe\_ms}, \texttt{overhead\_ofrs\_ms}).
+    \item \textbf{Algorithmic overhead}: per-iteration time spent in each PA-DSE layer (\texttt{overhead\_scf\_ms}, \texttt{overhead\_rpe\_ms}, \texttt{overhead\_ofrs\_ms}).
 \end{itemize}
 
 \textbf{Hardware.} All runs execute single-threaded on an Azure \texttt{Standard\_D4s\_v5} VM (4 vCPUs, 15\,GB RAM, Ubuntu 24.04, Python 3.12). No GPUs are used. Gurobi 12.0 (academic license) is used for Dynamatic's MILP buffer placement.
