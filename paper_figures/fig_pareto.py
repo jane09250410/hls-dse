@@ -133,8 +133,10 @@ def plot_panel(ax, df, title, threshold=85, lat_pad_frac=0.07):
     if len(rand):
         rsr = rand["SR"].iloc[0]
         rbl = rand["best_lat"].iloc[0]
-        # Place text just to the right of Random marker
-        ax.text(rsr + 2.5, rbl,
+        # Place text just to the right of Random marker; offset scales with x-range
+        x_range = x_max - x_min
+        x_offset = x_range * 0.06   # 6% of x-axis width — visually consistent across panels
+        ax.text(rsr + x_offset, rbl,
                 f"← Random\n(SR {rsr:.0f}%,\n not deployable)",
                 fontsize=7.5, color="#555", va="center", ha="left",
                 bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
