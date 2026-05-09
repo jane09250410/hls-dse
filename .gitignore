@@ -55,3 +55,9 @@ tests/
 # Tar/zip packaging artifacts
 *.tar
 *.zip
+
+# Allow paper data sources: aggregated run_summary.csv files
+# (raw eval_log_*.csv files remain on the VM, not pushed)
+!results/
+!results/**/
+!results/**/run_summary.csv
