@@ -52,11 +52,11 @@ plt.rcParams.update({
 cmap = LinearSegmentedColormap.from_list(
     "sr", ["#d73027", "#fdae61", "#fee08b", "#d9ef8b", "#a6d96a", "#1a9850"])
 
-fig, (axL, axR) = plt.subplots(1, 2, figsize=(13, 4.2),
-                                gridspec_kw={"width_ratios": [1.2, 0.95]})
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(14, 4.4),
+                                gridspec_kw={"width_ratios": [1.4, 0.85]})
 
 
-def plot_heatmap(ax, df, bench_order, title):
+def plot_heatmap(ax, df, bench_order, title, show_ylabels=True):
     # Compute mean SR per (strategy, benchmark)
     piv = (df.groupby(["strategy", "benchmark"])["sr_pct"]
              .mean()
@@ -82,8 +82,11 @@ def plot_heatmap(ax, df, bench_order, title):
 
     ax.set_xticks(np.arange(len(bench_order)))
     ax.set_xticklabels(bench_order, rotation=20, ha="right")
-    ax.set_yticks(np.arange(len(order_present)))
-    ax.set_yticklabels(order_present)
+    if show_ylabels:
+        ax.set_yticks(np.arange(len(order_present)))
+        ax.set_yticklabels(order_present)
+    else:
+        ax.set_yticks([])
     ax.set_title(title, loc="left", pad=6)
     # grid
     ax.set_xticks(np.arange(-0.5, len(bench_order), 1), minor=True)
@@ -92,11 +95,12 @@ def plot_heatmap(ax, df, bench_order, title):
     ax.tick_params(which="minor", length=0)
 
     # Bold PA-DSE / PA-DSE+QAT+QSD row labels
-    for lbl in ax.get_yticklabels():
-        if lbl.get_text() == "PA-DSE":
-            lbl.set_color("#C1272D"); lbl.set_fontweight("bold")
-        elif lbl.get_text() == "PA-DSE+QAT+QSD":
-            lbl.set_color("#7B0E12"); lbl.set_fontweight("bold")
+    if show_ylabels:
+        for lbl in ax.get_yticklabels():
+            if lbl.get_text() == "PA-DSE":
+                lbl.set_color("#C1272D"); lbl.set_fontweight("bold")
+            elif lbl.get_text() == "PA-DSE+QAT+QSD":
+                lbl.set_color("#7B0E12"); lbl.set_fontweight("bold")
     return im
 
 
@@ -108,7 +112,8 @@ bam_df = load_main(
 )
 BAMBU_BENCHES = ["matmul", "vadd", "fir", "histogram",
                  "atax", "bicg", "gemm", "gesummv"]
-im1 = plot_heatmap(axL, bam_df, BAMBU_BENCHES, "(a) Bambu per-benchmark SR (%)")
+im1 = plot_heatmap(axL, bam_df, BAMBU_BENCHES, "(a) Bambu per-benchmark SR (%)",
+                    show_ylabels=True)
 
 print("Loading Dynamatic data...")
 dyn_df = load_main(
@@ -117,7 +122,8 @@ dyn_df = load_main(
     qat_qsd_path="qse/dynamatic_main/run_summary.csv",
 )
 DYN_BENCHES = ["gcd", "matching", "binary_search", "kernel_2mm"]
-im2 = plot_heatmap(axR, dyn_df, DYN_BENCHES, "(b) Dynamatic per-benchmark SR (%)")
+im2 = plot_heatmap(axR, dyn_df, DYN_BENCHES, "(b) Dynamatic per-benchmark SR (%)",
+                    show_ylabels=False)
 
 # Shared colorbar
 cbar = fig.colorbar(im2, ax=[axL, axR], orientation="vertical",
