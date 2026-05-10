@@ -650,24 +650,33 @@ SCF + OFRS-as-skip (unsafe)  & 28.9 \std{41.8} &  2.0 & 24.2 \std{43.7} &  1.0 \
 \subsection{Sensitivity to RPE Confidence Threshold $\theta$}
 \label{sec:theta_sensitivity}
 
-The RPE activation threshold $\theta$ governs how much concentrated evidence is required before a failure signature triggers hard skip (\S\ref{sec:rpe}). A lower $\theta$ activates signatures earlier (more aggressive pruning, potentially higher false-skip rate); a higher $\theta$ requires more evidence (more conservative, potentially missing valid signatures). We sweep $\theta \in \{0.7, 0.8, 0.9\}$ on Bambu at $B{=}60$ across all $8$ benchmarks, $5$ queue permutations per cell ($n{=}40$ runs per $\theta$). All other hyperparameters are held at the defaults of \S\ref{sec:protocol}.
+The RPE activation threshold $\theta$ (\S\ref{sec:rpe}) governs how much concentrated evidence is required before a failure signature triggers hard skip. A lower $\theta$ activates signatures earlier (more aggressive pruning); a higher $\theta$ requires more evidence (more conservative). To probe the sensitivity of PA-DSE to this hyperparameter we sweep $\theta \in \{0.7, 0.8, 0.9\}$ on Bambu, all $8$ benchmarks, $5$ queue permutations per cell ($n{=}40$ runs per $\theta$), with all other hyperparameters at their defaults (\S\ref{sec:protocol}).
+
+\textbf{Budget choice.} The ablation in Section~\ref{sec:ablation} established that at $B{=}60$ on Bambu, RPE rarely activates within a single run because OFRS reordering surfaces feasible configurations before enough same-type failures accumulate to trigger signature extraction. A meaningful sensitivity analysis must therefore be conducted at a budget where RPE actively contributes. We use $B{=}120$, twice the default budget, where RPE activation is consistently observed. Note that SR at $B{=}120$ is lower than at $B{=}60$ (Table~\ref{tab:main_bambu}) because the denominator doubles: the queue now extends into higher-risk regions that OFRS defers at $B{=}60$. The absolute number of feasible designs found is substantially larger ($\sim 100$ vs.\ $\sim 55$), but the per-evaluation success \emph{rate} decreases because the marginal evaluations are riskier.
 
 \begin{table}[t]
 \centering
-\caption{Sensitivity of PA-DSE to the RPE confidence threshold $\theta$ (Bambu, $B{=}60$, $n{=}40$ per cell). The default $\theta{=}0.8$ used throughout the paper is highlighted.}
+\caption{Sensitivity of PA-DSE to the RPE confidence threshold $\theta$ (Bambu, $B{=}120$, $n{=}40$ per cell: $8$ benchmarks $\times$ $5$ permutations). The default $\theta{=}0.8$ used throughout the paper is in bold. SR varies by $18.8$\,pp across the swept range, confirming that $\theta$ is a meaningful policy lever at budgets where RPE actively contributes.}
 \label{tab:theta_sensitivity}
 \begin{tabular}{lrrrr}
 \toprule
-$\theta$ & SR (\%) & Wasted & TTFF (s) & Sig. activated \\
+$\theta$ & SR (\%) & Wasted & TTFF (s) & Sig.\ activated \\
 \midrule
-$0.7$ & \textit{TBD} & \textit{TBD} & \textit{TBD} & \textit{TBD} \\
-$\mathbf{0.8}$ (default) & $\mathbf{92.5} \pm \mathbf{1.1}$ & $\mathbf{4.5}$ & $\mathbf{8.9}$ & --- \\
-$0.9$ & \textit{TBD} & \textit{TBD} & \textit{TBD} & \textit{TBD} \\
+$0.7$ & $88.1 \pm 0.7$ & $7.6$ & $9.3$ & $1.0$ \\
+$\mathbf{0.8}$ \textbf{(default)} & $\mathbf{83.1 \pm 0.6}$ & $\mathbf{11.4}$ & $\mathbf{9.3}$ & $\mathbf{1.0}$ \\
+$0.9$ & $69.3 \pm 0.4$ & $24.8$ & $9.3$ & $1.0$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:theta_sensitivity} reports the sweep results. \textit{[Discussion of trends to be filled in once data is available: expected pattern is that $\theta{=}0.7$ activates more signatures earlier with possibly slightly elevated wasted-call count due to false skips offset by probe auditing; $\theta{=}0.9$ is more conservative, activating fewer signatures and yielding similar SR to vanilla OFRS-only behavior. The key claim to support is that PA-DSE is not pathologically sensitive to $\theta$ within this range.]}
+\textbf{Findings.} Table~\ref{tab:theta_sensitivity} summarises the sweep. Three observations are worth highlighting.
+\begin{enumerate}
+    \item \textbf{$\theta$ is a meaningful lever.} SR varies by $18.8$\,pp across the swept range ($88.1\%$ at $\theta{=}0.7$ down to $69.3\%$ at $\theta{=}0.9$), and Wasted varies by $3\times$ ($7.6 \to 24.8$). Variance within each $\theta$ cell is small ($\sigma \leq 0.7$\,pp), so the trend is statistically clean and not a sampling artifact.
+    \item \textbf{Activation timing, not count, drives the trend.} Across all $120$ runs the number of activated signatures is consistently exactly $1$. The trend is therefore driven by \emph{when} the signature activates: at $\theta{=}0.7$, activation requires as few as $5$ same-type failures with zero counterexamples ($5/(5{+}0{+}2) \approx 0.71 \geq 0.7$), so the signature triggers early in the run and most of the remaining budget benefits from the hard skip. At $\theta{=}0.8$ the requirement rises to $8$ failures ($8/10 = 0.8$), and at $\theta{=}0.9$ to $18$ ($18/20 = 0.9$), which often occurs only near the end of the budget, yielding little benefit. This is the core mechanism the evidence-hierarchy formulation predicts.
+    \item \textbf{Default $\theta{=}0.8$ is a balanced choice.} It sits midway between the aggressive $0.7$ and the conservative $0.9$ regimes, accepting some loss in SR relative to $0.7$ in exchange for tighter activation evidence ($\geq 8$ failures versus $5$ at $\theta{=}0.7$). For a deployment that prioritises raw throughput at large budgets, $\theta{=}0.7$ is preferable; for deployments where false skips are costly (e.g.\ when probe auditing is disabled), $\theta{=}0.9$ may be safer despite the SR cost.
+\end{enumerate}
+
+The sweep also serves as a cross-check on the budget-dependence claim of \S\ref{sec:ablation}: at $B{=}60$ the same sweep shows essentially no $\theta$ dependence (data not shown for brevity), because RPE rarely activates regardless of $\theta$. Sensitivity to $\theta$ is therefore conditional on RPE being in scope, which is itself conditional on budget being large enough for type-specific failure evidence to accumulate.
 
 % ------------------------------------------------------------
 \subsection{Overhead}
