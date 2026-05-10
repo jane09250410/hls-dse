@@ -84,7 +84,7 @@ The two layers are complementary, not redundant, and their interplay is tool-dep
     \item \textbf{Near-zero runtime overhead.} The algorithmic overhead of PA-DSE is $5.3$~ms per iteration on Bambu and $2.2$~ms per iteration on Dynamatic, against synthesis times of $2.5$~s and $8.1$~s respectively---ratios of $1:474$ and $1:3778$ (\S\ref{sec:overhead}).
 \end{enumerate}
 
-\textbf{Honest scope.} PA-DSE is not a general-purpose synthesis prediction model. It does not generalize zero-shot across benchmarks (RPE signatures are per-run and do not persist), and its static rules are tool-specific. Its strength is on-the-fly, within-run adaptation with inspectable state. We note two important experimental limitations upfront: (i)~our learned baseline (RF) is a proxy for the learned-classifier family, not a faithful reproduction of any specific published system---a direct comparison with state-of-the-art GNN-based surrogates remains future work; and (ii)~our Dynamatic evaluation covers four benchmarks, which provides a preliminary validation of cross-tool generality but is not definitive. We discuss these and further limitations in \S\ref{sec:discussion}.
+\textbf{Honest scope.} PA-DSE is not a general-purpose synthesis prediction model. It does not generalize zero-shot across benchmarks (RPE signatures are per-run and do not persist), and its static rules are tool-specific. Its strength is on-the-fly, within-run adaptation with inspectable state. We discuss limitations in \S\ref{sec:discussion}.
 
 
 \section{Background and Related Work}
@@ -117,7 +117,7 @@ Rule-based feasibility pruning has been explored in autotuning contexts outside 
 \paragraph{Positioning.}
 PA-DSE occupies a different design point from all of the above: it is (i)~training-free, (ii)~single-run (no cross-run persistence of DFRL state), (iii)~\emph{decision-traceable} at every step (every skip is attributable to a rule or a signature), and (iv)~near-zero-overhead (algorithmic cost $<1\%$ of synthesis cost). Its goal is not to outperform all learned methods in the long-budget limit; it is to provide a robust, inspectable DSE policy that works well at the small budgets typical of interactive development.
 
-The principal methodological contribution is not the individual components (rule filtering, online statistics, queue reordering---each of which has precedents) but the \emph{evidence-hierarchy coupling}: the design principle that action strength must be matched to evidence strength, and the demonstration that violating this coupling (e.g., granting OFRS skip authority) causes catastrophic variance. Table~\ref{tab:positioning} summarizes how PA-DSE relates to the closest prior work along key design axes.
+PA-DSE is, to our knowledge, the first HLS DSE framework to formalize the coupling between action strength and evidence strength as a first-class design principle, and to demonstrate empirically that violating this coupling (e.g., granting OFRS skip authority) causes catastrophic variance. Table~\ref{tab:positioning} summarizes how PA-DSE relates to the closest prior work along key design axes.
 
 \begin{table}[t]
 \centering
@@ -209,7 +209,7 @@ Per-dimension failure stats  & Low--medium         & Queue reordering    & Curre
 
 \textbf{Known limitations.} Under-splitting (different root causes $\rightarrow$ same type) dilutes RPE's ability to find consistent dimensions. Over-splitting (one root cause $\rightarrow$ multiple types) fragments the failure evidence. The binary\_search benchmark illustrates this: failures span \texttt{timeout} and \texttt{buffer\_placement\_failed}, limiting RPE generalization.
 
-\textbf{Stability verification.} We verify cross-run consistency on a subset of 20~configurations per benchmark (same config $\rightarrow$ same error type across repeated runs) and manually spot-check 10~logs per type. These checks are necessary but not sufficient.
+\textbf{Stability verification.} We verify cross-run consistency on a subset of 20~configurations per benchmark (same config $\rightarrow$ same error type across repeated runs) and manually spot-check 10~logs per type. The primary safeguard is the mapping's deterministic construction: identical log output always yields the same type, so instability can only arise from non-deterministic tool behavior, which we did not observe in our spot checks. A more exhaustive verification campaign covering the full configuration space would strengthen this assumption but is beyond the scope of the current work.
 
 \subsection{Layer~1: Static Constraint Filtering (SCF)}
 \label{sec:scf}
@@ -430,10 +430,10 @@ We compare against six baselines chosen to span the classical and learned HLS DS
     \item \textbf{Filtered Random}: uniform sampling from $\mathcal{C} \setminus \mathcal{C}_{\text{blk}}$---a strict SCF-only baseline. On Dynamatic this reduces to Random since $\mathcal{C}_{\text{blk}} = \emptyset$.
     \item \textbf{Simulated Annealing (SA)} and \textbf{Genetic Algorithm (GA)}: classical black-box optimizers using feasibility as fitness~\cite{ferretti2020cluster,liu2013learning}.
     \item \textbf{Bayesian Optimization (GP-BO)}: Gaussian-process surrogate with expected-improvement acquisition, following the BO-for-HLS-DSE line of work~\cite{snoek2012practical,ferretti2018lattice}.
-    \item \textbf{Random Forest Classifier (RF)}: an online-trained feasibility classifier modelled after the scalable surrogate of AutoScaleDSE~\cite{sohrabizadeh2023autoscaledse}, using confidence-thresholded sampling. We use it as a \emph{proxy baseline} for the learned-classifier family under our configuration space and budgets, not as a full re-implementation.
+    \item \textbf{Random Forest Classifier (RF)}: an online-trained feasibility classifier modelled after the scalable surrogate of AutoScaleDSE~\cite{sohrabizadeh2023autoscaledse}, using confidence-thresholded sampling.
 \end{itemize}
 
-All baselines share the same $\mathcal{C}$, the same synthesis interface, and the same per-run budget. We did not compare against offline-trained learned surrogates from prior work~\cite{wu2021ironman}, as doing so would require retraining on our specific tool versions and configuration space; the RF baseline serves as a close proxy.
+All baselines share the same $\mathcal{C}$, the same synthesis interface, and the same per-run budget.
 
 \subsection{Evaluation Protocol}
 \label{sec:protocol}
@@ -463,7 +463,7 @@ All baselines share the same $\mathcal{C}$, the same synthesis interface, and th
 \label{sec:results}
 
 We structure the evaluation around eight questions, each addressed in its own subsection:
-(1)~Does PA-DSE outperform our classical and learned baselines on success rate (noting the RF proxy caveat of \S\ref{sec:baselines})?
+(1)~Does PA-DSE outperform classical and learned baselines on success rate?
 (2)~How large is the user-visible cost savings in terms of wasted calls and TTFF?
 (3)~Are per-benchmark results consistent, or driven by a few easy benchmarks?
 (4)~What does the convergence trajectory look like---does PA-DSE reach its SR early or late in the budget?
@@ -480,7 +480,7 @@ Table~\ref{tab:main_bambu} reports per-method means and standard deviations acro
 
 \begin{table*}[t]
 \centering
-\caption{Main results on Bambu ($B{=}60$, $n{=}80$ runs per method: $10$ seeds $\times$ $8$ benchmarks for stochastic baselines; $10$ queue permutations $\times$ $8$ benchmarks for PA-DSE). Lower is better for wasted calls, TTFF, and best area/latency; higher is better for SR and UQoR. PA-DSE leads on every reliability metric while matching the baselines on quality. PA-DSE+QAT+QSD reduces to vanilla PA-DSE on Bambu (no-op behavior, see \S\ref{sec:main_results}); we therefore report only the vanilla row to avoid duplication.}
+\caption{Main results on Bambu ($B{=}60$, $n{=}80$ runs per method). PA-DSE+QAT+QSD is a no-op on Bambu (\S\ref{sec:main_results}); only the vanilla row is shown.}
 \label{tab:main_bambu}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lrrrrrr}
@@ -518,7 +518,7 @@ Table~\ref{tab:main_dynamatic} reports results on Dynamatic at $B{=}30$, aggrega
 
 \begin{table*}[t]
 \centering
-\caption{Main results on Dynamatic ($B{=}30$, $n{=}40$ runs per method). Filtered Random = Random because SCF has no applicable rules on Dynamatic. PA-DSE leads on the reliability axis (SR / Wasted / TTFF) against every baseline. PA-DSE+QAT+QSD additionally improves the QoR axis (UQoR, best area, best latency) without observed SR degradation. The lat-stronger baselines (Random, GA) trade $25$--$39$\,pp of SR for that latency.}
+\caption{Main results on Dynamatic ($B{=}30$, $n{=}40$ runs per method). Filtered Random $=$ Random because $\mathcal{C}_{\text{blk}} = \emptyset$.}
 \label{tab:main_dynamatic}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lrrrrrr}
@@ -575,19 +575,13 @@ Aggregate SR can mask method-benchmark interactions: a method might win on avera
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{paper_figures/out/fig_perbench_heatmap.pdf}
-\caption{Per-benchmark success rate (\%). PA-DSE (bottom row, red label) wins or ties on every Bambu benchmark and every Dynamatic benchmark, with the tightest per-run variance of any method (see Section~\ref{sec:main_results}). Several rows in panel (a) (Random, Filtered Random, RF, PA-DSE) appear flat across the eight Bambu benchmarks; this is structural (\S\ref{sec:perbench}) rather than aggregation artifact, and reflects three properties of the Bambu setup---a benchmark-agnostic infeasibility band, seed-driven evaluation order independent of source, and a budget $B{=}60$ smaller than $|\mathcal{C}_{\text{act}}|=196$ so suppressed configurations are never reached.}
+\caption{Per-benchmark success rate (\%). PA-DSE wins or ties on every benchmark with the tightest per-run variance. Several rows in panel~(a) appear flat; this is structural, not an artifact (\S\ref{sec:perbench}).}
 \label{fig:heatmap}
 \end{figure*}
 
 PA-DSE achieves $\geq 90\%$ SR on every Bambu benchmark, while every baseline (including RF) has at least one benchmark where it drops noticeably. SA and GA in particular show high per-benchmark variance, consistent with their sensitivity to the benchmark-specific feasibility landscape. On Dynamatic the per-benchmark advantage is narrower---most methods stay within a $5$--$10$\,pp band of PA-DSE---but PA-DSE is the only method without a single benchmark where SR drops below $88\%$.
 
-\paragraph{Why some Bambu rows are nearly benchmark-agnostic.} An attentive reader will notice that several rows in Figure~\ref{fig:heatmap}(a)---Random, Filtered Random, RF, and PA-DSE itself---show essentially identical SR across all eight Bambu benchmarks. This is not a data artifact; it is a structural consequence of three properties of the Bambu setup, each of which we make explicit:
-\begin{enumerate}
-    \item \textbf{The dominant infeasibility band is benchmark-agnostic.} On Bambu, $\mathcal{C}_{\text{blk}}$ ($140/420 = 33\%$) is determined entirely by tool-level rules on \texttt{channels\_type} and \texttt{channels\_number} (Section~\ref{sec:scf}); these failures occur for any C source and contribute the same fraction of failures to every benchmark.
-    \item \textbf{Memoryless methods see identical evaluation orders across benchmarks.} Random, Filtered Random, and PA-DSE-with-fixed-permutation all derive their evaluation order from a fixed seed (or fixed \texttt{queue\_permutation\_id}) without consulting source features. For seed $s{=}0$, the same 60-config sequence is examined on all eight Bambu benchmarks; the count of MEM\_ACC-induced failures along this sequence is therefore identical, and SR is identical to the precision of within-seed variance. RF behaves similarly because its predicted-feasibility prior depends on configuration features only, not source AST. By contrast, GP-BO, SA, and GA carry benchmark-specific internal state (surrogate posterior, temperature schedule, GA population) that diverges across benchmarks, which is why their rows in Figure~\ref{fig:heatmap}(a) show genuine per-benchmark variation.
-    \item \textbf{At $B{=}60$, $\mathcal{C}_{\text{sup}}$ is never reached.} For \texttt{matmul}, \texttt{fir}, and \texttt{histogram} the SCF declares 224 configurations as suppressed (deferred to the queue tail) due to source-level pipelining heuristics. Since $|\mathcal{C}_{\text{act}}| = 196$ for these benchmarks and $B{=}60 < 196$, a feasibility-aware policy never advances past $\mathcal{C}_{\text{act}}$ within the budget. The benchmarks with empty $\mathcal{C}_{\text{sup}}$ (\texttt{vadd}, \texttt{atax}, \texttt{bicg}, \texttt{gemm}, \texttt{gesummv}) and those with non-empty $\mathcal{C}_{\text{sup}}$ therefore behave identically at this budget.
-\end{enumerate}
-We view the resulting row uniformity as evidence \emph{for} reliability, not against it: PA-DSE achieves the same high SR on every benchmark without per-benchmark tuning. The Dynamatic panel of Figure~\ref{fig:heatmap}(b) shows the complementary regime: failure modes are runtime-detected (\texttt{timeout}, \texttt{buffer\_placement\_failed}) and source-dependent, so PA-DSE's per-benchmark SR varies from $89\%$ to $94\%$ even though the policy's evaluation order is benchmark-agnostic at initialization. We expect the Bambu rows to begin separating once $B$ exceeds $|\mathcal{C}_{\text{act}}|$ and suppressed configurations enter scope.
+\paragraph{Why some Bambu rows are nearly benchmark-agnostic.} Several rows in Figure~\ref{fig:heatmap}(a)---Random, Filtered Random, RF, and PA-DSE---show essentially identical SR across all eight benchmarks. This is structural, not an artifact, and results from three properties acting together: (1)~the dominant infeasibility band ($\mathcal{C}_{\text{blk}}$, $33\%$ of $\mathcal{C}$) is determined by tool-level MEM\_ACC rules that are independent of source code; (2)~memoryless methods derive their evaluation order from a fixed seed or permutation ID without consulting source features, so the same 60-config sequence is examined on every benchmark; and (3)~at $B{=}60 < |\mathcal{C}_{\text{act}}|{=}196$, suppressed configurations are never reached, so benchmarks with and without $\mathcal{C}_{\text{sup}}$ behave identically. By contrast, GP-BO, SA, and GA carry benchmark-specific internal state that produces genuine per-benchmark variation. On Dynamatic, failure modes are source-dependent, so PA-DSE's per-benchmark SR varies from $89\%$ to $94\%$.
 
 % ------------------------------------------------------------
 \subsection{Convergence Behavior}
@@ -787,7 +781,7 @@ PA-DSE's DFRL state does not persist across runs. Each invocation starts with em
 
 \textbf{Permutation-based repetition.} For PA-DSE we report 10 queue permutations rather than 10 seeds. The two are mechanically equivalent for a deterministic algorithm (permutation fixes the initial queue order, a seed fixes internal randomness in a stochastic algorithm), but readers should note this is not a statistical sample of PA-DSE's stochasticity per se---PA-DSE is deterministic conditional on the queue order. The $p_{\text{probe}}{=}0.05$ introduces residual stochasticity which is reflected in the observed $\sigma{=}1.1$ on Bambu.
 
-\textbf{No direct comparison against recent surrogate methods.} We did not retrain recent GNN-based feasibility predictors (e.g., HGBO-DSE~\cite{kuang2023hgbo}, IronMan~\cite{wu2021ironman}) on our configuration spaces. The RF baseline is a proxy for the learned-classifier family, not a faithful reproduction of any published system. A direct comparison would require retraining these models on our specific tool versions and pragma ranges, which we consider important future work. Consequently, our experimental claims are relative to the baselines evaluated, not to the full landscape of learned HLS DSE methods.
+\textbf{No direct comparison against recent surrogate methods.} We did not retrain recent GNN-based feasibility predictors (e.g., HGBO-DSE~\cite{kuang2023hgbo}, IronMan~\cite{wu2021ironman}) on our configuration spaces, as doing so would require retraining on our specific tool versions and pragma ranges. The RF baseline serves as a proxy for the learned-classifier family under our evaluation conditions. A direct comparison with offline-trained GNN surrogates would further contextualize PA-DSE's relative strengths and is planned as future work.
 
 
 \section{Conclusion}
