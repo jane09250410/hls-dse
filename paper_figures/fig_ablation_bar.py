@@ -16,7 +16,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-OUT = Path("/Users/zhangxinyu/Desktop/hls/paper_figures/out")
+OUT = Path(__file__).resolve().parent / "out"
 
 # Load the precomputed ablation summary tables
 bam = pd.read_csv(OUT / "table_ablation_bambu.csv").set_index("config")

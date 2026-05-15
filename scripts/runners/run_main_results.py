@@ -25,17 +25,24 @@ BAMBU = {
     "vadd":      {"src": "benchmarks/vadd/vadd.c",           "top": "vadd"},
     "fir":       {"src": "benchmarks/fir/fir.c",             "top": "fir"},
     "histogram": {"src": "benchmarks/histogram/histogram.c", "top": "histogram"},
+    "atax":      {"src": "benchmarks/atax/atax.c",           "top": "atax"},
+    "bicg":      {"src": "benchmarks/bicg/bicg.c",           "top": "bicg"},
+    "gemm":      {"src": "benchmarks/gemm/gemm.c",           "top": "gemm"},
+    "gesummv":   {"src": "benchmarks/gesummv/gesummv.c",     "top": "gesummv"},
 }
 BAMBU_PRIMARY = [60]
 BAMBU_SWEEP   = [20, 40, 60, 80]
 
 DYNAMATIC_PATH = os.path.expanduser("~/dynamatic")
 DYNAMATIC = {
-    "gcd":           {"src": f"{DYNAMATIC_PATH}/integration-test/gcd/gcd.c",                     "top": "gcd"},
-    "matching":      {"src": f"{DYNAMATIC_PATH}/integration-test/matching/matching.c",             "top": "matching"},
-    "binary_search": {"src": f"{DYNAMATIC_PATH}/integration-test/binary_search/binary_search.c",   "top": "binary_search"},
-    "fir":           {"src": f"{DYNAMATIC_PATH}/integration-test/fir/fir.c",                       "top": "fir"},
-    "histogram":     {"src": f"{DYNAMATIC_PATH}/integration-test/histogram/histogram.c",           "top": "histogram"},
+    "matmul":    {"src": f"{DYNAMATIC_PATH}/integration-test/matrix/matrix.c",       "top": "matrix"},
+    "vadd":      {"src": f"{DYNAMATIC_PATH}/integration-test/vadd/vadd.c",           "top": "vadd"},
+    "fir":       {"src": f"{DYNAMATIC_PATH}/integration-test/fir/fir.c",             "top": "fir"},
+    "histogram": {"src": f"{DYNAMATIC_PATH}/integration-test/histogram/histogram.c", "top": "histogram"},
+    "atax":      {"src": f"{DYNAMATIC_PATH}/integration-test/atax/atax.c",           "top": "atax"},
+    "bicg":      {"src": f"{DYNAMATIC_PATH}/integration-test/bicg/bicg.c",           "top": "bicg"},
+    "gemm":      {"src": f"{DYNAMATIC_PATH}/integration-test/gemm/gemm.c",           "top": "gemm"},
+    "gesummv":   {"src": f"{DYNAMATIC_PATH}/integration-test/gesummv/gesummv.c",     "top": "gesummv"},
 }
 DYNAMATIC_PRIMARY = [30]
 DYNAMATIC_SWEEP   = [20, 30, 40, 60]

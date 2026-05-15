@@ -22,7 +22,7 @@ setup()
 # DATA — identical to compute_paper_tables.py so figure and
 # Table II are guaranteed to agree.
 # ============================================================
-ROOT = Path("/Users/zhangxinyu/Desktop/hls/results")
+ROOT = Path(__file__).resolve().parent.parent / "results"
 
 BASELINE_MAP = {
     "Random":             "Random",

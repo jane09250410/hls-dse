@@ -115,9 +115,9 @@ def setup():
 
 
 # ======================= Paths =======================
-RESULTS_ROOT = Path("/Users/zhangxinyu/Desktop/hls/results")
+RESULTS_ROOT = Path(__file__).resolve().parent.parent / "results"
 ANALYSIS_DIR = RESULTS_ROOT / "analysis"
-FIGURES_DIR = Path("/Users/zhangxinyu/Desktop/hls/paper_figures/out")
+FIGURES_DIR = Path(__file__).resolve().parent / "out"
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 

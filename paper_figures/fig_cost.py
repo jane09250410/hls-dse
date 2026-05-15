@@ -12,7 +12,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-OUT = Path("/Users/zhangxinyu/Desktop/hls/paper_figures/out")
+OUT = Path(__file__).resolve().parent / "out"
 bam = pd.read_csv(OUT / "table_main_bambu.csv").set_index("method")
 dyn = pd.read_csv(OUT / "table_main_dynamatic.csv").set_index("method")
 

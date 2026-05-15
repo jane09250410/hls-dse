@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from pathlib import Path
 
-ROOT = Path("/Users/zhangxinyu/Desktop/hls/results")
-OUT  = Path("/Users/zhangxinyu/Desktop/hls/paper_figures/out")
+ROOT = Path(__file__).resolve().parent.parent / "results"
+OUT  = Path(__file__).resolve().parent / "out"
 
 RENAME = {
     "Random": "Random",

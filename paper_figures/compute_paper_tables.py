@@ -2,18 +2,18 @@
 """compute_paper_tables.py — compute all summary tables needed for the paper.
 
 NOTE on Dynamatic benchmark filter:
-    fir and histogram produce SR=100% for ALL methods on Dynamatic, so they
+    vadd, fir, and histogram produce SR=100% for ALL methods on Dynamatic, so they
     carry no discriminative signal. The paper (§IV.A) evaluates Dynamatic on
-    4 benchmarks: gcd, matching, binary_search, kernel_2mm. Any aggregation
+    5 non-trivial benchmarks: matmul, atax, bicg, gemm, gesummv. Any aggregation
     over Dynamatic MUST apply this filter or the reported numbers will
-    diverge from Table III.
+    diverge from Table IV.
 """
 
 import pandas as pd
 from pathlib import Path
 
-ROOT = Path("/Users/zhangxinyu/Desktop/hls/results")
-OUT  = Path("/Users/zhangxinyu/Desktop/hls/paper_figures/out")
+ROOT = Path(__file__).resolve().parent.parent / "results"
+OUT  = Path(__file__).resolve().parent / "out"
 OUT.mkdir(parents=True, exist_ok=True)
 
 BAMBU_BENCHMARKS = [
@@ -21,7 +21,7 @@ BAMBU_BENCHMARKS = [
     "atax", "bicg", "gemm", "gesummv",
 ]
 DYNAMATIC_BENCHMARKS = [
-    "gcd", "matching", "binary_search", "kernel_2mm",
+    "matmul", "atax", "bicg", "gemm", "gesummv",
 ]
 
 BASELINE_MAP = {
@@ -34,7 +34,7 @@ BASELINE_MAP = {
 }
 
 METRICS_MAIN = ["sr_pct", "wasted_calls", "ttff_s", "uqor", "best_area", "best_latency"]
-METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE", "PA-DSE+QAT+QSD"]
+METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
 
 
 def main_table(main_path, perms_path, bench_filter, qat_qsd_path=None):
@@ -88,7 +88,7 @@ bambu_tbl, bambu_all = main_table(
     "master/bambu_main/run_summary.csv",
     "rerun/bambu_pa_dse_perms/run_summary.csv",
     BAMBU_BENCHMARKS,
-    qat_qsd_path="qse/bambu_main/run_summary.csv",
+    qat_qsd_path=None,
 )
 bambu_tbl.to_csv(OUT / "table_main_bambu.csv", index=False)
 print(bambu_tbl.round(2).to_string(index=False))
@@ -101,7 +101,7 @@ dyn_tbl, dyn_all = main_table(
     "master/dynamatic_main/run_summary.csv",
     "rerun/dynamatic_pa_dse_perms/run_summary.csv",
     DYNAMATIC_BENCHMARKS,
-    qat_qsd_path="qse/dynamatic_main/run_summary.csv",
+    qat_qsd_path=None,
 )
 dyn_tbl.to_csv(OUT / "table_main_dynamatic.csv", index=False)
 print(dyn_tbl.round(2).to_string(index=False))
