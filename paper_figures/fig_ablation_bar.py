@@ -81,7 +81,7 @@ def draw(ax, df, title):
 
 axL.set_ylabel("Success Rate (%)")
 draw(axL, bam, "(a) Bambu (B=30, 24 runs/config)")
-draw(axR, dyn, "(b) Dynamatic (B=30, 12 runs/config)")
+draw(axR, dyn, "(b) Dynamatic (B=30, 25 runs/config)")
 
 # Legend
 from matplotlib.patches import Patch

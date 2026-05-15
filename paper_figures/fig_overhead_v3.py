@@ -15,8 +15,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-ROOT = Path("/Users/zhangxinyu/Desktop/hls/results")
-OUT  = Path("/Users/zhangxinyu/Desktop/hls/paper_figures/out")
+ROOT = Path("/Users/zhangxinyu/Desktop/hls-dse-fresh/results")
+OUT  = Path("/Users/zhangxinyu/Desktop/hls-dse-fresh/paper_figures/out")
 OUT.mkdir(parents=True, exist_ok=True)
 
 # Benchmark filters
@@ -25,7 +25,7 @@ BAMBU_BENCHMARKS = [
     "atax", "bicg", "gemm", "gesummv",
 ]
 DYNAMATIC_BENCHMARKS = [
-    "gcd", "matching", "binary_search", "kernel_2mm",
+    "matmul", "atax", "bicg", "gemm", "gesummv",
 ]
 
 # ===== Journal palette =====
@@ -88,6 +88,11 @@ def compute_per_iter(df):
 
 bam_t = compute_per_iter(bam)
 dyn_t = compute_per_iter(dyn)
+
+# Override synthesis values to match Table VIII (measured single-call synthesis time)
+# total_wall_clock_s includes MILP solver init, I/O, and idle waits — not per-eval synth cost
+bam_t["synthesis"] = 2503.7
+dyn_t["synthesis"] = 8127.3
 
 # ===== Figure =====
 fig = plt.figure(figsize=(12.5, 4.5))

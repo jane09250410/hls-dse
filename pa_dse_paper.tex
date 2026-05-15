@@ -40,9 +40,9 @@
 \begin{abstract}
 High-Level Synthesis (HLS) design-space exploration (DSE) is often bottlenecked by synthesis failures: on our Bambu suite, uniform-random sampling wastes $85\%$ of a 60-call budget on infeasible configurations. Prior work either ignores the failure signal (classical optimizers) or predicts it with offline-trained surrogates (learned classifiers), each with known limitations in interpretability and warm-up cost.
 
-We present \textbf{PA-DSE}, a feasibility-aware DSE policy built on one principle: \emph{action strength must not exceed evidence strength}. PA-DSE has two layers. Layer~1, the Static Constraint Filter (SCF), permanently removes configurations matching tool-documented rules. Layer~2, the Dynamic Failure Risk Learner (DFRL), learns online during a single run through two sub-components: a Recurrent Pattern Extractor (RPE) that hard-skips configurations matching learned failure signatures, and an Online Failure Risk Scorer (OFRS) that reorders the remaining queue by a smoothed per-dimension risk score. Two optional QoR-aware extensions to OFRS (QAT, QSD) further improve coverage of the (area, latency) space with no observed reliability degradation in our experiments.
+We present \textbf{PA-DSE}, a feasibility-aware DSE policy built on one principle: \emph{action strength must not exceed evidence strength}. PA-DSE has two layers. Layer~1, the Static Constraint Filter (SCF), permanently removes configurations matching tool-documented rules. Layer~2, the Dynamic Failure Risk Learner (DFRL), learns online during a single run through two sub-components: a Recurrent Pattern Extractor (RPE) that hard-skips configurations matching learned failure signatures (at $B{=}120$ on Bambu, RPE provides a $+36.3$\,pp SR gain over OFRS-only), and an Online Failure Risk Scorer (OFRS) that reorders the remaining queue by a smoothed per-dimension risk score.
 
-Across 12 benchmarks on two structurally different HLS tools (PandA-Bambu and Dynamatic), PA-DSE reaches $92.5\%$ success rate on Bambu (vs.\ $85.9\%$ for an AutoScaleDSE-style~\cite{sohrabizadeh2023autoscaledse} random-forest classifier) and $92.0\%$ on Dynamatic (vs.\ $90.1\%$ for GP-BO~\cite{ferretti2018lattice}), with $1.9$--$11\times$ fewer wasted synthesis calls and negligible overhead ($<0.22\%$ of synthesis cost). The optional QAT+QSD extensions are budget-adaptive: at the budget-tight Dynamatic operating point ($B{=}30$) they improve UQoR by $8.5\%$ and best latency by $3$ cycles while empirically preserving SR / Wasted / TTFF; at the budget-rich Bambu operating point ($B{=}60$) they self-deactivate and reduce to vanilla PA-DSE. An 8-way ablation confirms the evidence hierarchy: OFRS's weak-evidence reordering is the dominant contributor; SCF is a safety net whose benefit depends on the tool exposing documented rules; allowing OFRS to hard-skip breaks the hierarchy, with an order-of-magnitude variance increase. PA-DSE is training-free, single-run, and \emph{decision-traceable}: every skip is attributable to a named rule or signature. Code and data: \url{https://github.com/jane09250410/hls-dse}.
+Across eight shared benchmarks on two structurally different HLS tools (PandA-Bambu and Dynamatic), PA-DSE reaches $92.5\%$ success rate on Bambu (vs.\ $85.9\%$ for an AutoScaleDSE-style~\cite{sohrabizadeh2023autoscaledse} random-forest classifier) and $91.3\%$ on the five Dynamatic benchmarks with non-trivial failure rates (vs.\ $90.2\%$ for GP-BO~\cite{ferretti2018lattice}), with $1.9\times$ fewer wasted synthesis calls than the best-SR baseline (RF) on Bambu and half the time-to-first-feasible of the strongest baselines on Dynamatic, and negligible overhead ($<0.22\%$ of synthesis cost). An 8-way ablation confirms the evidence hierarchy: OFRS's weak-evidence reordering is the dominant contributor; SCF is a safety net whose benefit depends on the tool exposing documented rules; allowing OFRS to hard-skip breaks the hierarchy, with an order-of-magnitude variance increase. A cross-tool comparison reveals a structural asymmetry: Bambu failures are pragma-driven (source-independent), while Dynamatic failures are graph-complexity-driven (simple kernels are trivially feasible), validating the need for tool-adaptive feasibility handling. PA-DSE is training-free, single-run, and \emph{decision-traceable}: every skip is attributable to a named rule or signature. Code and data: \url{https://github.com/jane09250410/hls-dse}.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -54,11 +54,11 @@ High-Level Synthesis, Design Space Exploration, Feasibility-Aware Optimization, 
 \section{Introduction}
 \label{sec:intro}
 
-\IEEEPARstart{H}{igh}-Level Synthesis (HLS) enables rapid generation of hardware accelerators from C/C++ specifications, but the resulting design space is large and irregular. A single benchmark kernel may expose dozens of synthesis pragmas, each controlling loop pipelining, memory partitioning, array-to-channel mapping, or resource binding. For two representative HLS tools---PandA-Bambu~\cite{pilato2013bambu} and Dynamatic~\cite{josipovic2018dynamically}---the configurations we consider in this work number 420 and 192 respectively, and the space grows combinatorially with kernel complexity. Exhaustive exploration is impractical: a single synthesis run typically takes 2--10 seconds for small kernels and tens of seconds for larger ones, so brute-force evaluation of even a moderately sized space consumes hours of wall-clock time.
+\IEEEPARstart{H}{igh}-Level Synthesis (HLS) enables rapid generation of hardware accelerators from C/C++ specifications, but the resulting design space is large and irregular. A single benchmark kernel may expose dozens of synthesis pragmas, each controlling loop pipelining, memory partitioning, array-to-channel mapping, or resource binding. For two representative HLS tools, PandA-Bambu~\cite{pilato2013bambu} and Dynamatic~\cite{josipovic2018dynamically}, the configurations we consider in this work number 420 and 192 respectively, and the space grows combinatorially with kernel complexity. Exhaustive exploration is impractical: a single synthesis run typically takes 2--10 seconds for small kernels and tens of seconds for larger ones, so brute-force evaluation of even a moderately sized space consumes hours of wall-clock time.
 
 Design Space Exploration (DSE) methods attempt to navigate this space efficiently. Classical approaches draw on general-purpose optimization: simulated annealing, genetic algorithms, and Bayesian optimization with Gaussian Processes~\cite{snoek2012practical} have all been adapted to HLS DSE~\cite{ferretti2020cluster,ferretti2018lattice,liu2013learning}. More recent work applies machine learning to \emph{predict} synthesis outcomes before invoking the tool~\cite{wu2021ironman,sohrabizadeh2022automated,sohrabizadeh2023autoscaledse,kuang2023hgbo,koikeakino2024autohls}, potentially reducing the number of expensive tool invocations. Both families, however, share a blind spot: they treat synthesis failure as just another low-objective sample, rather than as a signal carrying structural information about which regions of the design space are \emph{systematically} infeasible.
 
-\textbf{Feasibility is the dominant cost driver.} In our experiments on eight Bambu benchmarks, roughly one-third of configurations in the raw design space are provably infeasible due to documented parameter incompatibilities (e.g., MEM\_ACC\_11 memory controllers with multi-channel binding). A larger fraction---often more than half---are \emph{likely} infeasible due to source-level patterns that interact poorly with pipelining (accumulation loops, control-flow branches inside loops). Random sampling against this space achieves only 15\% success rate (SR) at budget $B{=}60$ on Bambu. The problem is not that a good sampler cannot find feasible configurations; it is that most of the budget is wasted on configurations the tool will reject, often with error messages that are informative if anyone bothers to read them.
+\textbf{Feasibility is the dominant cost driver.} In our experiments on eight Bambu benchmarks, roughly one-third of configurations in the raw design space are provably infeasible due to documented parameter incompatibilities (e.g., MEM\_ACC\_11 memory controllers with multi-channel binding). A larger fraction (often more than half) are \emph{likely} infeasible due to source-level patterns that interact poorly with pipelining (accumulation loops, control-flow branches inside loops). Random sampling against this space achieves only 15\% success rate (SR) at budget $B{=}60$ on Bambu. The problem is not that a good sampler cannot find feasible configurations; it is that most of the budget is wasted on configurations the tool will reject, often with error messages that are informative if anyone bothers to read them.
 
 \textbf{The core idea.} PA-DSE is a \emph{feasibility-aware} DSE policy that learns from tool error messages online, during a single exploration run, without offline training or surrogate modeling. The policy is organized around a single design principle we call the \emph{evidence hierarchy}: the strength of the action taken on a configuration must not exceed the strength of the evidence justifying that action.
 
@@ -68,20 +68,19 @@ PA-DSE has two layers, the second of which contains two complementary sub-compon
 \item \textbf{Layer 1 (SCF, Static Constraint Filter).} Configurations matching tool-documented incompatibility rules are permanently removed before exploration begins. This is the \emph{strongest} action (cross-run permanent block), reserved for \emph{proven} constraints with zero false-positive risk. Configurations matching weaker source-level heuristics are \emph{deferred} (placed at the queue tail) but not removed; they may be promoted later by online evidence.
 \item \textbf{Layer 2 (DFRL, Dynamic Failure Risk Learning).} An online policy that accumulates empirical evidence during a single exploration run. It has two sub-components that operate at different evidence strengths:
 \begin{itemize}
-    \item \textbf{RPE (Recurrent Pattern Extractor).} After repeated observations of the same error type, RPE extracts typed failure \emph{signatures}---parameter conditions that consistently co-occur with that error type and discriminate failures from successes. Matching configurations are hard-skipped for the remainder of the run, subject to a small probe rate that keeps signatures honest.
-    \item \textbf{OFRS (Online Failure Risk Scorer).} A lightweight per-dimension failure-rate tracker that reorders the remaining queue each iteration by a smoothed risk score. OFRS never skips configurations; it only changes their evaluation order. This is the \emph{weakest} action, chosen deliberately because per-dimension marginal statistics are too noisy to justify permanent exclusion. Two optional QoR-aware extensions (QAT, QSD) augment OFRS's reordering signal with success-novelty and QoR-density information; both preserve the reorder-only action class.
+    \item \textbf{RPE (Recurrent Pattern Extractor).} After repeated observations of the same error type, RPE extracts typed failure \emph{signatures}, i.e.\ parameter conditions that consistently co-occur with that error type and discriminate failures from successes. Matching configurations are hard-skipped for the remainder of the run, subject to a small probe rate that keeps signatures honest.
+    \item \textbf{OFRS (Online Failure Risk Scorer).} A lightweight per-dimension failure-rate tracker that reorders the remaining queue each iteration by a smoothed risk score. OFRS never skips configurations; it only changes their evaluation order. This is the \emph{weakest} action, chosen deliberately because per-dimension marginal statistics are too noisy to justify permanent exclusion.
 \end{itemize}
 \end{itemize}
 
-The two layers are complementary, not redundant, and their interplay is tool-dependent. On Bambu, SCF removes $33\%$ of the space as provably infeasible; disabling it (DFRL-only) drops SR from $84.5\%$ to $80.0\%$ at $B{=}30$ (Table~\ref{tab:ablation}), because DFRL would otherwise spend budget observing catastrophic configurations rather than promising ones. On Dynamatic, the tool exposes no documented incompatibility rules ($\mathcal{C}_{\text{blk}} = \emptyset$), so SCF is a no-op; DFRL alone drives the $92\%$ SR at $B{=}30$, validating that DFRL is not parasitic on SCF. The slogan is: \emph{SCF for tools with static constraints, DFRL for all tools.}
+The two layers are complementary, not redundant, and their interplay is tool-dependent. On Bambu, SCF removes $33\%$ of the space as provably infeasible; disabling it (DFRL-only) drops SR from $84.5\%$ to $80.0\%$ at $B{=}30$ (Table~\ref{tab:ablation}), because DFRL would otherwise spend budget observing catastrophic configurations rather than promising ones. On Dynamatic, the tool exposes no documented incompatibility rules ($\mathcal{C}_{\text{blk}} = \emptyset$), so SCF is a no-op; DFRL alone drives $89.6\%$ SR at $B{=}30$, validating that DFRL is not parasitic on SCF. The slogan is: \emph{SCF for tools with static constraints, DFRL for all tools.}
 
-\textbf{Contributions.} This paper makes five contributions.
+\textbf{Contributions.} This paper makes four contributions.
 \begin{enumerate}
     \item \textbf{Policy design.} We propose PA-DSE, a two-layer feasibility-aware DSE policy organized around the \emph{evidence hierarchy} principle. Layer~1 (SCF) handles static, tool-documented constraints; Layer~2 (DFRL) is online and contains two sub-components (RPE and OFRS) that operate at different evidence strengths. Each layer's action strength is explicitly justified by the evidence it has access to (\S\ref{sec:method}).
-    \item \textbf{Empirical validation across tools.} We evaluate PA-DSE on two qualitatively different HLS tools---Bambu (static scheduling, C-centric) and Dynamatic (elastic dataflow, LLVM-based)---across 12 benchmarks (eight Bambu, four Dynamatic). PA-DSE achieves $92.5\%$ SR on Bambu (vs.\ $85.9\%$ for the best baseline) and $92.0\%$ SR on Dynamatic (vs.\ $90.1\%$ for the best baseline), consistently across seeds and queue permutations (\S\ref{sec:results}).
-    \item \textbf{Mechanism isolation.} Through an 8-way ablation we show that (a) OFRS reordering is the dominant contributor to within-run performance, (b) SCF is essential as a safety net preventing DFRL from learning from catastrophic configurations, and (c) RPE adds targeted coverage for type-specific failure modes. The evidence hierarchy is empirically grounded (\S\ref{sec:ablation}).
-    \item \textbf{QoR-aware OFRS extensions.} We introduce QAT (QoR-Attractor) and QSD (QoR-space Diversification), two additive bonuses to OFRS's risk score that broaden QoR coverage without observed SR degradation. Both preserve OFRS's reorder-only action class. Combined, they improve Dynamatic UQoR by $8.5\%$ and best latency by $3$ cycles compared to vanilla PA-DSE while maintaining identical SR/Wasted/TTFF in all evaluated settings (\S\ref{sec:qor_ext}, \S\ref{sec:tradeoff}).
-    \item \textbf{Near-zero runtime overhead.} The algorithmic overhead of PA-DSE is $5.3$~ms per iteration on Bambu and $2.2$~ms per iteration on Dynamatic, against synthesis times of $2.5$~s and $8.1$~s respectively---ratios of $1:474$ and $1:3778$ (\S\ref{sec:overhead}).
+    \item \textbf{Empirical validation across tools.} We evaluate PA-DSE on two qualitatively different HLS tools (Bambu, static scheduling, C-centric; Dynamatic, elastic dataflow, LLVM-based) across eight shared benchmarks. PA-DSE achieves $92.5\%$ SR on Bambu (vs.\ $85.9\%$ for the best baseline) and $91.3\%$ SR on the five Dynamatic benchmarks with non-trivial failure rates (vs.\ $90.2\%$ for GP-BO), while halving time-to-first-feasible compared to the strongest baselines (\S\ref{sec:results}). Using the same benchmarks on both tools reveals a structural asymmetry: Bambu failures are pragma-driven (source-independent), while Dynamatic failures are graph-complexity-driven (MILP difficulty scales with dataflow-graph complexity), validating the need for the two-layer design.
+    \item \textbf{Mechanism isolation.} Through an 8-way ablation we show that (a) OFRS reordering is the dominant contributor at small budgets ($B{=}30$--$60$), (b) SCF is essential as a safety net preventing DFRL from learning from catastrophic configurations, and (c) at $B{=}120$, RPE activates and provides a $+36.3$\,pp SR gain over OFRS-only by hard-skipping configurations matching a learned failure signature (\S\ref{sec:ablation}, \S\ref{sec:b120}).
+    \item \textbf{Near-zero runtime overhead.} The algorithmic overhead of PA-DSE is $5.3$~ms per iteration on Bambu and $2.0$~ms per iteration on Dynamatic, against synthesis times of $2.5$~s and $8.1$~s respectively, yielding ratios of $1:474$ and $1:4000$ (\S\ref{sec:overhead}).
 \end{enumerate}
 
 \textbf{Honest scope.} PA-DSE is not a general-purpose synthesis prediction model. It does not generalize zero-shot across benchmarks (RPE signatures are per-run and do not persist), and its static rules are tool-specific. Its strength is on-the-fly, within-run adaptation with inspectable state. We discuss limitations in \S\ref{sec:discussion}.
@@ -97,7 +96,7 @@ High-Level Synthesis compiles a C/C++ specification into RTL, subject to user-sp
 
 Two tools anchor our evaluation. \textbf{PandA-Bambu}~\cite{pilato2013bambu} is a source-to-source HLS compiler with a statically scheduled datapath. Its pragma surface includes memory controller type (\texttt{MEM\_ACC\_11}, \texttt{MEM\_ACC\_N1}, \texttt{MEM\_ACC\_NN}), channel count, loop pipelining, and binding strategy. \textbf{Dynamatic}~\cite{josipovic2018dynamically} generates dynamically scheduled (elastic dataflow) circuits and exposes a different surface: buffer placement, slack, fast-token paths, and target clock period. The two tools differ substantially in scheduling philosophy and failure mode distribution, making them a useful pair for stressing tool-generality claims.
 
-\textbf{Feasibility as a first-class outcome.} A central observation motivating this work is that a large fraction of $\mathcal{C}$ produces outright synthesis failure, not merely poor-quality success. On Bambu with our chosen pragma ranges, two rule-provable incompatibility patterns alone account for 33.3\% of the 420-point space: \texttt{MEM\_ACC\_11} requires exactly one channel, and \texttt{MEM\_ACC\_NN} requires at least two, so their union with the full channel-count range produces a deterministic infeasibility band. Beyond this, source-dependent patterns---pipelining a loop containing an accumulation dependence, or a data-dependent branch---drive further failures for a subset of benchmarks. A DSE method unaware of these structural failures will repeatedly consume budget on configurations the tool cannot synthesize.
+\textbf{Feasibility as a first-class outcome.} A central observation motivating this work is that a large fraction of $\mathcal{C}$ produces outright synthesis failure, not merely poor-quality success. On Bambu with our chosen pragma ranges, two rule-provable incompatibility patterns alone account for 33.3\% of the 420-point space: \texttt{MEM\_ACC\_11} requires exactly one channel, and \texttt{MEM\_ACC\_NN} requires at least two, so their union with the full channel-count range produces a deterministic infeasibility band. Beyond this, source-dependent patterns (pipelining a loop containing an accumulation dependence, or a data-dependent branch) drive further failures for a subset of benchmarks. A DSE method unaware of these structural failures will repeatedly consume budget on configurations the tool cannot synthesize.
 
 \subsection{Related Work}
 \label{sec:related_work}
@@ -106,7 +105,7 @@ Two tools anchor our evaluation. \textbf{PandA-Bambu}~\cite{pilato2013bambu} is 
 Simulated annealing, genetic algorithms, and Bayesian optimization are widely used as HLS DSE backends because they make minimal assumptions about the objective~\cite{ferretti2020cluster,ferretti2018lattice,liu2013learning}. Their blind spot is that they treat synthesis failure as a dominated sample rather than as structural information. In our Bambu evaluation, simulated annealing reaches $18.4\%$ SR and genetic algorithms reach $50.6\%$ at $B{=}60$, with high variance that reflects their sensitivity to the fraction of infeasible configurations. Bayesian optimization with Gaussian processes~\cite{snoek2012practical} fares better ($71.3\%$) because its surrogate implicitly learns the failure boundary, but the surrogate is slow to warm up on small budgets.
 
 \paragraph{Learned surrogates and classifiers.}
-A more recent line of work trains machine-learning models to predict synthesis outcomes before calling the tool. Approaches range from per-benchmark regressors and reinforcement-learning agents~\cite{wu2021ironman} to graph neural networks operating on LLVM IR or custom HLS-specific graphs~\cite{sohrabizadeh2022automated,ustun2020learning,murphy2024balor} to random forests in a scalable surrogate framework~\cite{sohrabizadeh2023autoscaledse,liu2013learning}. Hybrid pipelines that combine learned surrogates with Bayesian optimization have also been proposed~\cite{kuang2023hgbo,koikeakino2024autohls}. These methods can be effective, but they share two weaknesses. First, they require offline training, which in turn requires a labeled sample of the very design space they are meant to explore---often a chicken-and-egg problem for new tool versions or new benchmarks. Second, they produce point predictions whose failure modes are hard to interpret: when a surrogate confidently predicts success but the tool fails, debugging is difficult because the surrogate has no notion of \emph{why} it failed. Our random-forest baseline (RF, $85.9\%$ SR on Bambu) is a proxy for this family under our tool versions and budgets, not a full re-implementation of any specific prior system.
+A more recent line of work trains machine-learning models to predict synthesis outcomes before calling the tool. Approaches range from per-benchmark regressors and reinforcement-learning agents~\cite{wu2021ironman} to graph neural networks operating on LLVM IR or custom HLS-specific graphs~\cite{sohrabizadeh2022automated,ustun2020learning,murphy2024balor} to random forests in a scalable surrogate framework~\cite{sohrabizadeh2023autoscaledse,liu2013learning}. Hybrid pipelines that combine learned surrogates with Bayesian optimization have also been proposed~\cite{kuang2023hgbo,koikeakino2024autohls}. These methods can be effective, but they share two weaknesses. First, they require offline training, which in turn requires a labeled sample of the very design space they are meant to explore, often a chicken-and-egg problem for new tool versions or new benchmarks. Second, they produce point predictions whose failure modes are hard to interpret: when a surrogate confidently predicts success but the tool fails, debugging is difficult because the surrogate has no notion of \emph{why} it failed. Our random-forest baseline (RF, $85.9\%$ SR on Bambu) is a proxy for this family under our tool versions and budgets, not a full re-implementation of any specific prior system.
 
 \paragraph{Meta-learning and cross-benchmark transfer.}
 Recent work has explored transfer and meta-learning to amortize DSE cost across benchmarks. These approaches are complementary to PA-DSE: they focus on \emph{cross-benchmark} knowledge transfer, whereas PA-DSE operates \emph{within a single run} and does not persist learned signatures across runs. A potential extension is to use PA-DSE-extracted signatures as meta-features for cross-run transfer.
@@ -135,7 +134,7 @@ Online adaptation    & DFRL & No    & No     & Surrogate \\
 Action--evidence     & Yes  & No    & No     & No \\
 \quad coupling       &      &       &        &    \\
 Decision traceable   & Yes  & No    & No     & No \\
-Single-run           & Yes  & No    & No     & Yes \\
+No offline training  & Yes  & No    & No     & Yes \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -165,7 +164,7 @@ We frame feasibility-aware DSE as an \emph{online budgeted exploration problem} 
 \textbf{Operational goals.} The policy aims to:
 \begin{enumerate}
     \item Maximize the number of feasible designs discovered within a fixed budget $B$.
-    \item Minimize false skips---configurations incorrectly removed that were actually feasible.
+    \item Minimize false skips (configurations incorrectly removed that were actually feasible).
     \item Secondarily, minimize time-to-first-feasible and maximize best-QoR-under-budget.
 \end{enumerate}
 These are \emph{evaluation criteria} used to assess policy quality, not formal constraints enforced by the algorithm. In particular, the false skip rate is an \emph{empirical safety target}, not an online guarantee: PA-DSE does not have a mechanism that provably bounds false skips below any threshold. Instead, it relies on the evidence hierarchy (Section~\ref{sec:hierarchy}) and conservative activation rules to keep false skips low in practice.
@@ -203,11 +202,11 @@ Per-dimension failure stats  & Low--medium         & Queue reordering    & Curre
 \subsection{Failure Taxonomy (Modeling Assumption)}
 \label{sec:taxonomy}
 
-\textbf{Assumption.} DFRL assumes that synthesis failures can be meaningfully partitioned into a small set of \emph{normalized failure categories} (error types), and that configurations sharing the same error type share exploitable structural commonalities. If this assumption is violated---for example, if distinct failure mechanisms produce the same error type, or if a single mechanism produces inconsistent error types across runs---then RPE's per-type signature extraction will degrade. The validity of this assumption is empirical and tool-dependent.
+\textbf{Assumption.} DFRL assumes that synthesis failures can be meaningfully partitioned into a small set of \emph{normalized failure categories} (error types), and that configurations sharing the same error type share exploitable structural commonalities. If this assumption is violated (for example, if distinct failure mechanisms produce the same error type, or if a single mechanism produces inconsistent error types across runs), then RPE's per-type signature extraction will degrade. The validity of this assumption is empirical and tool-dependent.
 
 \textbf{Construction.} We define a deterministic keyword-based mapping from raw tool log output to canonical error types. For Bambu: \texttt{pipeline\_phi\_conflict}, \texttt{generic\_error}, \texttt{param\_incompatibility}. For Dynamatic: \texttt{timeout}, \texttt{buffer\_placement\_failed}. The mapping is tool-specific but deterministic: the same log output always produces the same type.
 
-\textbf{Known limitations.} Under-splitting (different root causes $\rightarrow$ same type) dilutes RPE's ability to find consistent dimensions. Over-splitting (one root cause $\rightarrow$ multiple types) fragments the failure evidence. The binary\_search benchmark illustrates this: failures span \texttt{timeout} and \texttt{buffer\_placement\_failed}, limiting RPE generalization.
+\textbf{Known limitations.} Under-splitting (different root causes $\rightarrow$ same type) dilutes RPE's ability to find consistent dimensions. Over-splitting (one root cause $\rightarrow$ multiple types) fragments the failure evidence. For example, on Dynamatic the \texttt{gemm} benchmark produces both \texttt{timeout} and \texttt{buffer\_placement\_failed} errors, limiting RPE's ability to form a single discriminative signature.
 
 \textbf{Stability verification.} We verify cross-run consistency on a subset of 20~configurations per benchmark (same config $\rightarrow$ same error type across repeated runs) and manually spot-check 10~logs per type. The primary safeguard is the mapping's deterministic construction: identical log output always yields the same type, so instability can only arise from non-deterministic tool behavior, which we did not observe in our spot checks. A more exhaustive verification campaign covering the full configuration space would strengthen this assumption but is beyond the scope of the current work.
 
@@ -218,7 +217,7 @@ SCF partitions $\mathcal{C} = \mathcal{C}_{\text{blk}} \cup \mathcal{C}_{\text{s
 
 \textbf{Sound blocking} ($\mathcal{C}_{\text{blk}}$): Permanently removed based on tool documentation (Bambu R1--R2). Provably correct; zero false-positive rate. Within the evidence hierarchy, this is the strongest action, reserved for proven constraints.
 
-\textbf{Heuristic suppression} ($\mathcal{C}_{\text{sup}}$): Provides an \emph{initial queue ordering prior}---suppressed configurations are placed after active ones in the initial queue. This is not a hard exclusion: if OFRS later assigns a suppressed configuration a lower risk score than some active configurations, the suppressed configuration may be promoted ahead of them. Suppression establishes a starting bias that can be overridden by online evidence. If budget permits, all suppressed configurations are eventually evaluated.
+\textbf{Heuristic suppression} ($\mathcal{C}_{\text{sup}}$): Provides an \emph{initial queue ordering prior}: suppressed configurations are placed after active ones in the initial queue. This is not a hard exclusion: if OFRS later assigns a suppressed configuration a lower risk score than some active configurations, the suppressed configuration may be promoted ahead of them. Suppression establishes a starting bias that can be overridden by online evidence. If budget permits, all suppressed configurations are eventually evaluated.
 
 \subsection{Layer~2: Dynamic Failure Risk Learning (DFRL)}
 \label{sec:dfrl}
@@ -232,7 +231,7 @@ DFRL requires the failure taxonomy assumption (Section~\ref{sec:taxonomy}) to ho
 
 \textbf{Semantic scope.} RPE outputs are \emph{typed recurrent failure signatures}: parameter conditions that consistently co-occur with a specific error type and discriminate failures from successes in the current observation history. They are discriminative summaries, \emph{not} root-cause identifications. Their validity depends on observation coverage and taxonomy stability.
 
-Within the evidence hierarchy (Section~\ref{sec:hierarchy}), RPE operates at the \emph{typed recurrent evidence} level: it requires concentrated, type-specific failure observations to trigger hard skip---the second-strongest action after sound blocking. This positioning reflects RPE's reliance on structured, repeated evidence rather than marginal or mixed-type statistics.
+Within the evidence hierarchy (Section~\ref{sec:hierarchy}), RPE operates at the \emph{typed recurrent evidence} level: it requires concentrated, type-specific failure observations to trigger hard skip, the second-strongest action after sound blocking. This positioning reflects RPE's reliance on structured, repeated evidence rather than marginal or mixed-type statistics.
 
 \textbf{Signature definition.} A signature is a tuple $\pi = (t, \mathbf{cond})$ where $t$ is a normalized error type and $\mathbf{cond} = \{(d_1, v_1), \ldots, (d_k, v_k)\}$ is a set of dimension-value pairs. A configuration $c$ \emph{matches} $\pi$, written $c \models \pi$, if and only if $c[d_i] = v_i$ for all $(d_i, v_i) \in \mathbf{cond}$.
 
@@ -257,15 +256,15 @@ That is, $n_{\text{fail}}$ counts all observed type-$t$ failures matching $\pi$,
 \text{conf}(\pi) = \frac{n_{\text{fail}}(\pi)}{n_{\text{fail}}(\pi) + n_{\text{counter}}(\pi) + 2}
 \label{eq:confidence}
 \end{equation}
-The additive constant $+2$ provides Laplace smoothing, ensuring the score is well-defined even with zero counterexamples. This score is a \emph{smoothed empirical evidence score}---not a calibrated probability, not a formal posterior estimate, and not a guaranteed risk bound. It summarizes the concentration of same-type failure evidence relative to counterevidence, and serves as a conservative activation gate: monotonically increasing in $n_{\text{fail}}$, monotonically decreasing in $n_{\text{counter}}$.
+The additive constant $+2$ provides Laplace smoothing, ensuring the score is well-defined even with zero counterexamples. This score is a \emph{smoothed empirical evidence score}, not a calibrated probability, not a formal posterior estimate, and not a guaranteed risk bound. It summarizes the concentration of same-type failure evidence relative to counterevidence, and serves as a conservative activation gate: monotonically increasing in $n_{\text{fail}}$, monotonically decreasing in $n_{\text{counter}}$.
 
 \textbf{Activation threshold.} A signature is activated (triggers hard skip for matching configs) only when $\text{conf}(\pi) \geq \theta$, with $\theta = 0.8$ in our experiments. To give concrete intuition: with $\theta = 0.8$, a signature with zero counterexamples requires $n_{\text{fail}} \geq 8$ to activate ($8/(8+0+2) = 0.8$). With one counterexample, it requires $n_{\text{fail}} \geq 12$ ($12/(12+1+2) = 0.8$). This means hard skip is triggered only after substantial and consistent failure evidence. The threshold $\theta$ is a user-configurable parameter; we report a sensitivity sweep across $\theta \in \{0.7, 0.8, 0.9\}$ in Section~\ref{sec:theta_sensitivity}.
 
-\textbf{Scope and lifecycle.} Signatures are \emph{run-scoped}: they apply only within the current exploration run, not across runs or benchmarks. Within a run, signatures follow \emph{threshold-triggered activation with persistence}: once $\text{conf}(\pi) \geq \theta$, the signature becomes active and is applied to all remaining queue members. The signature remains active as long as $\text{conf}(\pi) \geq \theta$. Since evidence counts are computed over the entire history $\mathcal{H}_t$ (Eqs.~\ref{eq:nfail}--\ref{eq:ncounter}), a signature's confidence can decrease if subsequent observations add to $n_{\text{counter}}$---either through configurations evaluated before the signature was formed, or through probe auditing (below). If $\text{conf}(\pi)$ drops below $\theta$, the signature is deactivated and no longer triggers hard skip.
+\textbf{Scope and lifecycle.} Signatures are \emph{run-scoped}: they apply only within the current exploration run, not across runs or benchmarks. Within a run, signatures follow \emph{threshold-triggered activation with persistence}: once $\text{conf}(\pi) \geq \theta$, the signature becomes active and is applied to all remaining queue members. The signature remains active as long as $\text{conf}(\pi) \geq \theta$. Since evidence counts are computed over the entire history $\mathcal{H}_t$ (Eqs.~\ref{eq:nfail}--\ref{eq:ncounter}), a signature's confidence can decrease if subsequent observations add to $n_{\text{counter}}$, either through configurations evaluated before the signature was formed, or through probe auditing (below). If $\text{conf}(\pi)$ drops below $\theta$, the signature is deactivated and no longer triggers hard skip.
 
 The lifecycle follows three rules: (1)~\emph{activation} is threshold-triggered: a signature becomes active when $\text{conf}(\pi) \geq \theta$; (2)~\emph{persistence}: an active signature remains in effect as long as $\text{conf}(\pi) \geq \theta$; (3)~\emph{deactivation} occurs only through observed counterevidence that increases $n_{\text{counter}}$ and drives $\text{conf}(\pi)$ below $\theta$. Hard-skipped configurations do not directly generate counterevidence because they are not evaluated. The only two sources of counterevidence are: (a)~configurations evaluated before the signature was formed that happen to match it and succeeded, and (b)~probe evaluations of would-be-skipped configurations.
 
-\textbf{Probe auditing.} To provide a self-correction path, a configuration that would be hard-skipped is instead evaluated with probability $p_{\text{probe}}$ (default 0.05). If the probe succeeds, $n_{\text{counter}}$ increases and $\text{conf}(\pi)$ decreases, potentially deactivating the signature. This costs at most $\lceil p_{\text{probe}} \cdot |\text{skipped}| \rceil$ additional budget units.
+\textbf{Probe auditing.} To provide a self-correction path, a configuration that would be hard-skipped is instead evaluated with probability $p_{\text{probe}}$ (default 0.05). If the probe succeeds, $n_{\text{counter}}$ increases and $\text{conf}(\pi)$ decreases, potentially deactivating the signature. This costs at most $\lceil p_{\text{probe}} \cdot |\text{skipped}| \rceil$ budget units drawn from the same $B$. At $B{=}60$ (Bambu) and $B{=}30$ (Dynamatic), RPE does not activate and no probes are triggered. At $B{=}120$ (Bambu), probes account for $0.8\%$ of the budget (1 probe per 120 evaluations); their outcomes are counted identically to regular evaluations in all reported metrics.
 
 \textbf{Subsumption.} Signature $\pi_1 = (t, \mathbf{cond}_1)$ \emph{subsumes} $\pi_2 = (t, \mathbf{cond}_2)$ if: (a)~they share the same error type $t$; (b)~$\mathbf{cond}_1 \subsetneq \mathbf{cond}_2$ ($\pi_1$ has strictly fewer conditions, all of which appear in $\mathbf{cond}_2$); and (c)~$\pi_1$ is itself \emph{activated} ($\text{conf}(\pi_1) \geq \theta$). When all three conditions hold, $\pi_2$ is deactivated and removed from $\mathcal{P}_t$, because $\pi_1$ matches a strict superset of the configurations matched by $\pi_2$ and has sufficient evidence to justify hard skip on its own. Condition~(c) is critical for conservativeness: a newly formed but insufficiently supported general candidate must not displace an already-activated narrower signature.
 
@@ -274,9 +273,9 @@ The lifecycle follows three rules: (1)~\emph{activation} is threshold-triggered:
 
 OFRS is a \emph{deliberately simple}, first-order, small-sample risk ranking model. Its sole function is queue reordering: delaying configurations with higher estimated failure association, never permanently excluding any configuration. It is not a calibrated failure predictor, probability estimator, or classifier.
 
-Within the evidence hierarchy (Section~\ref{sec:hierarchy}), OFRS operates at the weakest evidence level: per-dimension marginal statistics that mix across failure types. This positioning dictates that OFRS may only reorder, never permanently exclude---the weakest action available.
+Within the evidence hierarchy (Section~\ref{sec:hierarchy}), OFRS operates at the weakest evidence level: per-dimension marginal statistics that mix across failure types. This positioning dictates that OFRS may only reorder, never permanently exclude, the weakest action available.
 
-\textbf{Why OFRS only reorders, never skips.} Unlike RPE, which operates on concentrated, high-evidence per-type signatures, OFRS aggregates marginal single-dimension statistics across all failure types. These marginal statistics are: (1)~inherently noisy at small sample sizes; (2)~unable to capture parameter interactions that may drive failure; (3)~not type-specific, so they mix evidence from structurally different failure modes. Granting OFRS skip authority would allow noisy, marginal evidence to permanently exclude configurations---including potentially Pareto-optimal feasible ones. Restricting OFRS to reordering ensures that all configurations remain reachable if budget permits, and that the only permanent exclusion mechanism (RPE) requires type-specific, concentrated, high-evidence signatures.
+\textbf{Why OFRS only reorders, never skips.} Unlike RPE, which operates on concentrated, high-evidence per-type signatures, OFRS aggregates marginal single-dimension statistics across all failure types. These marginal statistics are: (1)~inherently noisy at small sample sizes; (2)~unable to capture parameter interactions that may drive failure; (3)~not type-specific, so they mix evidence from structurally different failure modes. Granting OFRS skip authority would allow noisy, marginal evidence to permanently exclude configurations, including potentially Pareto-optimal feasible ones. Restricting OFRS to reordering ensures that all configurations remain reachable if budget permits, and that the only permanent exclusion mechanism (RPE) requires type-specific, concentrated, high-evidence signatures.
 
 \textbf{Why first-order is sufficient here.} HLS infeasibility can involve parameter interactions. A higher-order model could in principle capture these, but at budgets $B \leq 80$, most pairwise $(d_1{=}v_1, d_2{=}v_2)$ combinations have 0--2 observations, making pairwise statistics unreliable. RPE handles interaction effects implicitly through its consistency-based extraction (a signature like $\{$pipeline=True$\}$ effectively captures all interactions involving pipeline). OFRS is designed to provide marginal ranking improvement as a complement to RPE, not to model failure structure independently. In interaction-dominated scenarios where no single dimension separates failure from success, all $w_d \approx 0$ and OFRS produces near-uniform rankings, gracefully degrading to no-op.
 
@@ -301,47 +300,6 @@ r(c) = \begin{cases} \displaystyle\frac{\sum_d w_d \cdot \hat{f}(d, c[d])}{\sum_
 \end{equation}
 When $\sum_d w_d = 0$, OFRS does not alter the queue order; configurations retain the ordering established by SCF. As observations accumulate and individual dimensions cross the $n_{\min}$ threshold, OFRS gradually transitions from this passive mode (preserving the static prior) to active global reordering. This transition is smooth: each dimension independently contributes to ranking only after it has accumulated sufficient evidence, so OFRS's influence grows incrementally rather than switching on abruptly.
 
-\subsection{QoR-aware OFRS Extensions (QAT, QSD)}
-\label{sec:qor_ext}
-
-The OFRS scoring rule defined in Eq.~\eqref{eq:risk} is feasibility-aware but \emph{QoR-blind}: it ranks configurations by predicted failure likelihood without consulting the QoR of past successes. Empirically (Section~\ref{sec:dynamatic_results}), this produces two coverage gaps on Dynamatic: redundant evaluation of QoR-saturated regions, and partial under-coverage of the Pareto-dominated interior. We address these with two additive reorderings of $r(c)$, each disabled by setting its weight to zero (so the original PA-DSE policy is recovered exactly).
-
-\subsubsection{QAT: QoR-Attractor (novelty bonus)}
-For each parameter dimension $d$ with value $v$, novelty is
-\begin{equation}
-\nu(d, v) \;=\; \max\!\left(0,\; 1 - \frac{n_s(d, v)}{N_{\text{QAT}}}\right)
-\end{equation}
-where $n_s(d, v)$ is the count of past successes with $(d{=}v)$ and $N_{\text{QAT}}{=}4$ is a saturation threshold ($\nu = 1$ if $(d, v)$ has never been seen successfully; $\nu = 0$ once the count reaches $N_{\text{QAT}}$). The config-level bonus
-\begin{equation}
-\beta_{\text{QAT}}(c) \;=\; \frac{\sum_d w_d \,\nu(d,\, c[d])}{\sum_d w_d}
-\end{equation}
-is subtracted from $r(c)$ with weight $\alpha_{\text{QAT}}{=}0.30$, but \emph{only when} the unweighted base risk satisfies $r_0(c) < 0.6$:
-\begin{equation}
-r(c) \;\leftarrow\; r(c) - \alpha_{\text{QAT}} \cdot \beta_{\text{QAT}}(c) \cdot \mathbb{1}[r_0(c) < 0.6].
-\end{equation}
-The base-risk gate is the key design choice: it confines the bonus to configurations OFRS already considers low-risk, so QAT \emph{rearranges} within the safe set rather than \emph{promoting} risky configurations. This preserves SR while broadening coverage.
-
-\subsubsection{QSD: QoR-space Diversification (density penalty)}
-Let $\mathcal{C}$ be the multiset of visited successful $(area, latency)$ tuples. Define the global QoR-saturation
-\begin{equation}
-S_g \;=\; 1 - \frac{|\mathcal{C}|_{\text{unique}}}{|\mathcal{C}|}.
-\end{equation}
-QSD activates only when $S_g > 0.3$ (rut detection: many evaluations have collapsed onto a small number of QoR points). For a candidate $c$, define a per-dimension density
-$\rho(d, c[d]) = n_s(d, c[d]) / \sum_{v} n_s(d, v)$, and the QSD penalty
-\begin{equation}
-\sigma_{\text{QSD}}(c) \;=\; S_g \cdot \frac{\sum_d w_d \,\rho(d,\, c[d])}{\sum_d w_d}
-\end{equation}
-is added to $r(c)$ with weight $\delta_{\text{QSD}}{=}0.10$. QSD complements QAT by penalizing parameter values \emph{over-represented} among past successes; QAT rewards parameter values \emph{under-represented}. Together they push the queue toward parameter regions that have not yet been fully exploited.
-
-\subsubsection{Action class preserved}
-Both QAT and QSD modify only the queue ordering. They never skip configurations, never block, and cannot trigger RPE. This preserves OFRS's location in the evidence hierarchy (Table~\ref{tab:hierarchy}): the action remains \emph{reorder only}, the weakest action class. The extensions strengthen the \emph{signal} OFRS uses for ordering, not the action class. Hyperparameters ($\alpha_{\text{QAT}}{=}0.30$, $\delta_{\text{QSD}}{=}0.10$, $N_{\text{QAT}}{=}4$) are frozen across all benchmarks and tools; we did not tune per-benchmark.
-
-\subsubsection{Budget adaptivity (built-in deactivation)}
-\label{sec:qor_ext_budget}
-A subtle but important property of both extensions is that they self-deactivate in budget-rich regimes. The QAT novelty bonus $\nu(d, v)$ is zero whenever $n_s(d, v) \geq N_{\text{QAT}}$: once each parameter value has been seen at least $N_{\text{QAT}}{=}4$ times among successes, QAT contributes nothing to $r(c)$. The QSD penalty is gated on $S_g > 0.3$: once the success cloud is sufficiently diverse (more than $70\%$ unique QoR points), QSD also contributes nothing. Both conditions are typically met when budget is large relative to design-space cardinality, because vanilla OFRS already achieves broad coverage organically.
-
-Concretely, on Bambu (8 benchmarks, $B{=}60$ on a $\sim$420-point space, $\approx 14\%$ coverage), vanilla PA-DSE already produces successes that span most parameter values, so $n_s(d, v) \geq 4$ holds for most $(d, v)$ and $S_g$ remains below the QSD activation threshold. Empirically (Section~\ref{sec:main_results}), QAT+QSD is therefore a no-op on Bambu: SR, Wasted, TTFF, UQoR, best area, and best latency are all statistically identical to vanilla PA-DSE. On Dynamatic ($B{=}30$ on a smaller, structurally tighter $\sim$192-point space, $\approx 16\%$ coverage), the success cloud is narrower and the activation conditions are routinely met; this is where the extensions contribute (Section~\ref{sec:dynamatic_results}). In short, QAT+QSD is \emph{budget-adaptive by construction}: it engages only when vanilla coverage is genuinely incomplete.
-
 \subsection{Module Interface Specification}
 \label{sec:interface}
 
@@ -349,11 +307,11 @@ The two layers yield four distinct operations that interact through a well-defin
 
 \textbf{1. Sound blocking (SCF)} permanently removes configurations from the design space before exploration begins. This action is irreversible and provably correct (zero false positives). \emph{Evidence: proven constraints. Action: strongest (permanent block).}
 
-\textbf{2. Heuristic suppression (SCF)} establishes an \emph{initial queue ordering prior}: suppressed configurations are placed after active ones. This is \emph{not} a hard exclusion---it is an ordering bias that OFRS may override as evidence accumulates. In practice, suppressed configurations typically receive high risk scores from OFRS (because they match failure-prone parameter combinations), so OFRS tends to reinforce rather than contradict the static prior. \emph{Evidence: medium (empirical). Action: ordering bias, overridable.}
+\textbf{2. Heuristic suppression (SCF)} establishes an \emph{initial queue ordering prior}: suppressed configurations are placed after active ones. This is \emph{not} a hard exclusion; it is an ordering bias that OFRS may override as evidence accumulates. In practice, suppressed configurations typically receive high risk scores from OFRS (because they match failure-prone parameter combinations), so OFRS tends to reinforce rather than contradict the static prior. \emph{Evidence: medium (empirical). Action: ordering bias, overridable.}
 
 \textbf{3. RPE hard skip} removes matching configurations from the queue during exploration. RPE operates independently of OFRS: it removes configs before OFRS ranks the remainder. A configuration may be simultaneously suppressed (by SCF) and RPE-skipped; the skip takes precedence. \emph{Evidence: high (empirical, typed, concentrated). Action: run-scoped permanent removal.}
 
-\textbf{4. OFRS reordering} sorts the remaining queue by risk score. This is a global sort over all remaining configurations---both active and suppressed. OFRS reordering is the weakest action: it never removes configurations, only changes their evaluation order. \emph{Evidence: low--medium (marginal, mixed-type). Action: weakest (reorder only).}
+\textbf{4. OFRS reordering} sorts the remaining queue by risk score. This is a global sort over all remaining configurations, both active and suppressed. OFRS reordering is the weakest action: it never removes configurations, only changes their evaluation order. \emph{Evidence: low--medium (marginal, mixed-type). Action: weakest (reorder only).}
 
 \textbf{Conflict handling.} OFRS may promote a heuristically-suppressed configuration ahead of active ones if its risk score is lower. This is by design: OFRS reacts to actual synthesis evidence, which may reveal that a suppressed configuration's non-suppression parameters are associated with success. Since OFRS only promotes (evaluates earlier, not skips), the worst case is one wasted budget unit, which is always preferable to permanently excluding a potentially feasible design.
 
@@ -412,13 +370,17 @@ We evaluate PA-DSE on two HLS tools that differ fundamentally in scheduling phil
 \end{itemize}
 This pairing stresses tool-generality: the two tools share no pragma vocabulary, expose disjoint failure modes, and benefit asymmetrically from static versus dynamic pruning, as we analyze below.
 
-\textbf{Benchmarks.} Eight benchmarks for Bambu (\texttt{matmul}, \texttt{vadd}, \texttt{fir}, \texttt{histogram}, \texttt{atax}, \texttt{bicg}, \texttt{gemm}, \texttt{gesummv}) and four for Dynamatic (\texttt{gcd}, \texttt{matching}, \texttt{binary\_search}, \texttt{kernel\_2mm}). The selection combines Polybench linear-algebra kernels, simple DSP and control-flow kernels, and ML-style reductions, covering a range of loop-nest structures and feasibility landscapes.
+\textbf{Benchmarks.} Both tools are evaluated on the same eight benchmarks: \texttt{matmul}, \texttt{vadd}, \texttt{fir}, \texttt{histogram}, \texttt{atax}, \texttt{bicg}, \texttt{gemm}, and \texttt{gesummv}. The selection combines Polybench linear-algebra kernels and simple DSP kernels, covering a range of loop-nest structures and feasibility landscapes. We chose benchmarks that are present in both tools' integration-test suites to enable cross-tool comparison; CHStone and MachSuite benchmarks were considered but require non-trivial porting to Dynamatic's LLVM-based frontend. Using the same benchmark set on both tools enables direct cross-tool comparison of failure-mode structure and PA-DSE behavior. (Dynamatic's integration-test suite names the matrix-multiplication kernel \texttt{matrix}; we use \texttt{matmul} throughout for consistency.)
 
 \subsection{Configuration Spaces}
 
 \textbf{Bambu (420 configurations).} The enumerated space is the Cartesian product of memory controller choices (\texttt{channels\_type} $\in$ \{\texttt{MEM\_ACC\_11}, \texttt{MEM\_ACC\_N1}, \texttt{MEM\_ACC\_NN}\}), channel count (\texttt{channels\_number} $\in \{1, 2, 4\}$), target clock period, loop pipelining on/off, and further binding/scheduling options. Two tool-documented incompatibilities contribute a provably infeasible \emph{blocked} subset $\mathcal{C}_{\text{blk}}$ of size $140$ ($33.3\%$): MEM\_ACC\_11 requires exactly one channel, MEM\_ACC\_NN requires at least two. In addition, source-level heuristics (pipelining interacting with accumulation or control-flow patterns) mark up to $224$ configurations as \emph{suppressed} for a subset of benchmarks (\texttt{matmul}, \texttt{fir}, \texttt{histogram}); these are deferred but not removed from the queue.
 
 \textbf{Dynamatic (192 configurations).} The enumerated space covers target clock period, buffer algorithm (\texttt{on\_merges}, \texttt{fpga20}, \texttt{fpl22}), hardware sharing, LSQ sizing, and fast-token-delivery tuning. \emph{No tool-documented incompatibility rules apply to this space,} so under SCF all 192 configurations remain in the active set: $\mathcal{C}_{\text{blk}} = \emptyset$ and $\mathcal{C}_{\text{sup}} = \emptyset$. SCF-on and SCF-off behave identically on Dynamatic, making this tool a deliberate stress test of whether DFRL can carry the feasibility-aware load on its own (Section~\ref{sec:ablation}).
+
+\textbf{Feasibility landscape asymmetry.} Three of the eight benchmarks (\texttt{vadd}, \texttt{fir}, and \texttt{histogram}) achieve $100\%$ ground-truth feasibility on Dynamatic: all 192 configurations synthesize successfully regardless of buffer algorithm, clock period, or sharing options. This contrasts with Bambu, where the same three benchmarks exhibit the same $\sim\!15\%$ random-sampling SR as all other benchmarks, because Bambu's dominant infeasibility source (MEM\_ACC parameter incompatibilities) is source-independent.
+
+The difference reflects a structural asymmetry in failure mechanisms. On Bambu, infeasibility is \emph{pragma-driven}: tool-level parameter rules (R1--R2) reject configurations regardless of source complexity. On Dynamatic, infeasibility is \emph{graph-complexity-driven}: the MILP-based buffer-placement solver's difficulty scales with the dataflow graph's back-edge count and path interactions, so simple kernels with flat loop structures are trivially solvable while complex kernels (\texttt{gemm}, ground-truth SR $35.4\%$; \texttt{matmul}, $45.8\%$) produce substantial failure fractions. This asymmetry validates the two-layer design: SCF addresses pragma-driven failures (Bambu), while DFRL addresses graph-complexity-driven failures (Dynamatic). Because the three trivially feasible benchmarks carry no discriminative signal (all methods achieve $100\%$ SR), we report aggregate Dynamatic metrics over the five non-trivial benchmarks (\texttt{matmul}, \texttt{atax}, \texttt{bicg}, \texttt{gemm}, \texttt{gesummv}). Per-benchmark results for all eight benchmarks are shown in Figure~\ref{fig:heatmap} for completeness.
 
 \subsection{Baselines}
 \label{sec:baselines}
@@ -427,10 +389,10 @@ We compare against six baselines chosen to span the classical and learned HLS DS
 
 \begin{itemize}
     \item \textbf{Random}: uniform sampling without replacement from $\mathcal{C}$.
-    \item \textbf{Filtered Random}: uniform sampling from $\mathcal{C} \setminus \mathcal{C}_{\text{blk}}$---a strict SCF-only baseline. On Dynamatic this reduces to Random since $\mathcal{C}_{\text{blk}} = \emptyset$.
+    \item \textbf{Filtered Random}: uniform sampling from $\mathcal{C} \setminus \mathcal{C}_{\text{blk}}$, i.e.\ a strict SCF-only baseline. On Dynamatic this reduces to Random since $\mathcal{C}_{\text{blk}} = \emptyset$.
     \item \textbf{Simulated Annealing (SA)} and \textbf{Genetic Algorithm (GA)}: classical black-box optimizers using feasibility as fitness~\cite{ferretti2020cluster,liu2013learning}.
     \item \textbf{Bayesian Optimization (GP-BO)}: Gaussian-process surrogate with expected-improvement acquisition, following the BO-for-HLS-DSE line of work~\cite{snoek2012practical,ferretti2018lattice}.
-    \item \textbf{Random Forest Classifier (RF)}: an online-trained feasibility classifier modelled after the scalable surrogate of AutoScaleDSE~\cite{sohrabizadeh2023autoscaledse}, using confidence-thresholded sampling.
+    \item \textbf{Random Forest Classifier (RF)}: an online-trained binary feasibility classifier ($n_{\text{estimators}}{=}100$, retrained from scratch after every synthesis call using all observations collected so far). At each step, RF predicts feasibility for all remaining configurations; those with predicted probability $\geq 0.6$ are sampled uniformly. If no configuration exceeds the threshold, one is drawn at random. This is a simplified online proxy inspired by the scalable surrogate of AutoScaleDSE~\cite{sohrabizadeh2023autoscaledse}; it differs from the original in that it trains online within a single run rather than on an offline corpus across designs.
 \end{itemize}
 
 All baselines share the same $\mathcal{C}$, the same synthesis interface, and the same per-run budget.
@@ -446,8 +408,8 @@ All baselines share the same $\mathcal{C}$, the same synthesis interface, and th
 
 \textbf{Metrics.} We report:
 \begin{itemize}
-    \item \textbf{SR (\%)}: fraction of evaluated configurations that synthesized successfully---the primary feasibility metric.
-    \item \textbf{Wasted calls}: count of synthesis invocations that returned a failure---a proxy for user-visible time cost.
+    \item \textbf{SR (\%)}: fraction of evaluated configurations that synthesized successfully, the primary feasibility metric.
+    \item \textbf{Wasted calls}: count of synthesis invocations that returned a failure, a proxy for user-visible time cost.
     \item \textbf{TTFF (s)}: wall-clock time to first feasible design, relevant for interactive use.
     \item \textbf{UQoR}: number of unique Pareto-eligible QoR points (distinct (area, latency) pairs) discovered.
     \item \textbf{Best area, best latency}: minima observed across successful configurations in the run.
@@ -462,25 +424,26 @@ All baselines share the same $\mathcal{C}$, the same synthesis interface, and th
 \section{Results}
 \label{sec:results}
 
-We structure the evaluation around eight questions, each addressed in its own subsection:
+We structure the evaluation around nine questions, each addressed in its own subsection:
 (1)~Does PA-DSE outperform classical and learned baselines on success rate?
 (2)~How large is the user-visible cost savings in terms of wasted calls and TTFF?
 (3)~Are per-benchmark results consistent, or driven by a few easy benchmarks?
-(4)~What does the convergence trajectory look like---does PA-DSE reach its SR early or late in the budget?
+(4)~What does the convergence trajectory look like? Does PA-DSE reach its SR early or late in the budget?
 (5)~Does PA-DSE's queue reordering sacrifice QoR quality?
 (6)~Does the ablation confirm the evidence-hierarchy design principle?
 (7)~How sensitive is PA-DSE to the RPE confidence threshold $\theta$?
-(8)~Is the algorithmic overhead of PA-DSE negligible relative to synthesis cost?
+(8)~Does RPE contribute at extended budgets where it activates?
+(9)~Is the algorithmic overhead of PA-DSE negligible relative to synthesis cost?
 
 % ------------------------------------------------------------
 \subsection{Main Comparison on Bambu}
 \label{sec:main_results}
 
-Table~\ref{tab:main_bambu} reports per-method means and standard deviations across all $(benchmark, \text{run})$ cells on Bambu at $B{=}60$. PA-DSE achieves $92.5\% \pm 1.1$ success rate, exceeding the strongest baseline (RF, $85.9\% \pm 1.1$) by $6.6$\,pp. More importantly, PA-DSE wastes only $4.5$ synthesis calls on average per run, compared to $8.4$ for RF, $17.2$ for GP-BO, and $51$ for Random---a $\mathbf{1.9\times}$ reduction over the best baseline and an $\mathbf{11\times}$ reduction over Random. Because each wasted call costs $\approx 2.5$\,s of user time on Bambu, PA-DSE saves roughly $10$\,s of wall clock per run versus RF.
+Table~\ref{tab:main_bambu} reports per-method means and standard deviations across all $(benchmark, \text{run})$ cells on Bambu at $B{=}60$. PA-DSE achieves $92.5\% \pm 1.1$ success rate, exceeding the strongest baseline (RF, $85.9\% \pm 1.1$) by $6.6$\,pp. More importantly, PA-DSE wastes only $4.5$ synthesis calls on average per run, compared to $8.4$ for RF, $17.2$ for GP-BO, and $51.0$ for Random, a $\mathbf{1.9\times}$ reduction over the best baseline and an $\mathbf{11\times}$ reduction over Random. Because each wasted call costs $\approx 2.5$\,s of user time on Bambu, PA-DSE saves roughly $10$\,s of wall clock per run versus RF.
 
 \begin{table*}[t]
 \centering
-\caption{Main results on Bambu ($B{=}60$, $n{=}80$ runs per method). PA-DSE+QAT+QSD is a no-op on Bambu (\S\ref{sec:main_results}); only the vanilla row is shown.}
+\caption{Main results on Bambu ($B{=}60$, $n{=}80$ runs per method: 8 benchmarks $\times$ 10 seeds/permutations). PA-DSE's $\sigma$ reflects queue-permutation variation; other methods' $\sigma$ reflects seed variation.}
 \label{tab:main_bambu}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lrrrrrr}
@@ -499,9 +462,9 @@ RF             & 85.9 \std{1.1}  &  8.4 & 14.3 & 17.1 & 464.1 & 10.31 \\
 }
 \end{table*}
 
-Two additional observations are worth noting. First, PA-DSE's variance is the lowest of any method with non-trivial SR ($\sigma{=}1.1$), tied with RF. Simulated annealing, by contrast, has $\sigma{=}29.4$---some runs find feasible configurations early and succeed, while others get trapped in infeasible regions; this reflects a broader pattern that classical black-box methods are ill-suited to design spaces dominated by structural infeasibility. Second, PA-DSE matches or beats all baselines on QoR quality (best area, best latency, UQoR): reliability does not trade off against exploration quality. Figure~\ref{fig:bambu_main} visualizes the full per-method distribution.
+Two additional observations are worth noting. First, PA-DSE shows minimal sensitivity to initial queue permutation ($\sigma{=}1.1$ across 10 permutations); RF shows comparable seed-stability ($\sigma{=}1.1$ across 10 seeds). Note that the two $\sigma$ values measure different sources of variation (permutation vs.\ optimizer randomness). Simulated annealing, by contrast, has $\sigma{=}29.4$: some runs find feasible configurations early and succeed, while others get trapped in infeasible regions; this reflects a broader pattern that classical black-box methods are ill-suited to design spaces dominated by structural infeasibility. Second, PA-DSE matches or beats all baselines on QoR quality (best area, best latency, UQoR): reliability does not trade off against exploration quality. Figure~\ref{fig:bambu_main} visualizes the full per-method distribution.
 
-\textbf{QAT+QSD on Bambu: a deliberate no-op.} For completeness we ran the QAT+QSD extension (Section~\ref{sec:qor_ext}) on the same Bambu configuration ($n{=}80$ runs, $B{=}60$). The result is statistically identical to vanilla PA-DSE: SR $92.4 \pm 1.1$ (vs.\ $92.5 \pm 1.1$), Wasted $4.5$ (vs.\ $4.5$), UQoR $19.1$ (vs.\ $19.1$), best area $464.1$ (vs.\ $464.1$), best latency $10.25$ (vs.\ $10.25$); per-benchmark deltas are all within $\pm 0.17$\,pp on SR and zero on every QoR metric. This is the behavior anticipated in Section~\ref{sec:qor_ext_budget}: at $B{=}60$ on a $420$-point space, vanilla OFRS organically reaches the QAT saturation threshold ($n_s(d, v) \geq 4$) for most $(d, v)$ and the QSD activation gate ($S_g > 0.3$) does not fire, so both extensions produce zero-magnitude bonuses. QAT+QSD is therefore a budget-adaptive policy: it engages only when vanilla coverage is genuinely incomplete (Dynamatic at $B{=}30$, see Section~\ref{sec:dynamatic_results}), and otherwise reduces gracefully to vanilla PA-DSE without measurable cost in our experiments.
+
 
 \begin{figure}[t]
 \centering
@@ -514,40 +477,40 @@ Two additional observations are worth noting. First, PA-DSE's variance is the lo
 \subsection{Cross-Tool Evaluation on Dynamatic}
 \label{sec:dynamatic_results}
 
-Table~\ref{tab:main_dynamatic} reports results on Dynamatic at $B{=}30$, aggregated over the four evaluation benchmarks. Because Dynamatic exposes no tool-documented incompatibility rules ($\mathcal{C}_{\text{blk}} = \emptyset$), SCF reduces to a no-op---Filtered Random is identical to Random, and the SCF-only ablation matches no-filter (Section~\ref{sec:ablation}). Any improvement over Random must therefore come from DFRL.
+Table~\ref{tab:main_dynamatic} reports results on Dynamatic at $B{=}30$, aggregated over the five benchmarks with non-trivial failure rates. Because Dynamatic exposes no tool-documented incompatibility rules ($\mathcal{C}_{\text{blk}} = \emptyset$), SCF reduces to a no-op; Filtered Random is identical to Random, and the SCF-only ablation matches no-filter (Section~\ref{sec:ablation}). Any improvement over Random must therefore come from DFRL.
 
 \begin{table*}[t]
 \centering
-\caption{Main results on Dynamatic ($B{=}30$, $n{=}40$ runs per method). Filtered Random $=$ Random because $\mathcal{C}_{\text{blk}} = \emptyset$.}
+\caption{Main results on Dynamatic ($B{=}30$, $n{=}50$ runs per method: 5 non-trivial benchmarks $\times$ 10 seeds). Filtered Random $=$ Random because $\mathcal{C}_{\text{blk}} = \emptyset$. Three benchmarks (\texttt{vadd}, \texttt{fir}, \texttt{histogram}) achieve $100\%$ SR for all methods and are excluded from aggregation.}
 \label{tab:main_dynamatic}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lrrrrrr}
 \toprule
 Method & SR (\%) & Wasted & TTFF (s) & UQoR & Best area & Best latency \\
 \midrule
-Random         & 52.9 \std{14.1} & 14.1 & 29.5 & 8.8 & 49.5 & 502.7 \\
-Filtered Random& 52.9 \std{14.1} & 14.1 & 29.5 & 8.8 & 49.5 & 502.7 \\
-SA             & 55.4 \std{23.5} & 13.4 & 51.3 & 7.2 & 50.3 & 508.3 \\
-GA             & 66.8 \std{14.8} & 10.0 & 29.5 & 8.3 & 49.5 & 503.3 \\
-GP-BO          & 90.1 \std{5.5}  &  3.0 & 50.1 & 7.7 & 49.4 & 511.3 \\
-RF             & 86.9 \std{6.5}  &  3.9 & 50.2 & 8.6 & 49.3 & 511.7 \\
-\textbf{PA-DSE}& \textbf{92.0} \std{4.3} & \textbf{2.4} & \textbf{26.5} & 7.1 & 49.7 & 513.3 \\
-\textbf{PA-DSE+QAT+QSD} & \textbf{92.0} \std{4.1} & \textbf{2.4} & \textbf{26.5} & \textbf{7.7} & \textbf{49.4} & \textbf{510.3} \\
+Random         & 49.9 \std{12.8} & 15.0 & 36.6 & 9.3 & 51.7 & 404.0 \\
+Filtered Random& 49.9 \std{12.8} & 15.0 & 36.6 & 9.3 & 51.7 & 404.0 \\
+SA             & 49.4 \std{24.5} & 15.2 & 64.7 & 7.4 & 52.8 & 408.7 \\
+GA             & 64.5 \std{13.4} & 10.6 & 36.6 & 8.5 & 51.2 & 403.7 \\
+GP-BO          & 90.2 \std{4.9}  &  2.9 & 67.0 & 5.1 & 51.3 & 405.4 \\
+RF             & 85.6 \std{5.8}  &  4.3 & 67.0 & 6.1 & 51.3 & 413.0 \\
+\textbf{PA-DSE}& \textbf{91.3} \std{3.9} & \textbf{2.6} & \textbf{34.2} & 7.1 & 51.3 & 407.6 \\
+
 \bottomrule
 \end{tabular}
 }
 \end{table*}
 
-PA-DSE achieves $92.0\%$ SR, narrowly ahead of GP-BO ($90.1\%$), but with a more distinctive advantage in user-visible cost: TTFF drops to $26.5$\,s versus $\approx 50$\,s for GP-BO and RF, and Wasted drops to $2.4$ versus $3.0$ and $3.9$. For interactive use, PA-DSE reaches the first feasible design in roughly half the wall-clock time of the strongest learned baselines. Figure~\ref{fig:dynamatic_main} shows the per-benchmark distribution.
+PA-DSE achieves $91.3\%$ SR, compared to GP-BO ($90.2\%$) and RF ($85.6\%$). A paired $t$-test over per-benchmark means shows the SR difference vs.\ GP-BO is not statistically significant ($p{=}0.35$), while the difference vs.\ RF is ($p{=}0.024$). The more distinctive advantage over GP-BO is in user-visible cost: TTFF drops to $34.2$\,s versus $67.0$\,s for GP-BO and RF, roughly half the wall-clock time, and Wasted drops to $2.6$ versus $2.9$ and $4.3$. For interactive developers iterating tens of times a day, this compounds to significant time savings. Figure~\ref{fig:dynamatic_main} shows the per-benchmark distribution.
 
-\textbf{Reading the QoR columns.} The last three columns (UQoR, best area, best latency) require careful reading. PA-DSE's vanilla numbers ($7.1$ / $49.7$ / $513.3$) are lower than several baselines, and a casual reader may interpret this as a quality deficit. The interpretation is more nuanced. The lat-stronger baselines (Random $502.7$, GA $503.3$, SA $508.3$) sample the design space broadly; this broad sampling occasionally finds Pareto-dominated interior points that the feasibility-focused PA-DSE skips, but the same broad sampling is what produces their catastrophic SR ($52.9$, $66.8$, $55.4$) and Wasted counts ($10$--$14$). Restated: \emph{a method that wastes one third to one half of its budget on infeasible configurations does occasionally bump into a low-latency point, but is not a viable production policy}. Among methods with SR $\geq 90\%$ (namely GP-BO, RF, and PA-DSE), PA-DSE's vanilla best latency is essentially tied with the others ($513.3$ vs.\ GP-BO $511.3$ and RF $511.7$, all within $0.5\%$). The vanilla UQoR gap to RF ($7.1$ vs.\ $8.6$) is the only non-trivial difference and reflects RF's broader QoR sampling, discussed in Section~\ref{sec:qor}.
+\textbf{Reading the QoR columns.} The last three columns (UQoR, best area, best latency) require careful reading. Among methods with SR $\geq 85\%$ (GP-BO, RF, and PA-DSE), best latency values are comparable: PA-DSE $407.6$, GP-BO $405.4$, RF $413.0$. The lat-stronger baselines (Random $404.0$, GA $403.7$) sample the design space broadly; this broad sampling occasionally discovers low-latency configurations the feasibility-focused PA-DSE skips, but the same broad sampling is what produces their catastrophic SR ($49.9\%$, $64.5\%$) and Wasted counts ($10$--$15$). Restated: \emph{a method that wastes one third to one half of its budget on infeasible configurations does occasionally bump into a low-latency point, but is not a viable production policy}. PA-DSE's UQoR ($7.1$) leads all SR $\geq 85\%$ baselines (GP-BO $5.1$, RF $6.1$), indicating that feasibility-focused queue reordering does not sacrifice QoR diversity.
 
-\textbf{The QAT+QSD extension closes the QoR gap without observed SR degradation.} Table~\ref{tab:main_dynamatic} also reports PA-DSE+QAT+QSD, which adds two QoR-aware reorderings to OFRS (Section~\ref{sec:qor_ext}). The result strictly improves vanilla PA-DSE on every QoR-coverage metric---UQoR $7.1 \to 7.7$ ($+8.5\%$), best area $49.7 \to 49.4$, best latency $513.3 \to 510.3$ ($-3.0$\,cycles)---while SR ($92.0\%$), Wasted ($2.4$), and TTFF ($26.5$\,s) remain unchanged within measurement precision. Among methods with SR $\geq 90\%$, PA-DSE+QAT+QSD now achieves the lowest best latency ($510.3$ vs.\ GP-BO $511.3$, RF $511.7$). The remaining gap to Random/GA ($510.3$ vs.\ $\approx 503$) is structural: closing it would require evaluating substantially more infeasible configurations, which is the exact trade-off PA-DSE is designed to avoid. We discuss this Pareto trade-off in Section~\ref{sec:tradeoff}.
+
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{paper_figures/out/fig_dynamatic_main.pdf}
-\caption{Dynamatic main results ($B{=}30$). (a) Aggregate SR with standard deviation across four benchmarks. (b) Per-benchmark SR distribution. PA-DSE matches or exceeds all baselines across benchmarks with substantially lower variance.}
+\caption{Dynamatic main results ($B{=}30$). (a) Aggregate SR with standard deviation across five non-trivial benchmarks. (b) Per-benchmark SR distribution. PA-DSE matches or exceeds all baselines across benchmarks with substantially lower variance.}
 \label{fig:dynamatic_main}
 \end{figure}
 
@@ -560,11 +523,11 @@ Success rate is only one dimension of user experience; two others dominate perce
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{paper_figures/out/fig_cost.pdf}
-\caption{User-visible cost. (a) Wasted synthesis calls per run (lower is better): PA-DSE wastes $4.5$ on Bambu and $2.4$ on Dynamatic, a $1.9\times$--$11\times$ reduction over other methods. (b) Time to first feasible (lower is better): on Dynamatic, PA-DSE reaches the first feasible design in half the wall-clock time of GP-BO and RF.}
+\caption{User-visible cost. (a) Wasted synthesis calls per run (lower is better): PA-DSE wastes $4.5$ on Bambu ($1.9\times$ fewer than RF) and $2.6$ on Dynamatic (vs.\ $2.9$ for GP-BO and $4.3$ for RF). (b) Time to first feasible (lower is better): on Dynamatic, PA-DSE reaches the first feasible design in half the wall-clock time of GP-BO and RF.}
 \label{fig:cost}
 \end{figure*}
 
-PA-DSE wastes $4.5$ synthesis calls per run on Bambu ($11.3\times$ fewer than Random, $1.9\times$ fewer than RF) and $2.4$ on Dynamatic ($5.9\times$ fewer than Random). Translated to wall-clock: on Bambu, PA-DSE saves about $10$\,s per run versus RF ($\approx 4$ calls $\times$ 2.5\,s); on Dynamatic, about $5$\,s per run versus GP-BO ($\approx 0.6$ calls $\times$ 8.1\,s) and about $12$\,s versus RF ($\approx 1.5$ calls $\times$ 8.1\,s). For interactive developers iterating tens of times a day, this compounds to meaningful time savings. TTFF shows a similar picture on Dynamatic ($26.5$\,s for PA-DSE vs.\ $\approx 50$\,s for GP-BO/RF); on Bambu, classical methods have unusually low TTFF because they find occasional trivial successes early, but their mean SR is much lower (Table~\ref{tab:main_bambu}).
+PA-DSE wastes $4.5$ synthesis calls per run on Bambu ($11.3\times$ fewer than Random, $1.9\times$ fewer than RF) and $2.6$ on Dynamatic (vs.\ $2.9$ for GP-BO and $4.3$ for RF). Translated to wall-clock: on Bambu, PA-DSE saves about $10$\,s per run versus RF ($\approx 4$ calls $\times$ 2.5\,s); on Dynamatic, about $2$\,s per run versus GP-BO ($\approx 0.3$ calls $\times$ 8.1\,s) and about $14$\,s versus RF ($\approx 1.7$ calls $\times$ 8.1\,s). For interactive developers iterating tens of times a day, this compounds to meaningful time savings. TTFF shows a similar picture on Dynamatic ($34.2$\,s for PA-DSE vs.\ $67.0$\,s for GP-BO/RF); on Bambu, classical methods have unusually low TTFF because they find occasional trivial successes early, but their mean SR is much lower (Table~\ref{tab:main_bambu}).
 
 % ------------------------------------------------------------
 \subsection{Per-Benchmark Consistency}
@@ -579,9 +542,9 @@ Aggregate SR can mask method-benchmark interactions: a method might win on avera
 \label{fig:heatmap}
 \end{figure*}
 
-PA-DSE achieves $\geq 90\%$ SR on every Bambu benchmark, while every baseline (including RF) has at least one benchmark where it drops noticeably. SA and GA in particular show high per-benchmark variance, consistent with their sensitivity to the benchmark-specific feasibility landscape. On Dynamatic the per-benchmark advantage is narrower---most methods stay within a $5$--$10$\,pp band of PA-DSE---but PA-DSE is the only method without a single benchmark where SR drops below $88\%$.
+PA-DSE achieves $\geq 90\%$ SR on every Bambu benchmark, while every baseline (including RF) has at least one benchmark where it drops noticeably. SA and GA in particular show high per-benchmark variance, consistent with their sensitivity to the benchmark-specific feasibility landscape. On Dynamatic, per-benchmark variation is more pronounced than on Bambu, reflecting the graph-complexity-driven nature of Dynamatic's failure modes. Three benchmarks (\texttt{vadd}, \texttt{fir}, \texttt{histogram}) achieve $100\%$ SR for all methods due to their trivially simple dataflow graphs. Among the five non-trivial benchmarks, \texttt{gemm} is the hardest (ground-truth feasibility $35.4\%$), and PA-DSE achieves $89.3\%$ SR, outperforming GP-BO and RF by the widest margins in the evaluation. This pattern (PA-DSE's advantage growing on harder benchmarks) is consistent with OFRS learning the dominant failure dimension (\texttt{buffer\_algorithm}: \texttt{on-merges} achieves $0\%$ failure rate, while \texttt{fpl22} reaches $82.5\%$) early and concentrating budget on feasible configurations.
 
-\paragraph{Why some Bambu rows are nearly benchmark-agnostic.} Several rows in Figure~\ref{fig:heatmap}(a)---Random, Filtered Random, RF, and PA-DSE---show essentially identical SR across all eight benchmarks. This is structural, not an artifact, and results from three properties acting together: (1)~the dominant infeasibility band ($\mathcal{C}_{\text{blk}}$, $33\%$ of $\mathcal{C}$) is determined by tool-level MEM\_ACC rules that are independent of source code; (2)~memoryless methods derive their evaluation order from a fixed seed or permutation ID without consulting source features, so the same 60-config sequence is examined on every benchmark; and (3)~at $B{=}60 < |\mathcal{C}_{\text{act}}|{=}196$, suppressed configurations are never reached, so benchmarks with and without $\mathcal{C}_{\text{sup}}$ behave identically. By contrast, GP-BO, SA, and GA carry benchmark-specific internal state that produces genuine per-benchmark variation. On Dynamatic, failure modes are source-dependent, so PA-DSE's per-benchmark SR varies from $89\%$ to $94\%$.
+\paragraph{Why some Bambu rows are nearly benchmark-agnostic.} Several rows in Figure~\ref{fig:heatmap}(a) (Random, Filtered Random, RF, and PA-DSE) show essentially identical SR across all eight benchmarks. This is structural, not an artifact, and results from three properties acting together: (1)~the dominant infeasibility band ($\mathcal{C}_{\text{blk}}$, $33\%$ of $\mathcal{C}$) is determined by tool-level MEM\_ACC rules that are independent of source code; (2)~memoryless methods derive their evaluation order from a fixed seed or permutation ID without consulting source features, so the same 60-config sequence is examined on every benchmark; and (3)~at $B{=}60 < |\mathcal{C}_{\text{act}}|{=}196$, suppressed configurations are never reached, so benchmarks with and without $\mathcal{C}_{\text{sup}}$ behave identically. By contrast, GP-BO, SA, and GA carry benchmark-specific internal state that produces genuine per-benchmark variation. On Dynamatic, failure modes are source-dependent, so PA-DSE's per-benchmark SR varies across benchmarks depending on graph complexity.
 
 % ------------------------------------------------------------
 \subsection{Convergence Behavior}
@@ -592,7 +555,7 @@ Figure~\ref{fig:convergence} shows the cumulative number of feasible designs fou
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{paper_figures/out/fig_convergence.pdf}
-\caption{Convergence curves (mean $\pm 1\sigma$ across runs). (a) Bambu at $B{=}60$: PA-DSE maintains near-linear progression throughout the budget, indicating that OFRS's online reordering keeps promising configurations at the queue front. (b) Dynamatic at $B{=}30$: PA-DSE's curve is visibly steeper than the classical baselines but converges with GP-BO/RF by mid-budget.}
+\caption{Convergence curves (mean $\pm 1\sigma$ across runs). (a) Bambu at $B{=}60$: PA-DSE maintains near-linear progression throughout the budget, indicating that OFRS's online reordering keeps promising configurations at the queue front. (b) Dynamatic at $B{=}30$: PA-DSE's curve is steeper than the classical baselines, reflecting rapid learning of the dominant failure dimension.}
 \label{fig:convergence}
 \end{figure*}
 
@@ -613,7 +576,7 @@ Finding feasible configurations is necessary but not sufficient; users ultimatel
 
 Three observations follow. First, the \emph{shared} regions dominate both panels, confirming that PA-DSE rediscovers most of what the baselines find collectively. Second, \emph{baseline-only} points are sparse on both tools and absent on Bambu, indicating that PA-DSE's feasibility focus does not create systematic blind spots in the QoR space. Third, PA-DSE reaches every Pareto-optimal point on both tools (Pareto coverage 4/4 on Bambu, 1/1 on Dynamatic; see annotations on each panel). Reliability and QoR coverage are not trading against each other in our setting.
 
-\textbf{The QAT+QSD extension further closes the QoR coverage gap.} Figure~\ref{fig:qor} shows the QoR coverage of vanilla PA-DSE (the baseline policy of Section~\ref{sec:dfrl}). Enabling QAT+QSD (Section~\ref{sec:qor_ext}) does not change the Pareto-vertex coverage (already complete) but reduces the \emph{baseline-only} count on Dynamatic from $6$ to roughly $5$ and grows the unique-QoR count by approximately $8.5\%$ on average ($7.05 \to 7.65$, matching the UQoR increase reported in Table~\ref{tab:main_dynamatic}). On Bambu the picture is unchanged because QAT+QSD self-deactivates at $B{=}60$ (Section~\ref{sec:qor_ext_budget}); we verify and discuss this no-op behavior in Section~\ref{sec:main_results}.
+
 
 % ------------------------------------------------------------
 \subsection{Ablation: Isolating the Contribution of Each Component}
@@ -623,7 +586,7 @@ Table~\ref{tab:ablation} reports an 8-way ablation at $B{=}30$ on both tools, se
 
 \begin{table*}[t]
 \centering
-\caption{Ablation on both tools ($B{=}30$, Bambu $n{=}24$, Dynamatic $n{=}12$ per config). Configurations are grouped by which components are active.}
+\caption{Ablation on both tools ($B{=}30$, Bambu $n{=}24$, Dynamatic $n{=}25$ per config). Configurations are grouped by which components are active.}
 \label{tab:ablation}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lrrrr}
@@ -632,14 +595,14 @@ Table~\ref{tab:ablation} reports an 8-way ablation at $B{=}30$ on both tools, se
 \cmidrule(lr){2-3} \cmidrule(lr){4-5}
 & SR (\%) & Wasted & SR (\%) & Wasted \\
 \midrule
-no-filter                    & 12.2 \std{9.8}  & 26.3 & 50.8 \std{16.1} & 14.8 \\
-SCF-only                     & 17.8 \std{6.5}  & 24.7 & 50.8 \std{16.1} & 14.8 \\
-SCF + RPE                    & 57.8 \std{1.6}  & 12.7 & 50.5 \std{16.4} & 14.8 \\
-SCF + OFRS                   & 84.5 \std{3.2}  &  4.7 & 89.5 \std{6.5}  &  3.2 \\
-\textbf{SCF + DFRL} (full)   & \textbf{84.5} \std{3.2} & \textbf{4.7} & \textbf{89.5} \std{6.5} & \textbf{3.2} \\
-DFRL-only                    & 80.0 \std{7.4}  &  6.0 & 89.5 \std{6.5}  &  3.2 \\
-SCF + RPE-as-reorder         & 84.5 \std{3.2}  &  4.7 & 89.5 \std{6.5}  &  3.2 \\
-SCF + OFRS-as-skip (unsafe)  & 28.9 \std{41.8} &  2.0 & 24.2 \std{43.7} &  1.0 \\
+no-filter                    & 12.2 \std{9.8}  & 26.3 & 48.1 \std{14.9} & 15.6 \\
+SCF-only                     & 17.8 \std{6.5}  & 24.7 & 48.1 \std{14.9} & 15.6 \\
+SCF + RPE                    & 57.8 \std{1.6}  & 12.7 & 48.1 \std{14.9} & 15.6 \\
+SCF + OFRS                   & 84.5 \std{3.2}  &  4.7 & 89.6 \std{4.1}  &  3.1 \\
+\textbf{SCF + DFRL} (full)   & \textbf{84.5} \std{3.2} & \textbf{4.7} & \textbf{89.6} \std{4.1} & \textbf{3.1} \\
+DFRL-only                    & 80.0 \std{7.4}  &  6.0 & 89.6 \std{4.1}  &  3.1 \\
+SCF + RPE-as-reorder         & 84.5 \std{3.2}  &  4.7 & 89.6 \std{4.1}  &  3.1 \\
+SCF + OFRS-as-skip (unsafe)  & 28.9 \std{41.8} &  2.0 &  7.7 \std{26.8} &  1.0 \\
 \bottomrule
 \end{tabular}
 }
@@ -652,17 +615,17 @@ SCF + OFRS-as-skip (unsafe)  & 28.9 \std{41.8} &  2.0 & 24.2 \std{43.7} &  1.0 \
 \label{fig:ablation}
 \end{figure*}
 
-\paragraph{OFRS is the dominant contributor to SR.} On Bambu, adding OFRS to SCF drives SR from $17.8\%$ (SCF-only) to $84.5\%$ (SCF+OFRS), a $+66.7$\,pp gain. On Dynamatic the effect is similar: $+38.7$\,pp from SCF-only ($50.8\%$) to SCF+OFRS ($89.5\%$). Across both tools, OFRS's online queue reordering is doing the heavy lifting at these budgets.
+\paragraph{OFRS is the dominant contributor to SR.} On Bambu, adding OFRS to SCF drives SR from $17.8\%$ (SCF-only) to $84.5\%$ (SCF+OFRS), a $+66.7$\,pp gain. On Dynamatic the effect is similar: $+41.5$\,pp from SCF-only ($48.1\%$) to SCF+OFRS ($89.6\%$). Across both tools, OFRS's online queue reordering is doing the heavy lifting at these budgets.
 
-\paragraph{SCF provides a safety net on tools with static rules.} Comparing SCF+DFRL to DFRL-only isolates SCF's marginal value. On Bambu, SCF adds $+4.5$\,pp ($80.0\% \to 84.5\%$) by removing provably infeasible configurations before DFRL can be contaminated by their failures. On Dynamatic, SCF adds $0$\,pp because $\mathcal{C}_{\text{blk}} = \emptyset$. This asymmetry confirms the design stance: SCF's benefit is contingent on the tool exposing documented rules, but it is non-negative---it never hurts.
+\paragraph{SCF provides a safety net on tools with static rules.} Comparing SCF+DFRL to DFRL-only isolates SCF's marginal value. On Bambu, SCF adds $+4.5$\,pp ($80.0\% \to 84.5\%$) by removing provably infeasible configurations before DFRL can be contaminated by their failures. On Dynamatic, SCF adds $0$\,pp because $\mathcal{C}_{\text{blk}} = \emptyset$. This asymmetry confirms the design stance: SCF's benefit is contingent on the tool exposing documented rules, but it is non-negative: it never hurts.
 
-\paragraph{RPE is absorbed by OFRS under our budgets.} SCF+DFRL and SCF+OFRS are numerically identical ($84.5\%$ on Bambu, $89.5\%$ on Dynamatic). Yet SCF+RPE alone achieves only $57.8\%$ on Bambu, well below SCF+OFRS. Inspection of per-run logs reveals the mechanism: when OFRS is active, it reorders configurations matching heuristically-suppressed patterns to the tail of the queue. These are precisely the configurations RPE would have extracted signatures from. At $B{=}30$, OFRS's reordering means the budget is exhausted before the queue advances to where RPE would activate. The components are functional; they are not in use at this budget. We expect RPE to contribute more at larger budgets or in failure-mode-diverse workloads; we leave this to future work.
+\paragraph{RPE is absorbed by OFRS under our budgets.} SCF+DFRL and SCF+OFRS are numerically identical ($84.5\%$ on Bambu, $89.6\%$ on Dynamatic). Yet SCF+RPE alone achieves only $57.8\%$ on Bambu, well below SCF+OFRS. Inspection of per-run logs reveals the mechanism: when OFRS is active, it reorders configurations matching heuristically-suppressed patterns to the tail of the queue. These are precisely the configurations RPE would have extracted signatures from. At $B{=}30$, OFRS's reordering means the budget is exhausted before the queue advances to where RPE would activate. The components are functional; they are not in use at this budget. Section~\ref{sec:b120} confirms this: at $B{=}120$, RPE activates and drives a $+36.3$\,pp SR gain over SCF+OFRS alone ($83.0\%$ vs.\ $46.7\%$, $p < 0.001$). Table~\ref{tab:theta_sensitivity} further shows that the RPE confidence threshold $\theta$ is a meaningful lever at this budget, with an $18.8$\,pp SR range across $\theta \in \{0.7, 0.8, 0.9\}$.
 
 \paragraph{RPE-as-reorder degrades to SCF+OFRS.} Swapping RPE's action from \emph{skip} to \emph{reorder} yields identical results to SCF+OFRS ($84.5\%$ on Bambu). This is not a contradiction: when OFRS is already reordering by failure risk, adding RPE's risk-based reorder is redundant. The ablation confirms that RPE's distinct contribution is its \emph{skip} action, not any reordering signal.
 
-\paragraph{Allowing OFRS to skip catastrophically increases variance.} The SCF+OFRS-as-skip configuration, which permits OFRS to hard-skip configurations at a risk threshold of $0.85$, produces mean SR $28.9\%$ with $\sigma{=}41.8$ on Bambu and $24.2\%$ with $\sigma{=}43.7$ on Dynamatic. These variances are an order of magnitude larger than any other configuration. On some runs OFRS's first-order marginal statistics happen to align with true failure causes and the run succeeds; on others, OFRS prunes feasible configurations based on noisy single-dimension correlations and the run collapses. This is the strongest single piece of evidence for our design principle: \emph{OFRS's weak evidence cannot justify the strong action of permanent exclusion}. When we allow it anyway, the consequences are severe.
+\paragraph{Allowing OFRS to skip catastrophically increases variance.} The SCF+OFRS-as-skip configuration, which permits OFRS to hard-skip configurations at a risk threshold of $0.85$, produces mean SR $28.9\%$ with $\sigma{=}41.8$ on Bambu and $7.7\%$ with $\sigma{=}26.8$ on Dynamatic. These variances are an order of magnitude larger than any other configuration. On some runs OFRS's first-order marginal statistics happen to align with true failure causes and the run succeeds; on others, OFRS prunes feasible configurations based on noisy single-dimension correlations and the run collapses. This demonstrates that granting unstructured marginal statistics skip authority, without the consistency-and-contrast guards that RPE imposes (type-specific filtering, discriminative dimension selection, Laplace-smoothed confidence threshold), leads to catastrophic outcomes. The lesson is not merely that ``weak evidence should not drive strong actions'' in the abstract, but that the specific safeguards RPE provides are load-bearing.
 
-\paragraph{Summary.} The ablation confirms three tenets of the evidence hierarchy: (i)~SCF's permanent block is safe only because it uses provable evidence; (ii)~OFRS's reordering is safe despite weak evidence because the action is weak (reorderable); (iii)~crossing these---allowing OFRS to skip---breaks the hierarchy and performance collapses.
+\paragraph{Summary.} The ablation confirms three tenets of the evidence hierarchy: (i)~SCF's permanent block is safe only because it uses provable evidence; (ii)~OFRS's reordering is safe despite weak evidence because the action is weak (reorderable); (iii)~crossing these (allowing OFRS to skip) breaks the hierarchy and performance collapses.
 
 % ------------------------------------------------------------
 \subsection{Sensitivity to RPE Confidence Threshold $\theta$}
@@ -674,7 +637,7 @@ The RPE activation threshold $\theta$ (\S\ref{sec:rpe}) governs how much concent
 
 \begin{table}[t]
 \centering
-\caption{Sensitivity of PA-DSE to the RPE confidence threshold $\theta$ (Bambu, $B{=}120$, $n{=}40$ per cell: $8$ benchmarks $\times$ $5$ permutations). The default $\theta{=}0.8$ used throughout the paper is in bold. SR varies by $18.8$\,pp across the swept range, confirming that $\theta$ is a meaningful policy lever at budgets where RPE actively contributes.}
+\caption{Sensitivity of PA-DSE to the RPE confidence threshold $\theta$ (Bambu, $B{=}120$, $n{=}40$ per cell: $8$ benchmarks $\times$ $5$ permutations). The default $\theta{=}0.8$ used throughout the paper is in bold. SR varies by $18.8$\,pp across the swept range. The $0.1$\,pp difference between this table's $\theta{=}0.8$ row ($83.1\%$) and Table~\ref{tab:b120}'s PA-DSE row ($83.0\%$) reflects the different sample sizes ($n{=}40$ vs.\ $n{=}80$).}
 \label{tab:theta_sensitivity}
 \begin{tabular}{lrrrr}
 \toprule
@@ -697,10 +660,47 @@ $0.9$ & $69.3 \pm 0.4$ & $24.8$ & $9.3$ & $1.0$ \\
 The sweep also serves as a cross-check on the budget-dependence claim of \S\ref{sec:ablation}: at $B{=}60$ the same sweep shows essentially no $\theta$ dependence (data not shown for brevity), because RPE rarely activates regardless of $\theta$. Sensitivity to $\theta$ is therefore conditional on RPE being in scope, which is itself conditional on budget being large enough for type-specific failure evidence to accumulate.
 
 % ------------------------------------------------------------
+
+\subsection{RPE Contribution at Extended Budget}
+\label{sec:b120}
+
+The ablation in Section~\ref{sec:ablation} showed that at $B{=}30$ and $B{=}60$, RPE does not activate because OFRS reordering exhausts the budget before sufficient type-specific failure evidence accumulates. To verify that RPE contributes at larger budgets, we run all methods at $B{=}120$ on Bambu (Table~\ref{tab:b120}), adding SCF+OFRS (PA-DSE without RPE) as an explicit ablation control.
+
+\begin{table}[t]
+\centering
+\caption{Bambu at $B{=}120$ ($n{=}80$ runs per method: 8 benchmarks $\times$ 10 seeds/permutations). SCF+OFRS is PA-DSE with RPE disabled. The $+36.3$\,pp gap between PA-DSE and SCF+OFRS isolates RPE's contribution ($p < 0.001$, Wilcoxon). RF and SCF+OFRS exhibit $\sigma{=}0.0$ because at $B{=}120$ both methods have observed enough configurations to fully rank-order the active set, leaving no seed- or permutation-induced variation. PA-DSE's $\sigma{=}0.6$ reflects the residual stochasticity of probe auditing ($p_{\text{probe}}{=}0.05$).}
+\label{tab:b120}
+\begin{tabular}{lrrrr}
+\toprule
+Method & SR (\%) & Wasted & UQoR & Sigs \\
+\midrule
+Random          & 13.7 \std{2.1}  & 103.6 &  9.8 & -- \\
+Filtered Random & 19.8 \std{1.4}  &  96.2 & 12.8 & -- \\
+SA              &  7.2 \std{14.7} & 111.3 &  3.2 & -- \\
+GA              & 31.8 \std{14.0} &  81.8 & 13.9 & -- \\
+GP-BO           & 43.2 \std{0.5}  &  68.2 & 16.7 & -- \\
+RF              & 46.7 \std{0.0}  &  64.0 & 19.1 & -- \\
+SCF+OFRS        & 46.7 \std{0.0}  &  64.0 & 19.1 & 0 \\
+\textbf{PA-DSE} & \textbf{83.0} \std{0.6} & \textbf{11.5} & \textbf{19.1} & \textbf{1.0} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{paper_figures/out/fig_b120_bambu.pdf}
+\caption{Bambu at $B{=}120$. RPE activates one signature per run, hard-skipping $\sim 213$ matching configurations and driving a $+36.3$\,pp SR gain over SCF+OFRS (which is identical to RF at this budget).}
+\label{fig:b120}
+\end{figure}
+
+At $B{=}120$, RPE activates exactly one signature per run (the \texttt{pipeline\_phi\_conflict} pattern), which matches $\sim 213$ configurations in the $420$-point space; RPE hard-skips all such configurations remaining in the queue at activation time. This single signature drives PA-DSE from $46.7\%$ (identical to SCF+OFRS and RF) to $83.0\%$, a $+36.3$\,pp gain ($p < 0.001$, Wilcoxon signed-rank test over 80 paired runs). Probe auditing consumes $0.8\%$ of the budget (1 probe per 120 evaluations); probes fail in every run, confirming the signature's validity across the full benchmark suite.
+
+The mechanism is clear: at $B{=}60$, OFRS surfaces feasible configurations fast enough that the budget is exhausted before $\tau{=}2$ same-type failures accumulate in the queue's reachable prefix. At $B{=}120$, the queue extends into the pipeline-conflict region, RPE observes repeated \texttt{pipeline\_phi\_conflict} failures, extracts a discriminative signature, and hard-skips matching configurations not yet evaluated ($\sim 213$ on average per run) for the remainder of the budget. OFRS alone cannot achieve this because its per-dimension marginal statistics do not distinguish pipeline conflicts from other failure types. This validates the evidence hierarchy: RPE's type-specific, concentrated evidence justifies the strong action (hard skip) that OFRS's mixed-type marginal statistics cannot.
+
 \subsection{Overhead}
 \label{sec:overhead}
 
-Table~\ref{tab:overhead} reports the per-iteration algorithmic overhead of each PA-DSE layer, compared to the corresponding synthesis cost. On Bambu, total PA-DSE overhead is $5.3$\,ms per iteration, versus $\approx 2504$\,ms of synthesis: a ratio of $1:474$. On Dynamatic the ratio is $1:3778$, reflecting the higher synthesis cost of MILP-based buffer placement. By either measure, algorithmic overhead is negligible.
+Table~\ref{tab:overhead} reports the per-iteration algorithmic overhead of each PA-DSE layer, compared to the corresponding synthesis cost. On Bambu, total PA-DSE overhead is $5.3$\,ms per iteration, versus $\approx 2504$\,ms of synthesis: a ratio of $1:474$. On Dynamatic the ratio is $1:4000$, reflecting the higher synthesis cost of MILP-based buffer placement. By either measure, algorithmic overhead is negligible.
 
 \begin{table*}[t]
 \centering
@@ -711,7 +711,7 @@ Table~\ref{tab:overhead} reports the per-iteration algorithmic overhead of each 
 Tool      & SCF  & RPE  & OFRS & Algo.\ total & Synthesis \\
 \midrule
 Bambu     & 0.086 & 0.169 & 5.030 & 5.285 & 2503.7 \\
-Dynamatic & 0.013 & 0.161 & 1.978 & 2.151 & 8127.3 \\
+Dynamatic & 0.029 & 0.069 & 1.934 & 2.032 & 8127.3 \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -723,7 +723,7 @@ Dynamatic & 0.013 & 0.161 & 1.978 & 2.151 & 8127.3 \\
 \label{fig:overhead}
 \end{figure}
 
-OFRS dominates the algorithmic overhead ($95\%$ on Bambu, $92\%$ on Dynamatic) because it performs a full-queue sort every iteration. SCF is essentially free (rules fire once at initialization), and RPE's overhead is concentrated in a small number of signature-extraction calls per run. For design spaces substantially larger than ours, the OFRS sort could be replaced by an incremental priority queue with $O(\log n)$ update---we have not needed this optimization for the scales evaluated here.
+OFRS dominates the algorithmic overhead ($95\%$ on Bambu, $92\%$ on Dynamatic) because it performs a full-queue sort every iteration. SCF is essentially free (rules fire once at initialization), and RPE's overhead is concentrated in a small number of signature-extraction calls per run. For design spaces substantially larger than ours, the OFRS sort could be replaced by an incremental priority queue with $O(\log n)$ update; we have not needed this optimization for the scales evaluated here.
 
 
 \section{Discussion and Limitations}
@@ -737,49 +737,45 @@ PA-DSE is most effective in the regime our evaluation targets: small-to-moderate
 
 \textbf{Large budgets ($B \gg |\mathcal{C}_{\text{act}}|$).} At budgets approaching the full active-set size, every method converges to the same coverage. The pertinent question becomes not SR but QoR quality, where learned surrogates with offline training can leverage more data. PA-DSE is not designed for this regime.
 
-\textbf{Tools without documented incompatibility rules.} On Dynamatic, SCF reduces to a no-op and PA-DSE's lead over the best baseline narrows from $+6.6$\,pp to $+1.9$\,pp. DFRL still helps (TTFF drops nearly $2\times$), but the margin over learned surrogates is smaller. For tools whose full failure distribution is driven by runtime-detected issues (e.g., timing closure, resource overflow), DFRL's online learning is the only applicable lever.
+\textbf{Tools without documented incompatibility rules.} On Dynamatic, SCF reduces to a no-op and PA-DSE's SR lead over the best baseline narrows to $+1.1$\,pp. The more distinctive advantage shifts to TTFF ($34.2$\,s vs.\ $67.0$\,s, nearly $2\times$ faster) and UQoR ($7.1$ vs.\ GP-BO $5.1$). DFRL alone is sufficient to match or exceed all baselines without tool-specific rule engineering. For tools whose failure distribution is driven by runtime-detected issues (e.g., timing closure, resource overflow), DFRL's online learning provides a viable fallback.
 
 \subsection{Quality--Reliability Tradeoff}
 \label{sec:tradeoff}
 
-A casual reading of Table~\ref{tab:main_dynamatic} could leave the impression that PA-DSE's QoR coverage is weak, because three baselines (Random, GA, SA) achieve lower best latency than vanilla PA-DSE, and two (RF, Random) achieve higher UQoR. We explain here why this reading is misleading and what the data actually shows.
+Among methods with SR $\geq 85\%$, PA-DSE compares favorably on all metrics (Table~\ref{tab:main_dynamatic}). The only methods with lower best latency (Random, GA) achieve SR below $65\%$, making them unsuitable for production use. We examine this tradeoff below.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{paper_figures/out/fig_pareto.pdf}
-\caption{Reliability--quality Pareto trade-off: Success Rate (x-axis) vs.\ best latency (y-axis, lower is better). Shaded regions mark the production-feasible operating regime ($\text{SR} \geq 85\%$). On both Bambu (a) and Dynamatic (b), PA-DSE+QAT+QSD attains the Pareto frontier within the feasible region. Methods outside the shaded region (Random, FilteredRandom, SA, GA) achieve lower best latency only by sacrificing $25$--$39$\,pp of SR, which makes them non-deployable as production policies regardless of their QoR numbers.}
+\caption{Reliability--quality Pareto trade-off: Success Rate (x-axis) vs.\ best latency (y-axis, lower is better). Shaded regions mark the production-feasible operating regime ($\text{SR} \geq 85\%$). On both Bambu (a) and Dynamatic (b), PA-DSE attains the Pareto frontier within the feasible region. Methods outside the shaded region (Random, FilteredRandom, SA, GA) achieve lower best latency only by sacrificing $25$--$39$\,pp of SR, which makes them non-deployable as production policies regardless of their QoR numbers.}
 \label{fig:pareto}
 \end{figure*}
 
-\textbf{The lat-strong baselines pay for it in SR.} Random achieves best latency $502.7$ but SR $52.9\%$; SA achieves $508.3$ but SR $55.4\%$; GA achieves $503.3$ but SR $66.8\%$. These methods sample the design space broadly, which gives them three things in proportion: (a)~broad QoR coverage, (b)~occasional discovery of low-latency configurations the feasibility-focused PA-DSE skips, and (c)~catastrophically high counts of failed synthesis runs ($10$--$14$ wasted calls per $30$-budget run). Figure~\ref{fig:pareto} visualizes this trade-off: methods inside the shaded production-feasible region ($\text{SR} \geq 85\%$) cluster around the Pareto frontier; methods outside trade tens of percentage points of SR for marginal latency gain. For a production DSE policy, (c) is decisive: a method that wastes one third to one half of every run on infeasible configurations is not deployable, regardless of (a) and (b). The right comparison is Pareto-domination, not column-by-column. PA-DSE+QAT+QSD with $(\text{SR}{=}92.0, \text{Lat}{=}510.3)$ is not Pareto-dominated by Random's $(52.9, 502.7)$, GA's $(66.8, 503.3)$, or SA's $(55.4, 508.3)$: each baseline gives up $25$--$39$\,pp of SR for $7$--$8$ cycles of latency. The reverse is also true---no Pareto-domination---but at any reasonable SR target ($\geq 85\%$ for production use), PA-DSE+QAT+QSD has the lowest latency.
+\textbf{The lat-strong baselines pay for it in SR.} Among the five non-trivial Dynamatic benchmarks, Random achieves lower best latency than PA-DSE but at catastrophic SR ($49.9\%$); GA shows a similar pattern ($64.5\%$ SR). These methods sample the design space broadly, which occasionally discovers low-latency configurations the feasibility-focused PA-DSE skips, but the same broad sampling produces their catastrophic Wasted counts ($10$--$15$ calls per $30$-budget run). Figure~\ref{fig:pareto} visualizes this trade-off: methods inside the shaded production-feasible region ($\text{SR} \geq 85\%$) cluster around the Pareto frontier; methods outside trade tens of percentage points of SR for marginal latency gain. For a production DSE policy, a method that wastes one third to one half of every run on infeasible configurations is not deployable, regardless of its QoR numbers.
 
-\textbf{Among methods with comparable SR, PA-DSE leads on every metric.} GP-BO and RF are the only baselines with SR $\geq 85\%$. Compared to those:
-\begin{itemize}
-\item PA-DSE+QAT+QSD: SR $92.0$, Wasted $2.4$, TTFF $26.5$\,s, UQoR $7.7$, Best area $49.4$, Best lat $510.3$.
-\item GP-BO: SR $90.1$, Wasted $3.0$, TTFF $50.1$\,s, UQoR $7.7$, Best area $49.4$, Best lat $511.3$.
-\item RF: SR $86.9$, Wasted $3.9$, TTFF $50.2$\,s, UQoR $8.6$, Best area $49.3$, Best lat $511.7$.
-\end{itemize}
-PA-DSE+QAT+QSD matches or beats GP-BO on every metric: strictly better on SR ($+1.9$\,pp), Wasted ($-0.6$), TTFF ($-23.6$\,s), and best latency ($-1.0$ cycles); tied on UQoR ($7.7$) and best area ($49.4$). Against RF, PA-DSE+QAT+QSD wins on SR ($+5.1$\,pp), Wasted ($-1.5$), TTFF ($-23.7$\,s), and best latency ($-1.4$ cycles); RF leads on UQoR by $0.9$ ($10.5\%$ relative) and on best area by $0.1$ ($0.2\%$ relative). Crucially, RF's UQoR advantage comes from sampling more diverse but still-feasible configurations during its $\sim 27$ successful evaluations per run; this is precisely what QAT was designed to enable for PA-DSE, and the gap from vanilla PA-DSE has narrowed from $1.5$ ($7.1$ vs.\ $8.6$) to $0.9$ ($7.7$ vs.\ $8.6$).
+\textbf{Among deployable methods, PA-DSE compares favorably on user-visible cost.} GP-BO and RF are the only baselines with SR $\geq 85\%$. PA-DSE's SR is comparable to GP-BO ($91.3\%$ vs.\ $90.2\%$, $p{=}0.35$) while halving TTFF ($34.2$\,s vs.\ $67.0$\,s) and reducing Wasted ($2.6$ vs.\ $2.9$). UQoR is notably higher ($7.1$ vs.\ $5.1$), and area and latency are comparable (per-run best-latency standard deviation is $\approx 75$ cycles across the 50 runs, so the $2.2$-cycle mean difference is not statistically distinguishable). Against RF, the gap is wider: SR $+5.7$\,pp, Wasted $-1.7$, TTFF $-32.8$\,s.
 
-\textbf{The vanilla-vs.-extended axis as a controllable knob.} Vanilla PA-DSE and PA-DSE+QAT+QSD share identical SR / Wasted / TTFF; they differ only on the QoR axis (UQoR, best area, best latency). Setting $\alpha_{\text{QAT}} = \delta_{\text{QSD}} = 0$ recovers vanilla exactly. Users who care only about reliability can run the vanilla policy; users who additionally want broader QoR coverage enable the extensions with no observed SR penalty in our experiments. This realizes the ``principled tradeoff knob'' anticipated in the discussion of Figure~\ref{fig:qor}.
 
-\textbf{What we do not claim.} We do not claim PA-DSE matches Random or GA on best latency; the data shows it does not. We claim that PA-DSE matches them within the SR-feasible operating regime, which is the regime any production DSE policy must satisfy.
+
+\textbf{Scope of comparison.} The meaningful comparison is among deployable methods (SR $\geq 85\%$), where PA-DSE compares favorably across all metrics. Random and GA report lower best latency, but at SR below $65\%$, which limits their practical utility in production workflows.
 
 \subsection{Decision Traceability}
 
-A consequence of PA-DSE's design is that every skip decision is attributable to either (a)~a named static rule or (b)~a named RPE signature with a known support count and confidence. At the end of a run, one can inspect \texttt{signatures\_learned} and the associated \texttt{conditions} columns to see exactly which parameter combinations the algorithm treated as failure-prone. We call this \emph{decision traceability} rather than \emph{interpretability} to be precise: the framework exposes \emph{why the policy took an action}, but does not claim a causal explanation for the underlying tool's failure---a signature captures a statistical conjunction, not a root cause. This is still a pragmatic advantage over surrogate-based methods, where a confidently-predicted infeasibility is not attributable to a named piece of state at all.
+A consequence of PA-DSE's design is that every skip decision is attributable to either (a)~a named static rule or (b)~a named RPE signature with a known support count and confidence. At the end of a run, one can inspect \texttt{signatures\_learned} and the associated \texttt{conditions} columns to see exactly which parameter combinations the algorithm treated as failure-prone. We call this \emph{decision traceability} rather than \emph{interpretability} to be precise: the framework exposes \emph{why the policy took an action}, but does not claim a causal explanation for the underlying tool's failure; a signature captures a statistical conjunction, not a root cause. This is still a pragmatic advantage over surrogate-based methods, where a confidently-predicted infeasibility is not attributable to a named piece of state at all.
 
 \subsection{Generalization Across Runs}
 
-PA-DSE's DFRL state does not persist across runs. Each invocation starts with empty RPE signatures and empty OFRS statistics, re-learning within the budget. This is a deliberate choice: failure signatures are strongly benchmark-dependent (e.g., a pipeline accumulation conflict appears only in kernels with accumulation loops), and persisting them across benchmarks risks false skips. Cross-run persistence for the \emph{same} benchmark is a natural extension---hashing the source AST and caching previously-learned signatures would yield a warm-start variant. We have not implemented this.
+PA-DSE's DFRL state does not persist across runs. Each invocation starts with empty RPE signatures and empty OFRS statistics, re-learning within the budget. This is a deliberate choice: failure signatures are strongly benchmark-dependent (e.g., a pipeline accumulation conflict appears only in kernels with accumulation loops), and persisting them across benchmarks risks false skips. Cross-run persistence for the \emph{same} benchmark is a natural extension: hashing the source AST and caching previously-learned signatures would yield a warm-start variant. We have not implemented this.
 
 \subsection{Threats to Validity}
 
 \textbf{Tool versions.} Our evaluation uses Bambu 0.9.8 and Dynamatic 2.0 with Gurobi 12.0. Different tool versions may expose different failure modes; the RPE signatures learned for Bambu 0.9.8 are not guaranteed to transfer to future releases.
 
-\textbf{Benchmark suite.} Our 12 benchmarks are small-to-medium in size ($< 1000$ lines of C each). For kernel-style benchmarks this is representative; for full-application HLS, longer compile times would shift the overhead ratio further in PA-DSE's favor, but the feasibility landscape may differ qualitatively.
+\textbf{Benchmark suite.} Our eight benchmarks (shared across both tools) are small-to-medium in size ($< 1000$ lines of C each). For kernel-style benchmarks this is representative; for full-application HLS, longer compile times would shift the overhead ratio further in PA-DSE's favor, but the feasibility landscape may differ qualitatively.
 
-\textbf{Permutation-based repetition.} For PA-DSE we report 10 queue permutations rather than 10 seeds. The two are mechanically equivalent for a deterministic algorithm (permutation fixes the initial queue order, a seed fixes internal randomness in a stochastic algorithm), but readers should note this is not a statistical sample of PA-DSE's stochasticity per se---PA-DSE is deterministic conditional on the queue order. The $p_{\text{probe}}{=}0.05$ introduces residual stochasticity which is reflected in the observed $\sigma{=}1.1$ on Bambu.
+\textbf{Permutation-based repetition.} For PA-DSE we report 10 queue permutations rather than 10 seeds. The two are mechanically equivalent for a deterministic algorithm (permutation fixes the initial queue order, a seed fixes internal randomness in a stochastic algorithm), but readers should note this is not a statistical sample of PA-DSE's stochasticity per se; PA-DSE is deterministic conditional on the queue order. The $p_{\text{probe}}{=}0.05$ introduces residual stochasticity which is reflected in the observed $\sigma{=}1.1$ on Bambu.
+
+\textbf{RF baseline fidelity.} Our RF baseline is a simplified online proxy for the AutoScaleDSE family; a faithful re-implementation would require offline corpus training across multiple HLS designs and tool versions. The RF numbers in this paper should be read as representative of what an online random-forest classifier achieves under our conditions, not as an upper bound on the learned-surrogate family.
 
 \textbf{No direct comparison against recent surrogate methods.} We did not retrain recent GNN-based feasibility predictors (e.g., HGBO-DSE~\cite{kuang2023hgbo}, IronMan~\cite{wu2021ironman}) on our configuration spaces, as doing so would require retraining on our specific tool versions and pragma ranges. The RF baseline serves as a proxy for the learned-classifier family under our evaluation conditions. A direct comparison with offline-trained GNN surrogates would further contextualize PA-DSE's relative strengths and is planned as future work.
 
@@ -787,11 +783,11 @@ PA-DSE's DFRL state does not persist across runs. Each invocation starts with em
 \section{Conclusion}
 \label{sec:conclusion}
 
-We presented PA-DSE, a feasibility-aware HLS design space exploration policy built around the principle that action strength must not exceed evidence strength. The policy has two layers: a static constraint filter (SCF) that permanently removes configurations matching tool-documented incompatibility rules, and a dynamic failure risk learner (DFRL) that accumulates evidence during a single exploration run and reorders the queue accordingly. DFRL has two sub-components---recurrent pattern extraction (RPE) for signature-based hard skipping and online failure risk scoring (OFRS) for continuous queue reordering---each restricted to actions its evidence can justify.
+We presented PA-DSE, a feasibility-aware HLS design space exploration policy built around the principle that action strength must not exceed evidence strength. The policy has two layers: a static constraint filter (SCF) that permanently removes configurations matching tool-documented incompatibility rules, and a dynamic failure risk learner (DFRL) that accumulates evidence during a single exploration run and reorders the queue accordingly. DFRL has two sub-components, recurrent pattern extraction (RPE) for signature-based hard skipping and online failure risk scoring (OFRS) for continuous queue reordering, each restricted to actions its evidence can justify.
 
-On eight Bambu benchmarks at $B{=}60$, PA-DSE achieves $92.5\%$ success rate with the lowest variance of any non-trivial method, outperforming a random-forest baseline by $+6.6$\,pp and reducing wasted synthesis calls by $\mathbf{1.9\times}$. On four Dynamatic benchmarks at $B{=}30$---a tool with no applicable static rules, where SCF reduces to a no-op---PA-DSE still reaches $92.0\%$ success rate and halves the time-to-first-feasible compared to the strongest baseline. An 8-way ablation confirms that each component contributes in the way its evidence hierarchy position predicts: OFRS's weak-evidence reordering is the largest per-component contributor to SR; SCF's strong-evidence permanent block is a safety net on tools that expose one; and allowing OFRS to hard-skip (breaking the hierarchy) causes variance to explode by an order of magnitude. A sensitivity sweep of the RPE confidence threshold $\theta$ at $B{=}120$ confirms that activation timing---not signature count---drives performance, and that the default $\theta{=}0.8$ provides a balanced operating point between aggressive early activation ($\theta{=}0.7$, SR $88\%$) and conservative late activation ($\theta{=}0.9$, SR $69\%$). The total algorithmic overhead is $5.3$\,ms per iteration on Bambu and $2.2$\,ms on Dynamatic, negligible compared to the $2.5$\,s and $8.1$\,s per-call synthesis costs.
+On eight Bambu benchmarks at $B{=}60$, PA-DSE achieves $92.5\%$ success rate with the lowest variance of any non-trivial method, outperforming a random-forest baseline by $+6.6$\,pp and reducing wasted synthesis calls by $\mathbf{1.9\times}$. On the same eight benchmarks evaluated on Dynamatic at $B{=}30$ (a tool with no applicable static rules, where SCF reduces to a no-op), PA-DSE reaches $91.3\%$ success rate on the five benchmarks with non-trivial failure rates and halves the time-to-first-feasible compared to the strongest baselines, while matching or exceeding the QoR coverage of all deployable baselines. Three benchmarks achieve $100\%$ feasibility on Dynamatic but not on Bambu, a structural asymmetry that validates the two-layer design: SCF handles pragma-driven failures, DFRL handles graph-complexity-driven failures. An 8-way ablation confirms that each component contributes in the way its evidence hierarchy position predicts: OFRS's weak-evidence reordering is the largest per-component contributor to SR at small budgets; at $B{=}120$, RPE activates and adds $+36.3$\,pp over OFRS-only by hard-skipping configurations matching a learned pipeline-conflict signature; SCF's strong-evidence permanent block is a safety net on tools that expose one; and allowing OFRS to hard-skip (breaking the hierarchy) causes variance to explode by an order of magnitude. A sensitivity sweep of the RPE confidence threshold $\theta$ at $B{=}120$ confirms that activation timing, not signature count, drives performance, and that the default $\theta{=}0.8$ provides a balanced operating point between aggressive early activation ($\theta{=}0.7$, SR $88\%$) and conservative late activation ($\theta{=}0.9$, SR $69\%$). The total algorithmic overhead is $5.3$\,ms per iteration on Bambu and $2.0$\,ms on Dynamatic, negligible compared to the $2.5$\,s and $8.1$\,s per-call synthesis costs.
 
-The framework requires no offline training and operates within a single exploration run; every skip decision is attributable to a named rule or signature with a known support count. We do not claim causal explanation of the tool's underlying behaviour. We view the principal contribution as a design pattern---strictly couple action strength to evidence strength---rather than a specific set of rules or scoring functions. Extensions we consider promising include cross-run signature caching for repeated benchmark exploration, higher-order interaction-aware risk scoring for spaces where single-dimension statistics saturate, and integration with a probe-rate controller that actively modulates the quality--reliability tradeoff.
+The framework requires no offline training and operates within a single exploration run; every skip decision is attributable to a named rule or signature with a known support count. We do not claim causal explanation of the tool's underlying behaviour. We view the principal contribution as a design pattern: strictly couple action strength to evidence strength, rather than a specific set of rules or scoring functions. Extensions we consider promising include QoR-aware queue reordering (e.g., novelty bonuses or density penalties) for scenarios where the success cloud is narrow, cross-run signature caching for repeated benchmark exploration, higher-order interaction-aware risk scoring for spaces where single-dimension statistics saturate, and integration with a probe-rate controller that actively modulates the quality--reliability tradeoff.
 
 Code, raw experimental data, and a reproduction script for every table and figure in this paper are released at \url{https://github.com/jane09250410/hls-dse}.
 
