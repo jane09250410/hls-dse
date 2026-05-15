@@ -56,7 +56,7 @@ MARKERS = {
     "PA-DSE+QAT+QSD": "*",
 }
 
-DYNAMATIC_BENCHMARKS = ["gcd", "matching", "binary_search", "kernel_2mm"]
+DYNAMATIC_BENCHMARKS = ["matmul", "atax", "bicg", "gemm", "gesummv"]
 BAMBU_BENCHMARKS = ["matmul", "vadd", "fir", "histogram",
                     "atax", "bicg", "gemm", "gesummv"]
 

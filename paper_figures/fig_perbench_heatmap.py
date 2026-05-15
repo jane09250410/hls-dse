@@ -121,7 +121,8 @@ dyn_df = load_main(
     "rerun/dynamatic_pa_dse_perms/run_summary.csv",
     qat_qsd_path="qse/dynamatic_main/run_summary.csv",
 )
-DYN_BENCHES = ["gcd", "matching", "binary_search", "kernel_2mm"]
+DYN_BENCHES = ["matmul", "vadd", "fir", "histogram",
+               "atax", "bicg", "gemm", "gesummv"]
 im2 = plot_heatmap(axR, dyn_df, DYN_BENCHES, "(b) Dynamatic per-benchmark SR (%)",
                     show_ylabels=False)
 

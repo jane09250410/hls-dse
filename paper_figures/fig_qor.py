@@ -1,3 +1,12 @@
+"""
+NOTE: This script requires eval_log.csv files (~100MB each) that are NOT
+checked into the repository due to size. To regenerate them, re-run:
+  - master/{bambu,dynamatic}_main/eval_log.csv: scripts/runners/run_main_results.py
+  - rerun/{bambu,dynamatic}_pa_dse_perms/eval_log.csv: run_b120_bambu.py and rerun_ablation_n5.py
+
+Aggregated run_summary.csv files (used by all OTHER figure scripts) ARE in the repo.
+"""
+
 """Figure 8 (v4): QoR coverage classification.
 
 Each unique (area, latency) point is classified by who found it:

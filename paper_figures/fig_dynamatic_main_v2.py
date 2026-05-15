@@ -19,8 +19,8 @@ ROOT = Path(__file__).resolve().parent.parent / "results"
 OUT  = Path(__file__).resolve().parent / "out"
 OUT.mkdir(parents=True, exist_ok=True)
 
-# Dynamatic 4-benchmark evaluation set (fir/histogram excluded)
-DYNAMATIC_BENCHMARKS = ["gcd", "matching", "binary_search", "kernel_2mm"]
+# Dynamatic 5 non-trivial benchmarks (vadd/fir/histogram have 100% SR for all methods)
+DYNAMATIC_BENCHMARKS = ["matmul", "atax", "bicg", "gemm", "gesummv"]
 
 plt.rcParams.update({
     "font.family": "serif",
