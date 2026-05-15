@@ -1,123 +1,112 @@
-# PA-DSE: Feasibility-Aware Design-Space Exploration for HLS
+# PA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis
 
-Implementation and reproduction package for the paper **"PA-DSE: Feasibility-Aware
-Design Space Exploration for High-Level Synthesis via Hierarchical
-Evidence-Bounded Pruning"**.
+Implementation and experimental data for **PA-DSE**, a feasibility-aware HLS DSE policy built on the principle that *action strength must not exceed evidence strength*.
 
-## What's in this repo
+📄 **Paper**: [`pa_dse_paper.pdf`](pa_dse_paper.pdf) — *PA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis via Hierarchical Evidence-Bounded Pruning*
 
-| Path | Contents |
-|---|---|
-| `pa_dse_paper.tex` / `references.bib` | Paper source |
-| `paper_figures/` | Figure-generation scripts and aggregated tables |
-| `scripts/` | DSE algorithms, baselines, runners, logging |
-| `benchmarks/` | Bambu C kernels (8 benchmarks) |
-| `master_experiments.py` | Main experiment driver (vanilla PA-DSE + baselines) |
-| `rerun_tonight.py` | Bambu PA-DSE 10-permutation completion |
-| `rerun_dynamatic_full.py` | Dynamatic full rerun after Gurobi fix |
-| `rerun_cc.py` | **NEW**: PA-DSE-CC (Categorical Coverage extension) runs |
-| `offline_sim/` | Optional ground-truth-based offline simulator |
+## Overview
 
-Dynamatic benchmarks (`gcd`, `matching`, `binary_search`, `kernel_2mm`,
-`fir`, `histogram`) are read from `~/dynamatic/integration-test/<name>/<name>.c`.
-You must have the Dynamatic toolchain installed (paper §IV-A).
+PA-DSE has two layers:
 
-## Algorithm
+- **SCF (Static Constraint Filter)** — permanently removes configurations matching tool-documented incompatibility rules.
+- **DFRL (Dynamic Failure Risk Learner)** — accumulates evidence online during a single run, with two sub-components:
+  - **RPE (Recurrent Pattern Extractor)** — hard-skips configurations matching learned failure signatures.
+  - **OFRS (Online Failure Risk Scorer)** — reorders the queue by smoothed per-dimension risk score.
 
-PA-DSE has two layers organized around the *evidence hierarchy* principle —
-action strength must not exceed evidence strength.
+## Headline Results
 
-**Layer 1 — SCF (Static Constraint Filter).** Tool-documented incompatibility
-rules permanently remove configurations before exploration begins.
+Evaluated on 8 shared benchmarks (matmul, vadd, fir, histogram, atax, bicg, gemm, gesummv) on two HLS tools:
 
-**Layer 2 — DFRL (Dynamic Failure Risk Learning).**
-  - **RPE (Recurrent Pattern Extractor).** After repeated same-type failures,
-    extracts a typed signature; matching configs are hard-skipped.
-  - **OFRS (Online Failure Risk Scorer).** Per-dimension risk model that
-    reorders the queue, never skips.
-  - **OFRS-CC (Categorical-Coverage extension).** A coverage bonus subtracted
-    from OFRS's risk score that prioritises (dim, value) pairs OFRS has
-    observed fewer than `n_cov` times. Addresses a deficiency observed
-    when SCF is unavailable: a single early failure can cause OFRS to abandon
-    an entire categorical sub-space. Controlled by `β_cov` (default 0.2);
-    `β_cov = 0` reproduces the original PA-DSE.
+| Tool | Budget | PA-DSE SR | Best Baseline | Wasted Reduction |
+|---|---|---|---|---|
+| Bambu (v0.9.8) | 60 | **92.5%** | RF 85.9% | 1.9× fewer |
+| Dynamatic (v2.0) | 30 | **91.3%** | GP-BO 90.2% | 2× faster TTFF |
+| Bambu | 120 | **83.0%** | SCF+OFRS 46.7% | RPE adds +36.3pp |
 
-The 8 ablation configurations are: `no-filter`, `SCF-only`, `SCF+RPE`,
-`SCF+OFRS`, `SCF+DFRL` (recommended), `DFRL-only`, `SCF+RPE-reorder`,
-`SCF+OFRS-skip` (hierarchy stress test).
+Algorithmic overhead: 5.3 ms/iter on Bambu, 2.0 ms/iter on Dynamatic (< 0.22% of synthesis cost).
 
-Implementation files:
-- `scripts/dynamic_failure_learner.py` — RPE + OFRS (with CC extension)
-- `scripts/methods/pa_dse_method.py` — PADSEMethod (8 ablation configs + CC switch)
-- `scripts/feasibility_filter.py` — SCF (Layer 1)
+## Repository Structure
 
-## Reproducing the paper
-
-### Vanilla PA-DSE (paper Tables II / III / IV)
-
-```bash
-# Multi-day unattended runner with resume capability
-nohup python3 master_experiments.py > master.log 2>&1 &
-tail -f master.log
-
-# Then add 10 PA-DSE permutations on Bambu
-nohup python3 rerun_tonight.py > rerun_tonight.log 2>&1 &
-
-# And on Dynamatic
-nohup python3 rerun_dynamatic_full.py > rerun_dyn.log 2>&1 &
+```
+hls-dse/
+├── pa_dse_paper.tex      # Paper source
+├── pa_dse_paper.pdf      # Compiled paper
+├── references.bib        # Bibliography
+├── benchmarks/           # C source for 8 benchmarks
+├── scripts/              # PA-DSE implementation
+│   ├── config_generator.py
+│   ├── dynamatic_config_generator.py
+│   ├── feasibility_filter.py       # SCF
+│   ├── pattern_learner.py          # RPE
+│   ├── dynamic_failure_learner.py  # OFRS
+│   ├── methods/                    # PA-DSE + baselines
+│   └── runners/
+├── offline_sim/          # Offline simulator (ground-truth oracle)
+├── paper_figures/        # Plotting scripts + generated PDFs
+└── results/              # Aggregated experimental data
+    ├── master/bambu_main/                # Bambu B=60 main comparison
+    ├── master/dynamatic_main/            # Dynamatic B=30 main comparison
+    ├── b30/ablation_bambu/               # 8-way ablation (Bambu)
+    ├── b30/ablation_dynamatic/           # 8-way ablation (Dynamatic)
+    ├── b120/bambu_main/                  # B=120 experiment (RPE active)
+    ├── bambu_ground_truth/               # 420 configs × 8 benchmarks
+    ├── theta_sweep_b120/                 # θ sensitivity sweep
+    └── rerun/                            # PA-DSE permutation runs (overhead)
 ```
 
-### PA-DSE-CC (categorical coverage extension)
+## Reproducibility
+
+All `run_summary.csv` files needed to regenerate every table and figure are checked in. Raw `eval_log.csv` files (35 GB on the experiment VM) are not included.
+
+### Regenerate figures
 
 ```bash
-# Run all CC stages (main + ablation) — 8-12 hours
-nohup python3 rerun_cc.py > rerun_cc.log 2>&1 &
-
-# Or one stage at a time
-python3 rerun_cc.py --stage bambu_main
-python3 rerun_cc.py --stage dynamatic_main
-python3 rerun_cc.py --stage ablation
+cd paper_figures
+python3 fig1_main_results_v2.py
+python3 fig_dynamatic_main_v2.py
+python3 fig_cost.py
+python3 fig_perbench_heatmap.py
+python3 fig_convergence.py
+python3 fig_qor.py
+python3 fig_ablation_bar.py
+python3 fig_overhead_v3.py
+python3 fig_pareto.py
+python3 fig_b120_bambu.py
 ```
 
-CC outputs go to `results/cc/`, kept separate from `results/master/`
-(vanilla data) so the comparison is straightforward.
+### Rerun experiments
 
-### Aggregating tables and figures
+Requires Bambu 0.9.8, Dynamatic 2.0 (Gurobi 12.0), Python 3.12, sklearn, scipy, pandas, matplotlib.
 
 ```bash
-python3 paper_figures/compute_paper_tables.py
-python3 paper_figures/fig1_main_results_v2.py
-python3 paper_figures/fig_dynamatic_main_v2.py
-# …etc
+# Collect Bambu ground truth (~2 hours)
+python3 collect_bambu_gt.py
+
+# B=120 main comparison (offline, ~10 minutes after GT is ready)
+python3 run_b120_bambu.py
+
+# Dynamatic ablation (n=25 perms per config)
+python3 rerun_ablation_n5.py
 ```
-
-## Hyperparameters (frozen, no per-benchmark tuning)
-
-| Parameter | Value | Notes |
-|---|---|---|
-| τ (RPE min failure support) | 2 | |
-| θ (RPE confidence threshold) | 0.8 | |
-| n_min (OFRS cold-start) | 5 | |
-| p_probe (probe rate) | 0.05 | |
-| β_cov (CC weight) | 0.2 | β_cov=0 → vanilla |
-| n_cov (CC observation budget) | 2 | |
-
-Sensitivity analyses for τ, θ, β_cov are reported in the paper §V.
-
-## Hardware / Software
-
-- Azure Standard D4s_v5 (4 vCPUs, 15 GB RAM, Ubuntu 24.04)
-- Python 3.12, pandas, numpy, scikit-learn, GPy
-- PandA-Bambu 0.9.8
-- Dynamatic 2.0 with Gurobi 12.0 (academic license)
 
 ## Citation
 
 ```bibtex
 @article{padse2026,
-  title  = {PA-DSE: Feasibility-Aware Design Space Exploration for
-            High-Level Synthesis via Hierarchical Evidence-Bounded Pruning},
-  author = {Anonymous},
-  year   = {2026},
+  title={PA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis
+         via Hierarchical Evidence-Bounded Pruning},
+  author={Zhang, Xinyu and Pilato, Christian},
+  year={2026},
+  note={Under submission}
 }
 ```
+
+## Tools
+
+- **PandA-Bambu** v0.9.8 — Static HLS, Politecnico di Milano
+- **Dynamatic** v2.0 — Dynamic dataflow HLS with MILP buffer placement, EPFL (Gurobi 12.0)
+
+## Author
+
+Xinyu Zhang — Politecnico di Milano, DEIB
+Supervisor: Prof. Christian Pilato
