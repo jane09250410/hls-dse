@@ -357,6 +357,8 @@ Algorithm~\ref{alg:padse} summarizes the PA-DSE policy. Newly learned RPE signat
 \end{algorithmic}
 \end{algorithm}
 
+\textbf{How $n_{\text{counter}}(\pi)$ is maintained.} Algorithm~\ref{alg:padse} shows an explicit \texttt{RPE.addCounter} call only on probe-success paths (line 22). This is consistent with Eq.~\ref{eq:ncounter} because the two sources of counterevidence identified in \S\ref{sec:rpe} are handled at different points. Pre-signature counterevidence (case~(a): successes in $\mathcal{H}_t$ that happen to match $\pi$) is computed by \texttt{RPE.tryExtract} when the signature is first evaluated for activation: the routine scans the success log $\mathcal{H}_t^{\text{succ}}$ and counts matches against the candidate $\pi$. Post-activation counterevidence (case~(b): probe successes) is added incrementally by the \texttt{addCounter} call. Non-probe successes after activation cannot match an active signature by construction: every config matching an active signature is routed to the probe-or-skip branch (lines 5--10), so a non-probe success at line 15 is by definition a config that did not match any active signature, and there is nothing to update.
+
 
 \section{Experimental Setup}
 \label{sec:setup}
