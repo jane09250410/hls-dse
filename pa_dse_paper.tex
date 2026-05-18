@@ -753,11 +753,11 @@ Among methods with SR $\geq 85\%$, PA-DSE leads on reliability-oriented metrics 
 
 \textbf{The lat-strong baselines pay for it in SR.} Among the five non-trivial Dynamatic benchmarks, Random achieves lower best latency than PA-DSE but at catastrophic SR ($49.9\%$); GA shows a similar pattern ($64.5\%$ SR). These methods sample the design space broadly, which occasionally discovers low-latency configurations that PA-DSE does not reach within the limited budget, but the same broad sampling produces their catastrophic Wasted counts ($10$--$15$ calls per $30$-budget run). Figure~\ref{fig:pareto} visualizes this trade-off: methods inside the shaded production-feasible region ($\text{SR} \geq 85\%$) cluster around the Pareto frontier; methods outside trade tens of percentage points of SR for marginal latency gain. For a production DSE policy, a method that wastes one third to one half of every run on infeasible configurations is not deployable, regardless of its QoR numbers.
 
-\textbf{Among deployable methods, PA-DSE compares favorably on user-visible cost.} GP-BO and RF are the only baselines with SR $\geq 85\%$. PA-DSE's SR is comparable to GP-BO ($91.3\%$ vs.\ $90.2\%$) while halving TTFF ($34.2$\,s vs.\ $67.0$\,s) and reducing Wasted ($2.6$ vs.\ $2.9$). UQoR is notably higher ($7.1$ vs.\ $5.1$). Best area is matched ($51.3$ vs.\ $51.3$), and best latency remains close to GP-BO ($407.6$ vs.\ $405.4$, a $2.2$-cycle / $0.5\%$ gap). Against RF, the gap is wider: SR $+5.7$\,pp, Wasted $-1.7$, TTFF $-32.8$\,s.
+\textbf{Among deployable methods, PA-DSE compares favorably on user-visible cost.} GP-BO and RF are the only baselines with SR $\geq 85\%$. PA-DSE's SR is comparable to GP-BO ($91.3\%$ vs.\ $90.2\%$) while halving TTFF ($34.2$\,s vs.\ $67.0$\,s) and reducing Wasted ($2.6$ vs.\ $2.9$). UQoR is notably higher ($7.1$ vs.\ $5.1$). Best area is matched ($51.3$ vs.\ $51.3$). Best latency remains close to GP-BO ($407.6$ vs.\ $405.4$, a $2.2$-cycle / $0.5\%$ gap). Against RF, the gap is wider: SR $+5.7$\,pp, Wasted $-1.7$, TTFF $-32.8$\,s.
 
 
 
-\textbf{Scope of comparison.} The meaningful comparison is among deployable methods (SR $\geq 85\%$), where PA-DSE compares favorably across all metrics. Random and GA report lower best latency, but at SR below $65\%$, which limits their practical utility in production workflows.
+\textbf{Scope of comparison.} The meaningful comparison is among deployable methods (SR $\geq 85\%$), where PA-DSE compares favorably on reliability-oriented metrics while remaining close on QoR. Random and GA report lower best latency, but at SR below $65\%$, which limits their practical utility in production workflows.
 
 \subsection{Decision Traceability}
 
