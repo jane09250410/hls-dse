@@ -538,7 +538,7 @@ Aggregate SR can mask method-benchmark interactions: a method might win on avera
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{paper_figures/out/fig_perbench_heatmap.pdf}
-\caption{Per-benchmark success rate (\%). PA-DSE is consistently high across benchmarks: it wins or ties on all Bambu benchmarks and remains competitive on all Dynamatic benchmarks, with the tightest per-run variance. Several rows in panel~(a) appear flat; this is structural, not an artifact (\S\ref{sec:perbench}).}
+\caption{Per-benchmark success rate (\%). PA-DSE is consistently high across benchmarks: it wins or ties on all Bambu benchmarks and remains competitive on all Dynamatic benchmarks, with low per-run variance. Several rows in panel~(a) appear flat; this is structural, not an artifact (\S\ref{sec:perbench}).}
 \label{fig:heatmap}
 \end{figure*}
 
@@ -747,7 +747,7 @@ Among methods with SR $\geq 85\%$, PA-DSE leads on reliability-oriented metrics 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{paper_figures/out/fig_pareto.pdf}
-\caption{Reliability--quality Pareto trade-off: Success Rate (x-axis) vs.\ best latency (y-axis, lower is better). Shaded regions mark the production-feasible operating regime ($\text{SR} \geq 85\%$). On both Bambu (a) and Dynamatic (b), PA-DSE attains the Pareto frontier within the feasible region. On Dynamatic, methods outside the shaded region (Random, FilteredRandom, SA, GA) achieve lower best latency only by sacrificing $25$--$39$\,pp of SR, making them non-deployable as production policies regardless of their QoR numbers.}
+\caption{Reliability--quality Pareto trade-off: Success Rate (x-axis) vs.\ best latency (y-axis, lower is better). Shaded regions mark the production-feasible operating regime ($\text{SR} \geq 85\%$). On both Bambu (a) and Dynamatic (b), PA-DSE attains the Pareto frontier within the feasible region. On Dynamatic, methods outside the shaded region (Random, FilteredRandom, SA, GA) achieve lower best latency only by sacrificing tens of percentage points of SR, making them non-deployable as production policies regardless of their QoR numbers.}
 \label{fig:pareto}
 \end{figure*}
 
