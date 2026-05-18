@@ -481,7 +481,7 @@ Table~\ref{tab:main_dynamatic} reports results on Dynamatic at $B{=}30$, aggrega
 
 \begin{table*}[t]
 \centering
-\caption{Main results on Dynamatic ($B{=}30$, $n{=}50$ runs per method: 5 non-trivial benchmarks $\times$ 10 seeds). Filtered Random $=$ Random because $\mathcal{C}_{\text{blk}} = \emptyset$. Three benchmarks (\texttt{vadd}, \texttt{fir}, \texttt{histogram}) achieve $100\%$ SR for all methods and are excluded from aggregation.}
+\caption{Main results on Dynamatic ($B{=}30$, $n{=}50$ runs per method: 5 non-trivial benchmarks $\times$ 10 seeds/permutations). Filtered Random $=$ Random because $\mathcal{C}_{\text{blk}} = \emptyset$. Three benchmarks (\texttt{vadd}, \texttt{fir}, \texttt{histogram}) achieve $100\%$ SR for all methods and are excluded from aggregation.}
 \label{tab:main_dynamatic}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lrrrrrr}
@@ -503,14 +503,14 @@ RF             & 85.6 \std{5.8}  &  4.3 & 67.0 & 6.1 & 51.3 & 413.0 \\
 
 PA-DSE achieves $91.3\%$ SR, compared to GP-BO ($90.2\%$) and RF ($85.6\%$). A paired $t$-test over per-benchmark means shows the SR difference vs.\ GP-BO is not statistically significant ($p{=}0.35$), while the difference vs.\ RF is ($p{=}0.024$). The more distinctive advantage over GP-BO is in user-visible cost: TTFF drops to $34.2$\,s versus $67.0$\,s for GP-BO and RF, roughly half the wall-clock time, and Wasted drops to $2.6$ versus $2.9$ and $4.3$. For interactive developers iterating tens of times a day, this compounds to significant time savings. Figure~\ref{fig:dynamatic_main} shows the per-benchmark distribution.
 
-\textbf{Reading the QoR columns.} The last three columns (UQoR, best area, best latency) require careful reading. Among methods with SR $\geq 85\%$ (GP-BO, RF, and PA-DSE), best latency values are comparable: PA-DSE $407.6$, GP-BO $405.4$, RF $413.0$. The lat-stronger baselines (Random $404.0$, GA $403.7$) sample the design space broadly; this broad sampling occasionally discovers low-latency configurations the feasibility-focused PA-DSE skips, but the same broad sampling is what produces their catastrophic SR ($49.9\%$, $64.5\%$) and Wasted counts ($10$--$15$). Restated: \emph{a method that wastes one third to one half of its budget on infeasible configurations does occasionally bump into a low-latency point, but is not a viable production policy}. PA-DSE's UQoR ($7.1$) leads all SR $\geq 85\%$ baselines (GP-BO $5.1$, RF $6.1$), indicating that feasibility-focused queue reordering does not sacrifice QoR diversity.
+\textbf{Reading the QoR columns.} The last three columns (UQoR, best area, best latency) require careful reading. Among methods with SR $\geq 85\%$ (GP-BO, RF, and PA-DSE), best latency values are comparable: PA-DSE $407.6$, GP-BO $405.4$, RF $413.0$. The lat-stronger baselines (Random $404.0$, GA $403.7$) sample the design space broadly; this broad sampling occasionally discovers low-latency configurations that PA-DSE does not reach within the limited budget, but the same broad sampling is what produces their catastrophic SR ($49.9\%$, $64.5\%$) and Wasted counts ($10$--$15$). Restated: \emph{a method that wastes one third to one half of its budget on infeasible configurations does occasionally bump into a low-latency point, but is not a viable production policy}. PA-DSE's UQoR ($7.1$) leads all SR $\geq 85\%$ baselines (GP-BO $5.1$, RF $6.1$), indicating that feasibility-focused queue reordering does not sacrifice QoR diversity.
 
 
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{paper_figures/out/fig_dynamatic_main.pdf}
-\caption{Dynamatic main results ($B{=}30$). (a) Aggregate SR with standard deviation across five non-trivial benchmarks. (b) Per-benchmark SR distribution. PA-DSE matches or exceeds all baselines across benchmarks with substantially lower variance.}
+\caption{Dynamatic main results ($B{=}30$). (a) Aggregate SR with standard deviation across five non-trivial benchmarks. (b) Per-benchmark SR distribution. PA-DSE achieves the highest aggregate SR and remains competitive across non-trivial Dynamatic benchmarks, with lower variance among deployable methods.}
 \label{fig:dynamatic_main}
 \end{figure}
 
@@ -538,7 +538,7 @@ Aggregate SR can mask method-benchmark interactions: a method might win on avera
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{paper_figures/out/fig_perbench_heatmap.pdf}
-\caption{Per-benchmark success rate (\%). PA-DSE wins or ties on every benchmark with the tightest per-run variance. Several rows in panel~(a) appear flat; this is structural, not an artifact (\S\ref{sec:perbench}).}
+\caption{Per-benchmark success rate (\%). PA-DSE is consistently high across benchmarks: it wins or ties on all Bambu benchmarks and remains competitive on all Dynamatic benchmarks, with the tightest per-run variance. Several rows in panel~(a) appear flat; this is structural, not an artifact (\S\ref{sec:perbench}).}
 \label{fig:heatmap}
 \end{figure*}
 
@@ -751,7 +751,7 @@ Among methods with SR $\geq 85\%$, PA-DSE leads on reliability-oriented metrics 
 \label{fig:pareto}
 \end{figure*}
 
-\textbf{The lat-strong baselines pay for it in SR.} Among the five non-trivial Dynamatic benchmarks, Random achieves lower best latency than PA-DSE but at catastrophic SR ($49.9\%$); GA shows a similar pattern ($64.5\%$ SR). These methods sample the design space broadly, which occasionally discovers low-latency configurations the feasibility-focused PA-DSE skips, but the same broad sampling produces their catastrophic Wasted counts ($10$--$15$ calls per $30$-budget run). Figure~\ref{fig:pareto} visualizes this trade-off: methods inside the shaded production-feasible region ($\text{SR} \geq 85\%$) cluster around the Pareto frontier; methods outside trade tens of percentage points of SR for marginal latency gain. For a production DSE policy, a method that wastes one third to one half of every run on infeasible configurations is not deployable, regardless of its QoR numbers.
+\textbf{The lat-strong baselines pay for it in SR.} Among the five non-trivial Dynamatic benchmarks, Random achieves lower best latency than PA-DSE but at catastrophic SR ($49.9\%$); GA shows a similar pattern ($64.5\%$ SR). These methods sample the design space broadly, which occasionally discovers low-latency configurations that PA-DSE does not reach within the limited budget, but the same broad sampling produces their catastrophic Wasted counts ($10$--$15$ calls per $30$-budget run). Figure~\ref{fig:pareto} visualizes this trade-off: methods inside the shaded production-feasible region ($\text{SR} \geq 85\%$) cluster around the Pareto frontier; methods outside trade tens of percentage points of SR for marginal latency gain. For a production DSE policy, a method that wastes one third to one half of every run on infeasible configurations is not deployable, regardless of its QoR numbers.
 
 \textbf{Among deployable methods, PA-DSE compares favorably on user-visible cost.} GP-BO and RF are the only baselines with SR $\geq 85\%$. PA-DSE's SR is comparable to GP-BO ($91.3\%$ vs.\ $90.2\%$) while halving TTFF ($34.2$\,s vs.\ $67.0$\,s) and reducing Wasted ($2.6$ vs.\ $2.9$). UQoR is notably higher ($7.1$ vs.\ $5.1$). Best area is matched ($51.3$ vs.\ $51.3$), and best latency remains close to GP-BO ($407.6$ vs.\ $405.4$, a $2.2$-cycle / $0.5\%$ gap). Against RF, the gap is wider: SR $+5.7$\,pp, Wasted $-1.7$, TTFF $-32.8$\,s.
 
