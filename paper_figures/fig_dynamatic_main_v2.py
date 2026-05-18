@@ -2,11 +2,11 @@
 
 Two-panel figure for Dynamatic evaluation:
   (a) Overall SR comparison: bar chart with error bars, 7 methods
-  (b) Per-benchmark boxplot - 4 benchmarks
+  (b) Per-benchmark boxplot - 5 non-trivial benchmarks
 
 IMPORTANT: fir and histogram achieve SR=100% for ALL methods on Dynamatic,
 so they carry no discriminative signal. The paper (Sec. IV.A) evaluates
-Dynamatic on 4 benchmarks only: gcd, matching, binary_search, kernel_2mm.
+Dynamatic on 5 non-trivial benchmarks only: matmul, atax, bicg, gemm, gesummv.
 We apply this filter here so all numbers agree with Table III.
 """
 
@@ -15,11 +15,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent / "results"
+ROOT = Path(__file__).resolve().parents[1] / "results"
 OUT  = Path(__file__).resolve().parent / "out"
 OUT.mkdir(parents=True, exist_ok=True)
 
-# Dynamatic 5 non-trivial benchmarks (vadd/fir/histogram have 100% SR for all methods)
+# Dynamatic 5 non-trivial benchmarks (vadd, fir, histogram excluded)
 DYNAMATIC_BENCHMARKS = ["matmul", "atax", "bicg", "gemm", "gesummv"]
 
 plt.rcParams.update({
@@ -45,13 +45,6 @@ dyn_main_clean = dyn_main[~dyn_main["strategy"].str.contains("PA-DSE")].copy()
 dyn_perms_clean = dyn_perms.copy()
 dyn_perms_clean["strategy"] = "PA-DSE"
 
-# Optional: PA-DSE+QAT+QSD data (results/qse/dynamatic_main/)
-qat_path = ROOT / "qse/dynamatic_main/run_summary.csv"
-if qat_path.exists():
-    dyn_qat = pd.read_csv(qat_path).copy()
-    dyn_qat["strategy"] = "PA-DSE+QAT+QSD"
-else:
-    dyn_qat = pd.DataFrame()
 
 RENAME = {
     "Random":             "Random",
@@ -64,17 +57,15 @@ RENAME = {
 dyn_main_clean["strategy"] = dyn_main_clean["strategy"].map(RENAME).fillna(dyn_main_clean["strategy"])
 
 frames = [dyn_main_clean, dyn_perms_clean]
-if len(dyn_qat) > 0:
-    frames.append(dyn_qat)
 df = pd.concat(frames, ignore_index=True)
 
-# Filter to 4 benchmarks
+# Filter to 5 non-trivial benchmarks
 before = len(df)
 df = df[df["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
-print(f"[filter] Dynamatic 4 benchmarks: {before} -> {len(df)} rows")
+print(f"[filter] Dynamatic 5 non-trivial benchmarks: {before} -> {len(df)} rows")
 
 # ==================== Method order + colors ====================
-METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE", "PA-DSE+QAT+QSD"]
+METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
 BENCH_ORDER_PANEL_B = DYNAMATIC_BENCHMARKS
 
 COLORS = {
@@ -84,9 +75,7 @@ COLORS = {
     "GA":             "#59A14F",
     "GP-BO":          "#F28E2B",
     "RF":             "#E15759",
-    "PA-DSE":         "#C1272D",
-    "PA-DSE+QAT+QSD": "#7B0E12",
-}
+    "PA-DSE":         "#C1272D",}
 
 # Filter METHOD_ORDER to only methods that have data
 METHOD_ORDER = [m for m in METHOD_ORDER if m in df["strategy"].unique()]
@@ -115,7 +104,7 @@ for i, method in enumerate(METHOD_ORDER):
     m = row["mean"]
     s = row["std"]
     y_pos = m + s + 2
-    if method in ("PA-DSE", "PA-DSE+QAT+QSD"):
+    if method in ("PA-DSE"):
         axL.text(i, y_pos, f"{m:.1f}",
                  ha="center", fontsize=9, fontweight="bold",
                  color=COLORS[method])
@@ -127,7 +116,7 @@ axL.set_xticks(x)
 axL.set_xticklabels(METHOD_ORDER, rotation=25, ha="right")
 axL.set_ylabel("Success Rate (%)")
 axL.set_ylim(0, 115)
-axL.set_title("(a) Overall success rate (4 benchmarks)")
+axL.set_title("(a) Overall success rate (5 non-trivial benchmarks)")
 axL.grid(axis="y", alpha=0.3)
 
 # Panel (b)
@@ -167,7 +156,7 @@ axR.set_xticks(group_centers)
 axR.set_xticklabels(BENCH_ORDER_PANEL_B, rotation=15, ha="right")
 axR.set_ylabel("Success Rate (%)")
 axR.set_ylim(0, 105)
-axR.set_title("(b) Per-benchmark distribution (4 benchmarks)")
+axR.set_title("(b) Per-benchmark distribution (5 non-trivial benchmarks)")
 axR.grid(axis="y", alpha=0.3)
 
 from matplotlib.patches import Patch
@@ -185,7 +174,7 @@ plt.show()
 
 # Print table
 print("\n" + "=" * 80)
-print("PAPER-READY TABLE (Dynamatic Main Results, 4 benchmarks)")
+print("PAPER-READY TABLE (Dynamatic Main Results, 5 non-trivial benchmarks)")
 print("=" * 80)
 print(f"{'Method':<15s} {'Mean':>8s} {'Std':>8s} {'n':>6s}")
 print("-" * 45)
