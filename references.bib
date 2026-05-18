@@ -61,7 +61,7 @@
   number  = {1},
   pages   = {35--43},
   year    = {2021},
-  doi     = {10.1109/TETC.2018.2866210},
+  doi     = {10.1109/TETC.2018.2794068},
 }
 
 @inproceedings{liu2013learning,
@@ -92,15 +92,15 @@
 % ---- ADDED FOR BASELINE COVERAGE (verify before camera-ready) ----
 
 @article{sohrabizadeh2023autoscaledse,
-  author   = {Sohrabizadeh, Atefeh and Yu, Cody Hao and Gao, Min and
-              Cong, Jason},
+  author   = {Jun, HyeGang and Ye, Hanchen and Jeong, Hyunmin and Chen, Deming},
   title    = {{AutoScaleDSE}: {A} Scalable Design Space Exploration
               Engine for High-Level Synthesis},
   journal  = {ACM Transactions on Reconfigurable Technology and Systems},
   year     = {2023},
   volume   = {16},
   number   = {3},
-  pages    = {1--30},
+  articleno = {46},
+  numpages = {30},
   doi      = {10.1145/3572959},
   note     = {The random-forest classifier baseline in our experiments
               is modelled after AutoScaleDSE's scalable surrogate.},
@@ -141,6 +141,7 @@
   pages     = {106--114},
   publisher = {IEEE},
   address   = {Yokohama, Japan},
+  doi       = {10.1109/ICFPT59805.2023.00017},
   note      = {Combines a hierarchical GNN QoR predictor with a
                tree-structured modeler that removes invalid
                configurations before Bayesian optimization---a
@@ -161,14 +162,17 @@
   note      = {GNN-based QoR estimator targeting the Dynamatic HLS flow.},
 }
 
-@article{koikeakino2024autohls,
-  author  = {Koike-Akino, Toshiaki and Wang, Pu and Kim, Kieran and
-             Pajovic, Milutin and Millar, Philip and
-             Yonge-Mallo, David S. and Parsons, Kieran},
-  title   = {{AutoHLS}: {L}earning to Accelerate Design Space Exploration
-            for {HLS} Designs},
-  journal = {arXiv preprint arXiv:2403.10686},
-  year    = {2024},
-  note    = {Integrates a DNN feasibility predictor with Bayesian
-             optimization. Related to our GP-BO baseline.},
+@inproceedings{koikeakino2024autohls,
+  author    = {Ahmed, Md Rubel and Koike-Akino, Toshiaki and
+               Parsons, Kieran and Wang, Ye},
+  title     = {{AutoHLS}: {L}earning to Accelerate Design Space Exploration
+               for {HLS} Designs},
+  booktitle = {Proceedings of the 2023 IEEE 66th International Midwest
+               Symposium on Circuits and Systems (MWSCAS)},
+  year      = {2023},
+  pages     = {491--495},
+  publisher = {IEEE},
+  doi       = {10.1109/MWSCAS57524.2023.10405914},
+  note      = {Integrates a DNN feasibility predictor with Bayesian
+               optimization. Related to our GP-BO baseline.},
 }
