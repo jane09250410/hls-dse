@@ -50,6 +50,7 @@ hls-dse/
     ├── b30/ablation_dynamatic/           # 8-way ablation (Dynamatic)
     ├── b120/bambu_main/                  # B=120 experiment (RPE active)
     ├── bambu_ground_truth/               # 420 configs × 8 benchmarks
+    ├── dynamatic_ground_truth/           # 192 configs × 8 benchmarks
     ├── theta_sweep_b120/                 # θ sensitivity sweep
     └── rerun/                            # PA-DSE permutation runs (overhead)
 ```
@@ -59,6 +60,13 @@ hls-dse/
 All `run_summary.csv` files needed to regenerate every table and figure are checked in. Raw `eval_log.csv` files (35 GB on the experiment VM) are not included.
 
 ### Regenerate figures
+
+**Note**: `fig_convergence.py` and `fig_qor.py` require per-evaluation logs
+(`eval_log.csv`, ~100MB each) that are NOT in the repository. Regenerate them
+by rerunning the corresponding experiments (see Rerun experiments section).
+All other figures only need the aggregated `run_summary.csv` files, which ARE
+in the repository.
+
 
 ```bash
 cd paper_figures
