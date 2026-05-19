@@ -5,10 +5,11 @@ Import at the top of every figure script:
     setup()
 
 Benchmark filtering:
-    fir and histogram are EXCLUDED from Dynamatic (SR=100% for all methods,
-    no discriminative signal). The paper (§IV.A) reports Dynamatic on 4
-    benchmarks only. Any script aggregating Dynamatic data MUST filter to
-    DYNAMATIC_BENCHMARKS or call filter_dynamatic(df).
+    vadd, fir, and histogram are EXCLUDED from Dynamatic (SR=100% for all
+    methods, no discriminative signal). The paper reports Dynamatic aggregates
+    on the 5 non-trivial benchmarks: matmul, atax, bicg, gemm, gesummv. Any
+    script aggregating Dynamatic data MUST filter to DYNAMATIC_BENCHMARKS or
+    call filter_dynamatic(df).
 """
 
 import matplotlib.pyplot as plt
@@ -53,11 +54,11 @@ def filter_bambu(df, col="benchmark", verbose=True):
 
 
 def filter_dynamatic(df, col="benchmark", verbose=True):
-    """Keep only the 4 discriminative Dynamatic benchmarks.
+    """Keep only the 5 non-trivial Dynamatic benchmarks.
 
-    Applies the paper's §IV.A filter: drops fir and histogram, which produce
-    SR=100% for every method on Dynamatic. Call this on every Dynamatic
-    aggregation so numbers match Table III.
+    Drops vadd, fir, and histogram, which produce SR=100% for every method
+    on Dynamatic. Call this on every Dynamatic aggregation so numbers match
+    the paper.
     """
     before = len(df)
     df = df[df[col].isin(DYNAMATIC_BENCHMARKS)].copy()

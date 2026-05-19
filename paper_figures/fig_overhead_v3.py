@@ -4,10 +4,11 @@ Panel (a) line chart on log scale showing orders-of-magnitude gap
 between algorithmic overhead and HLS synthesis cost.
 Panel (b) stacked bar showing layer composition within algo overhead.
 
-Dynamatic algorithmic overhead is averaged over the 5 non-trivial
-benchmarks used in the paper's Dynamatic aggregation (matmul, atax,
-bicg, gemm, gesummv). Synthesis time is the per-call mean from the
-exhaustive ground-truth evaluation (all 8 benchmarks).
+IMPORTANT: Dynamatic numbers use ONLY the 4 evaluation benchmarks
+(gcd, matching, binary_search, kernel_2mm). fir/histogram are excluded
+because they achieve SR=100% for all methods and are not part of the
+paper's Dynamatic evaluation. Including them would underestimate
+synthesis time and inflate the algo:synth ratio.
 """
 import numpy as np
 import pandas as pd
@@ -72,7 +73,7 @@ bam = bam[bam["benchmark"].isin(BAMBU_BENCHMARKS)].copy()
 dyn = dyn[dyn["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
 print(f"[filter] Bambu: {before_b} -> {len(bam)} rows")
 print(f"[filter] Dynamatic: {before_d} -> {len(dyn)} rows "
-      f"(fir/histogram excluded, SR=100% for all methods)")
+      f"(vadd/fir/histogram excluded, SR=100% for all methods)")
 
 def compute_per_iter(df):
     scf_pi  = (df["overhead_phago_ms"] / df["total_evals"]).mean()

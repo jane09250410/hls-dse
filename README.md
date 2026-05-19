@@ -62,8 +62,9 @@ All `run_summary.csv` files needed to regenerate every table and most figures ar
 ### Regenerate figures
 
 **Note**: `fig_convergence.py` and `fig_qor.py` require per-evaluation logs
-(`eval_log.csv`, ~100MB each) that are NOT in the repository. Regenerate them
-by rerunning the corresponding experiments (see Rerun experiments section).
+(`eval_log.csv`, ~100MB each). These traces were produced on the experiment
+VM and are not included in this artifact due to size. The pre-generated
+convergence and QoR figures are included under `paper_figures/out/`.
 All other figures only need the aggregated `run_summary.csv` files, which ARE
 in the repository.
 
