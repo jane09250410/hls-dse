@@ -180,9 +180,14 @@ for tool, path, bench_filter in [
     rpe  = (df["overhead_rpe_ms"]   / df["total_evals"]).mean()
     ofrs = (df["overhead_ofrs_ms"]  / df["total_evals"]).mean()
     total = scf + rpe + ofrs
-    synth = ((df["total_wall_clock_s"] * 1000
-              - (df["overhead_phago_ms"] + df["overhead_rpe_ms"] + df["overhead_ofrs_ms"]))
-             / df["total_evals"]).mean()
+    # Use per-call mean synthesis time from exhaustive ground truth,
+    # matching the methodology described in Table VIII of the paper.
+    gt_map = {
+        "Bambu":     "bambu_ground_truth/run_summary.csv",
+        "Dynamatic": "dynamatic_ground_truth/run_summary.csv",
+    }
+    gt = pd.read_csv(ROOT / gt_map[tool])
+    synth = gt["synthesis_time_s"].mean() * 1000  # ms
     overhead_rows.append({
         "tool": tool,
         "scf_ms": scf, "rpe_ms": rpe, "ofrs_ms": ofrs,
