@@ -80,7 +80,7 @@ The two layers are complementary, not redundant, and their interplay is tool-dep
     \item \textbf{Policy design.} We propose PA-DSE, a two-layer feasibility-aware DSE policy organized around the \emph{evidence hierarchy} principle. Layer~1 (SCF) handles static, tool-documented constraints; Layer~2 (DFRL) is online and contains two sub-components (RPE and OFRS) that operate at different evidence strengths. Each layer's action strength is explicitly justified by the evidence it has access to (\S\ref{sec:method}).
     \item \textbf{Empirical validation across tools.} We evaluate PA-DSE on two qualitatively different HLS tools (Bambu, static scheduling, C-centric; Dynamatic, elastic dataflow, LLVM-based) across eight shared benchmarks. PA-DSE achieves $92.5\%$ SR on Bambu (vs.\ $85.9\%$ for the best baseline) and $91.3\%$ SR on the five Dynamatic benchmarks with non-trivial failure rates (vs.\ $90.2\%$ for GP-BO), while halving time-to-first-feasible compared to the strongest baselines (\S\ref{sec:results}). Using the same benchmarks on both tools reveals a structural asymmetry: Bambu failures are pragma-driven (source-independent), while Dynamatic failures are graph-complexity-driven (MILP difficulty scales with dataflow-graph complexity), validating the need for the two-layer design.
     \item \textbf{Mechanism isolation.} Through an 8-way ablation we show that (a) OFRS reordering is the dominant contributor at small budgets ($B{=}30$--$60$), (b) SCF is essential as a safety net preventing DFRL from learning from catastrophic configurations, and (c) at $B{=}120$, RPE activates and provides a $+36.3$\,pp SR gain over OFRS-only by hard-skipping configurations matching a learned failure signature (\S\ref{sec:ablation}, \S\ref{sec:b120}).
-    \item \textbf{Near-zero runtime overhead.} The algorithmic overhead of PA-DSE is $5.3$~ms per iteration on Bambu and $2.0$~ms per iteration on Dynamatic, against synthesis times of $2.1$~s and $16.5$~s respectively, yielding ratios of $1{:}403$ and $1{:}8100$ (\S\ref{sec:overhead}).
+    \item \textbf{Near-zero runtime overhead.} The algorithmic overhead of PA-DSE is $5.3$~ms per iteration on Bambu and $2.0$~ms per iteration on Dynamatic, against synthesis times of $2.1$~s and $16.5$~s respectively, yielding ratios of $1{:}403$ and $1{:}8164$ (\S\ref{sec:overhead}).
 \end{enumerate}
 
 \textbf{Honest scope.} PA-DSE is not a general-purpose synthesis prediction model. It does not generalize zero-shot across benchmarks (RPE signatures are per-run and do not persist), and its static rules are tool-specific. Its strength is on-the-fly, within-run adaptation with inspectable state. We discuss limitations in \S\ref{sec:discussion}.
@@ -702,7 +702,7 @@ The mechanism is clear: at $B{=}60$, OFRS surfaces feasible configurations fast 
 \subsection{Overhead}
 \label{sec:overhead}
 
-Table~\ref{tab:overhead} reports the per-iteration algorithmic overhead of each PA-DSE layer, compared to the corresponding synthesis cost. Synthesis times are the per-call mean from the exhaustive ground-truth evaluation. On Bambu, total PA-DSE overhead is $5.3$\,ms per iteration, versus $\approx 2129$\,ms of synthesis: a ratio of $1{:}403$. On Dynamatic the ratio is $1{:}8100$, reflecting the higher synthesis cost of MILP-based buffer placement. By either measure, algorithmic overhead is negligible.
+Table~\ref{tab:overhead} reports the per-iteration algorithmic overhead of each PA-DSE layer, compared to the corresponding synthesis cost. Synthesis times are the per-call mean from the exhaustive ground-truth evaluation. On Bambu, total PA-DSE overhead is $5.3$\,ms per iteration, versus $\approx 2129$\,ms of synthesis: a ratio of $1{:}403$. On Dynamatic the ratio is $1{:}8164$, reflecting the higher synthesis cost of MILP-based buffer placement. By either measure, algorithmic overhead is negligible.
 
 \begin{table*}[t]
 \centering
@@ -713,7 +713,7 @@ Table~\ref{tab:overhead} reports the per-iteration algorithmic overhead of each 
 Tool      & SCF  & RPE  & OFRS & Algo.\ total & Synthesis \\
 \midrule
 Bambu     & 0.086 & 0.169 & 5.030 & 5.285 & 2129.0 \\
-Dynamatic & 0.029 & 0.069 & 1.934 & 2.032 & 16462.2 \\
+Dynamatic & 0.025 & 0.069 & 1.923 & 2.017 & 16462.2 \\
 \bottomrule
 \end{tabular}
 \end{table*}
