@@ -60,13 +60,6 @@ All `run_summary.csv` files needed to regenerate every table and figure are chec
 
 ### Regenerate figures
 
-**Note**: `fig_convergence.py` and `fig_qor.py` require per-evaluation logs
-(`eval_log.csv`, ~100MB each) that are NOT in the repository. Regenerate them
-by rerunning the corresponding experiments (see Rerun experiments section).
-All other figures only need the aggregated `run_summary.csv` files, which ARE
-in the repository.
-
-
 ```bash
 cd paper_figures
 python3 fig1_main_results_v2.py
