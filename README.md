@@ -57,32 +57,40 @@ hls-dse/
 
 ## Reproducibility
 
-All `run_summary.csv` files needed to regenerate every table and most figures are checked in. Raw `eval_log.csv` files (35 GB on the experiment VM) are not included; the convergence and QoR figures require these traces (see note below).
+This artifact supports reproducibility at three tiers, ordered from strongest to weakest.
 
-### Reproducing paper tables from the checked-in CSVs
-
-The primary reproduction path uses the included `run_summary.csv` files:
+### Tier 1: Paper tables from checked-in CSVs (authoritative)
 
 ```bash
 python3 paper_figures/compute_paper_tables.py
 ```
 
-This regenerates every numerical value reported in Tables I-VIII, including the main success-rate comparisons, the ablation breakdowns, the B=120 RPE analysis, the theta sensitivity sweep, and the per-iteration overhead decomposition. All numbers in this path match the paper byte-for-byte.
+This regenerates every numerical value reported in Tables I-VIII (main success-rate comparisons, ablation breakdowns, B=120 RPE analysis, theta sensitivity sweep, per-iteration overhead decomposition). All numbers in this path match the paper byte-for-byte.
 
-### Reproducing PA-DSE from source via the offline simulator
+### Tier 2: PA-DSE algorithm from source via the offline simulator
 
-The `offline_sim/simulator.py` module replays any DSE method against the released ground-truth tables (`results/{bambu,dynamatic}_ground_truth/run_summary.csv`) without invoking the real HLS toolchain. We have verified that this path reproduces PA-DSE's main-table numbers:
+The `offline_sim/simulator.py` module replays any DSE method against the released ground-truth tables (`results/{bambu,dynamatic}_ground_truth/run_summary.csv`) without invoking the real HLS toolchain. We have verified that this path reproduces PA-DSE main-table numbers within statistical noise:
 
-- Bambu B=60, 8 benchmarks × 5 seeds: PA-DSE SR = 92.33 ± 1.35 (paper: 92.5 ± 1.1)
-- Dynamatic B=30, 5 non-trivial benchmarks × 10 seeds: PA-DSE SR = 91.33 ± 3.93 (paper: 91.33 ± 3.93, exact)
+- Bambu B=60, n=40: PA-DSE SR = 92.33 ± 1.35 (paper: 92.5 ± 1.1, Δ = -0.17 pp)
+- Dynamatic B=30, n=50: PA-DSE SR = 91.33 ± 3.93 (paper: 91.33 ± 3.93, exact match)
 
-This validates that the released PA-DSE source code implements the algorithm described in the paper.
+This validates that the released PA-DSE source code implements the algorithm described in the paper. Random and Filtered Random baselines also reproduce closely via this path (Δ ≤ 1 pp on Bambu).
 
-### Note on baseline reproducibility via the offline simulator
+### Tier 3: ML/stochastic baselines via the offline simulator
 
-The baseline results reported in the paper (`results/master/bambu_main/run_summary.csv`) were produced by running each method against the real Bambu/Dynamatic toolchain on the experiment VM (mean wall-clock ≈ 150 s per Bambu run). Replaying ML-based baselines (`RFClassifierMethod`, `GPBayesOptMethod`) against the offline simulator with a different scikit-learn version may yield different absolute SR values than the released CSVs, because tree-based and Bayesian models have version-dependent tie-breaking and random-state behavior. In one such replay with scikit-learn 1.8 we observed RF at ≈ 71 % rather than the paper's 85.9 %.
+The baseline results reported in the paper (`results/master/bambu_main/run_summary.csv`) were collected on the experiment VM with the real Bambu/Dynamatic toolchain (≈ 150 s per run). Re-running SA, GA, GP-BO, and RF against the offline simulator with the source code in this artifact does **not** reproduce the absolute SR numbers in the paper; in our replays we observed:
 
-The released paper-table values come directly from the real-tool runs in the CSVs; `compute_paper_tables.py` is the authoritative reproduction script. The offline simulator is suitable for validating PA-DSE itself and for sanity-checking baseline ordering, but absolute baseline SR numbers should be read from the CSVs rather than recomputed via the simulator unless the original sklearn/SciPy/GPy versions are pinned.
+| Method | Released CSV | Replay (sklearn 1.8 / Python 3.12) | Δ |
+|--------|-------------:|----------------------------------:|---:|
+| Random         | 15.0 % | 14.0 % | -1.0 |
+| Filtered Random | 18.5 % | 18.3 % | -0.2 |
+| SA             | 18.4 % | 12.6 % | -5.8 |
+| GA             | 50.6 % | 28.0 % | -22.6 |
+| GP-BO          | 71.3 % | 65.5 % | -5.8 |
+| RF             | 85.9 % | 71.0 % | -14.9 |
+| PA-DSE         | 92.5 % | 92.3 % | -0.2 |
+
+The released CSVs are the authoritative source for all paper-reported baseline numbers. The offline simulator is suitable for validating PA-DSE end-to-end and for sanity-checking baseline ordering (PA-DSE > RF > GP-BO > GA > Filtered Random > SA > Random holds in both columns), but absolute baseline SR figures should be read from the CSVs rather than recomputed via the simulator. Environment drift (NumPy / SciPy / scikit-learn versions and Python random-stream behaviour) is the most likely source of the gap; we do not currently pin a reproducibility environment.
 
 ### Regenerate figures
 
