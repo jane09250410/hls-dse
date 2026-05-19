@@ -23,7 +23,7 @@ Evaluated on 8 shared benchmarks (matmul, vadd, fir, histogram, atax, bicg, gemm
 | Dynamatic (v2.0) | 30 | **91.3%** | GP-BO 90.2% | 2× faster TTFF |
 | Bambu | 120 | **83.0%** | SCF+OFRS 46.7% | RPE adds +36.3pp |
 
-Algorithmic overhead: 5.3 ms/iter on Bambu, 2.0 ms/iter on Dynamatic (< 0.22% of synthesis cost).
+Algorithmic overhead: 5.3 ms/iter on Bambu, 2.0 ms/iter on Dynamatic (< 0.25% of synthesis cost).
 
 ## Repository Structure
 
@@ -57,7 +57,7 @@ hls-dse/
 
 ## Reproducibility
 
-All `run_summary.csv` files needed to regenerate every table and figure are checked in. Raw `eval_log.csv` files (35 GB on the experiment VM) are not included.
+All `run_summary.csv` files needed to regenerate every table and most figures are checked in. Raw `eval_log.csv` files (35 GB on the experiment VM) are not included; the convergence and QoR figures require these traces (see note below).
 
 ### Regenerate figures
 
@@ -81,6 +81,14 @@ python3 fig_overhead_v3.py
 python3 fig_pareto.py
 python3 fig_b120_bambu.py
 ```
+
+### Note on experiment launchers
+
+The included `run_summary.csv` files are the authoritative data source for all paper tables.
+The aggregation script `paper_figures/compute_paper_tables.py` regenerates the reported table values from these CSV files.
+
+`scripts/runners/run_main_results.py` is a legacy stub kept only to preserve git history.
+It does not reproduce the main tables. The complete main-experiment results were produced by batch jobs on the experiment VM and are released here as `results/master/*/run_summary.csv` and `results/rerun/*/run_summary.csv`.
 
 ### Rerun experiments
 
