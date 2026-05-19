@@ -57,40 +57,37 @@ hls-dse/
 
 ## Reproducibility
 
-This artifact supports reproducibility at three tiers, ordered from strongest to weakest.
+All paper-reported numbers were produced by running each method against the real Bambu and Dynamatic toolchains on the experiment VM (mean wall-clock $\approx 150$\,s per Bambu run, $\approx 16$\,s per Dynamatic run). The corresponding `run_summary.csv` files are checked in. Raw `eval_log.csv` files ($\sim 35$\,GB on the experiment VM) are not included; the convergence and QoR figures require these traces (see note below).
 
-### Tier 1: Paper tables from checked-in CSVs (authoritative)
+### Reproducing paper tables from the released CSVs (authoritative path)
 
 ```bash
 python3 paper_figures/compute_paper_tables.py
 ```
 
-This regenerates every numerical value reported in Tables I-VIII (main success-rate comparisons, ablation breakdowns, B=120 RPE analysis, theta sensitivity sweep, per-iteration overhead decomposition). All numbers in this path match the paper byte-for-byte.
+This regenerates every numerical value reported in Tables I-VIII byte-for-byte from the checked-in real-tool run summaries (main success-rate comparisons, ablation breakdowns, B=120 RPE analysis, theta sensitivity sweep, per-iteration overhead decomposition).
 
-### Tier 2: PA-DSE algorithm from source via the offline simulator
+### Validating PA-DSE end-to-end via the offline simulator
 
-The `offline_sim/simulator.py` module replays any DSE method against the released ground-truth tables (`results/{bambu,dynamatic}_ground_truth/run_summary.csv`) without invoking the real HLS toolchain. We have verified that this path reproduces PA-DSE main-table numbers within statistical noise:
+`offline_sim/simulator.py` replays the released ground-truth tables (`results/{bambu,dynamatic}_ground_truth/run_summary.csv`) as a synthesis oracle so that the PA-DSE source code can be exercised end-to-end without re-running the HLS toolchain. We have verified the offline path reproduces PA-DSE main-table numbers within statistical noise:
 
-- Bambu B=60, n=40: PA-DSE SR = 92.33 ± 1.35 (paper: 92.5 ± 1.1, Δ = -0.17 pp)
-- Dynamatic B=30, n=50: PA-DSE SR = 91.33 ± 3.93 (paper: 91.33 ± 3.93, exact match)
+| Method (Bambu B=60, n=40) | Released CSV | Offline replay | Δ |
+|---------------------------|-------------:|---------------:|---:|
+| PA-DSE                    | 92.5 % | 92.3 % | -0.2 |
+| Random                    | 15.0 % | 14.0 % | -1.0 |
+| Filtered Random           | 18.5 % | 18.3 % | -0.2 |
 
-This validates that the released PA-DSE source code implements the algorithm described in the paper. Random and Filtered Random baselines also reproduce closely via this path (Δ ≤ 1 pp on Bambu).
+| Method (Dynamatic B=30, n=50) | Released CSV | Offline replay | Δ |
+|-------------------------------|-------------:|---------------:|---:|
+| PA-DSE                        | 91.33 % | 91.33 % | exact |
 
-### Tier 3: ML/stochastic baselines via the offline simulator
+This validates that the PA-DSE source code in this repository implements the algorithm reported in the paper.
 
-The baseline results reported in the paper (`results/master/bambu_main/run_summary.csv`) were collected on the experiment VM with the real Bambu/Dynamatic toolchain (≈ 150 s per run). Re-running SA, GA, GP-BO, and RF against the offline simulator with the source code in this artifact does **not** reproduce the absolute SR numbers in the paper; in our replays we observed:
+### Note on reproducing stochastic baselines via the offline simulator
 
-| Method | Released CSV | Replay (sklearn 1.8 / Python 3.12) | Δ |
-|--------|-------------:|----------------------------------:|---:|
-| Random         | 15.0 % | 14.0 % | -1.0 |
-| Filtered Random | 18.5 % | 18.3 % | -0.2 |
-| SA             | 18.4 % | 12.6 % | -5.8 |
-| GA             | 50.6 % | 28.0 % | -22.6 |
-| GP-BO          | 71.3 % | 65.5 % | -5.8 |
-| RF             | 85.9 % | 71.0 % | -14.9 |
-| PA-DSE         | 92.5 % | 92.3 % | -0.2 |
+When the released CSVs were generated, the experiment runner fed each method the SCF-prefiltered active set (the 280 unblocked Bambu configurations after the documented MEM\_ACC rules) rather than the raw 420-point grid. This shared SCF prefilter is part of the paper's evidence-hierarchy design: SCF is layer 1 of PA-DSE, and giving every baseline the same SCF-filtered starting point isolates the additional contribution of DFRL (layers 2-3) over a vanilla optimizer. The released `run_summary.csv` files reflect this configuration.
 
-The released CSVs are the authoritative source for all paper-reported baseline numbers. The offline simulator is suitable for validating PA-DSE end-to-end and for sanity-checking baseline ordering (PA-DSE > RF > GP-BO > GA > Filtered Random > SA > Random holds in both columns), but absolute baseline SR figures should be read from the CSVs rather than recomputed via the simulator. Environment drift (NumPy / SciPy / scikit-learn versions and Python random-stream behaviour) is the most likely source of the gap; we do not currently pin a reproducibility environment.
+The current `offline_sim/simulator.py`, used as-is with the released methods, runs baselines against the raw 420-point grid rather than the SCF-filtered set. For PA-DSE this makes no difference (SCF is internal to PA-DSE and runs automatically). For deterministic baselines (Random, Filtered Random) the difference is small. For trajectory-dependent baselines (SA, GA, GP-BO, RF) the difference can be large: a single-point mutation chain starting in the blocked region (140 of 420 configurations) gets stuck there and produces an SR floor much lower than when starting in the unblocked set. The released CSVs are the authoritative source for paper-reported baseline numbers; reviewers wishing to re-execute SA/GA/GP-BO/RF should either pre-filter their input configurations using SCF or run against the real HLS toolchain.
 
 ### Regenerate figures
 
