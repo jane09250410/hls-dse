@@ -91,8 +91,8 @@ dyn_t = compute_per_iter(dyn)
 
 # Override synthesis values to match Table VIII (measured single-call synthesis time)
 # total_wall_clock_s includes MILP solver init, I/O, and idle waits — not per-eval synth cost
-bam_t["synthesis"] = 2503.7
-dyn_t["synthesis"] = 8127.3
+bam_t["synthesis"] = 2129.0
+dyn_t["synthesis"] = 16462.2
 
 # ===== Figure =====
 fig = plt.figure(figsize=(12.5, 4.5))

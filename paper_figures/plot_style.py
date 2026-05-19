@@ -36,7 +36,7 @@ BAMBU_BENCHMARKS = ["matmul", "vadd", "fir", "histogram",
 
 # Dynamatic: 4 benchmarks. fir, histogram EXCLUDED (SR=100% for all methods,
 # no discriminative signal). Paper (§IV.A) reports on these 4 only.
-DYNAMATIC_BENCHMARKS = ["gcd", "matching", "binary_search", "kernel_2mm"]
+DYNAMATIC_BENCHMARKS = ["matmul", "atax", "bicg", "gemm", "gesummv"]
 
 # Backward-compatibility alias: old scripts used BENCHMARK_ORDER for Bambu.
 BENCHMARK_ORDER = BAMBU_BENCHMARKS
