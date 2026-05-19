@@ -616,6 +616,13 @@ class DynamicFailureRiskLearner:
     def add_failure(self, config: Config, output: str, runtime_s: float,
                     benchmark_name: Optional[str] = None) -> Optional[LearnedPattern]:
         self._ensure_keys(config)
+        # NOTE: extract_error_type is a tool-agnostic keyword classifier tuned
+        # primarily for Bambu's error messages. For Dynamatic failures, the
+        # more specific classify_dynamatic_error in scripts/run_dynamatic_single.py
+        # is used when collecting ground truth; many Dynamatic failures may map
+        # to "generic_error" or "unknown_failure" here. In the reported
+        # experiments this has no effect on results because RPE is not activated
+        # at the Dynamatic budget (B=30); see Section V-G in the paper.
         err = extract_error_type(output)
         rec = FailureRecord(
             config_id=int(config.get("id", -1)),

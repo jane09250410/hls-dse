@@ -34,8 +34,8 @@ COLORS = {
 BAMBU_BENCHMARKS = ["matmul", "vadd", "fir", "histogram",
                     "atax", "bicg", "gemm", "gesummv"]
 
-# Dynamatic: 4 benchmarks. fir, histogram EXCLUDED (SR=100% for all methods,
-# no discriminative signal). Paper (§IV.A) reports on these 4 only.
+# Dynamatic: 5 non-trivial benchmarks. vadd, fir, histogram EXCLUDED
+# (SR=100% for all methods, no discriminative signal).
 DYNAMATIC_BENCHMARKS = ["matmul", "atax", "bicg", "gemm", "gesummv"]
 
 # Backward-compatibility alias: old scripts used BENCHMARK_ORDER for Bambu.

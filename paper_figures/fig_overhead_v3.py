@@ -4,11 +4,10 @@ Panel (a) line chart on log scale showing orders-of-magnitude gap
 between algorithmic overhead and HLS synthesis cost.
 Panel (b) stacked bar showing layer composition within algo overhead.
 
-IMPORTANT: Dynamatic numbers use ONLY the 4 evaluation benchmarks
-(gcd, matching, binary_search, kernel_2mm). fir/histogram are excluded
-because they achieve SR=100% for all methods and are not part of the
-paper's Dynamatic evaluation. Including them would underestimate
-synthesis time and inflate the algo:synth ratio.
+Dynamatic algorithmic overhead is averaged over the 5 non-trivial
+benchmarks used in the paper's Dynamatic aggregation (matmul, atax,
+bicg, gemm, gesummv). Synthesis time is the per-call mean from the
+exhaustive ground-truth evaluation (all 8 benchmarks).
 """
 import numpy as np
 import pandas as pd

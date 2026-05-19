@@ -1,8 +1,9 @@
 """
 NOTE: This script requires eval_log.csv files (~100MB each) that are NOT
-checked into the repository due to size. To regenerate them, re-run:
-  - master/{bambu,dynamatic}_main/eval_log.csv: scripts/runners/run_main_results.py
-  - rerun/{bambu,dynamatic}_pa_dse_perms/eval_log.csv: run_b120_bambu.py and rerun_ablation_n5.py
+checked into the repository due to size. The released artifact includes a
+pre-generated PDF/PNG of this figure under paper_figures/out/. Regenerating
+the underlying eval logs requires the original experiment VM environment
+with the Bambu/Dynamatic toolchains installed.
 
 Aggregated run_summary.csv files (used by all OTHER figure scripts) ARE in the repo.
 """
@@ -144,7 +145,7 @@ dyn_curves = load_and_process(
     max_step=30,
     qat_qsd_path="qse/dynamatic_main/eval_log.csv",
 )
-plot_curves(axR, dyn_curves, 30, "(b) Dynamatic convergence (B=30, 4 benchmarks)")
+plot_curves(axR, dyn_curves, 30, "(b) Dynamatic convergence (B=30, 5 non-trivial benchmarks)")
 axR.legend(loc="upper left", frameon=False, ncol=2, fontsize=8.5)
 
 plt.tight_layout()

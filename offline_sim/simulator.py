@@ -12,8 +12,8 @@ without invoking the real Dynamatic toolchain.
 Mirrors run_single.py main loop exactly: apply_skips → apply_reorder →
 select_next → "synthesize" (table lookup) → update.
 
-Coverage: gcd, matching, binary_search (192 configs each, all evaluated).
-kernel_2mm is not in ground truth and must be validated on real tool.
+Coverage: the 8 shared benchmarks (matmul, vadd, fir, histogram, atax,
+bicg, gemm, gesummv); 192 configs each for Dynamatic, 420 for Bambu.
 """
 
 import json

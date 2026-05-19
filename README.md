@@ -74,12 +74,16 @@ python3 fig1_main_results_v2.py
 python3 fig_dynamatic_main_v2.py
 python3 fig_cost.py
 python3 fig_perbench_heatmap.py
-python3 fig_convergence.py
-python3 fig_qor.py
 python3 fig_ablation_bar.py
 python3 fig_overhead_v3.py
 python3 fig_pareto.py
 python3 fig_b120_bambu.py
+
+# The two scripts below require eval_log.csv (~100MB each), which are NOT
+# included in the repository. Pre-generated PDF/PNG outputs are in
+# paper_figures/out/. Uncomment only if you have regenerated the eval logs.
+# python3 fig_convergence.py
+# python3 fig_qor.py
 ```
 
 ### Note on experiment launchers
@@ -101,7 +105,7 @@ python3 collect_bambu_gt.py
 # B=120 main comparison (offline, ~10 minutes after GT is ready)
 python3 run_b120_bambu.py
 
-# Dynamatic ablation (n=25 perms per config)
+# Dynamatic ablation (5 permutations per benchmark; n=25 rows/config after filtering to 5 non-trivial benchmarks)
 python3 rerun_ablation_n5.py
 ```
 

@@ -95,7 +95,7 @@ print(bambu_tbl.round(2).to_string(index=False))
 
 print()
 print("=" * 80)
-print("MAIN RESULTS - DYNAMATIC (4 benchmarks; fir/histogram excluded, SR=100% for all)")
+print("MAIN RESULTS - DYNAMATIC (5 non-trivial benchmarks; vadd/fir/histogram excluded, SR=100% for all)")
 print("=" * 80)
 dyn_tbl, dyn_all = main_table(
     "master/dynamatic_main/run_summary.csv",
@@ -152,7 +152,7 @@ print(bam_abl.round(2).to_string(index=False))
 
 print()
 print("=" * 80)
-print("ABLATION - DYNAMATIC (4 benchmarks)")
+print("ABLATION - DYNAMATIC (5 non-trivial benchmarks)")
 print("=" * 80)
 dyn_abl = ablation_table("b30/ablation_dynamatic/run_summary.csv", DYNAMATIC_BENCHMARKS)
 dyn_abl.to_csv(OUT / "table_ablation_dynamatic.csv", index=False)

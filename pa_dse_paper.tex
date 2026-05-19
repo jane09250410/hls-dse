@@ -402,7 +402,7 @@ All baselines share the same $\mathcal{C}$, the same synthesis interface, and th
 \subsection{Evaluation Protocol}
 \label{sec:protocol}
 
-\textbf{Budgets.} We use $B{=}60$ evaluations per run on Bambu and $B{=}30$ on Dynamatic. These are chosen to represent realistic ``coffee-break'' interactive budgets: with per-call synthesis cost of $\approx 2.5$\,s (Bambu) and $\approx 8$\,s (Dynamatic), a full run completes in 2--4 minutes of wall clock in both cases. We also sweep $B \in \{30, 60\}$ in the Bambu ablation.
+\textbf{Budgets.} We use $B{=}60$ evaluations per run on Bambu and $B{=}30$ on Dynamatic. These are chosen to represent realistic ``coffee-break'' interactive budgets: with per-call mean synthesis cost of $\approx 2.1$\,s (Bambu) and $\approx 16.5$\,s (Dynamatic), a full run completes in roughly 2\,min on Bambu and 8\,min on Dynamatic. We also sweep $B \in \{30, 60\}$ in the Bambu ablation.
 
 \textbf{Repetitions.} Each (method, benchmark, budget) cell is repeated 10 times. For stochastic baselines (Random, SA, GA, GP-BO, RF) the repetition index is a random seed. For deterministic methods (Filtered Random, PA-DSE) we vary the initial queue ordering via a \texttt{queue\_permutation\_id}, which is mechanically equivalent to a seed for sensitivity analysis. This isolates ordering sensitivity from optimizer-internal randomness.
 
@@ -441,7 +441,7 @@ We structure the evaluation around nine questions, each addressed in its own sub
 \subsection{Main Comparison on Bambu}
 \label{sec:main_results}
 
-Table~\ref{tab:main_bambu} reports per-method means and standard deviations across all $(benchmark, \text{run})$ cells on Bambu at $B{=}60$. PA-DSE achieves $92.5\% \pm 1.1$ success rate, exceeding the strongest baseline (RF, $85.9\% \pm 1.1$) by $6.6$\,pp. More importantly, PA-DSE wastes only $4.5$ synthesis calls on average per run, compared to $8.4$ for RF, $17.2$ for GP-BO, and $51.0$ for Random, a $\mathbf{1.9\times}$ reduction over the best baseline and an $\mathbf{11\times}$ reduction over Random. Because each wasted call costs $\approx 2.5$\,s of user time on Bambu, PA-DSE saves roughly $10$\,s of wall clock per run versus RF.
+Table~\ref{tab:main_bambu} reports per-method means and standard deviations across all $(benchmark, \text{run})$ cells on Bambu at $B{=}60$. PA-DSE achieves $92.5\% \pm 1.1$ success rate, exceeding the strongest baseline (RF, $85.9\% \pm 1.1$) by $6.6$\,pp. More importantly, PA-DSE wastes only $4.5$ synthesis calls on average per run, compared to $8.4$ for RF, $17.2$ for GP-BO, and $51.0$ for Random, a $\mathbf{1.9\times}$ reduction over the best baseline and an $\mathbf{11\times}$ reduction over Random. Because each wasted call costs $\approx 2.1$\,s of user time on Bambu, PA-DSE saves roughly $8$\,s of wall clock per run versus RF.
 
 \begin{table*}[t]
 \centering
