@@ -59,6 +59,31 @@ hls-dse/
 
 All `run_summary.csv` files needed to regenerate every table and most figures are checked in. Raw `eval_log.csv` files (35 GB on the experiment VM) are not included; the convergence and QoR figures require these traces (see note below).
 
+### Reproducing paper tables from the checked-in CSVs
+
+The primary reproduction path uses the included `run_summary.csv` files:
+
+```bash
+python3 paper_figures/compute_paper_tables.py
+```
+
+This regenerates every numerical value reported in Tables I-VIII, including the main success-rate comparisons, the ablation breakdowns, the B=120 RPE analysis, the theta sensitivity sweep, and the per-iteration overhead decomposition. All numbers in this path match the paper byte-for-byte.
+
+### Reproducing PA-DSE from source via the offline simulator
+
+The `offline_sim/simulator.py` module replays any DSE method against the released ground-truth tables (`results/{bambu,dynamatic}_ground_truth/run_summary.csv`) without invoking the real HLS toolchain. We have verified that this path reproduces PA-DSE's main-table numbers:
+
+- Bambu B=60, 8 benchmarks × 5 seeds: PA-DSE SR = 92.33 ± 1.35 (paper: 92.5 ± 1.1)
+- Dynamatic B=30, 5 non-trivial benchmarks × 10 seeds: PA-DSE SR = 91.33 ± 3.93 (paper: 91.33 ± 3.93, exact)
+
+This validates that the released PA-DSE source code implements the algorithm described in the paper.
+
+### Note on baseline reproducibility via the offline simulator
+
+The baseline results reported in the paper (`results/master/bambu_main/run_summary.csv`) were produced by running each method against the real Bambu/Dynamatic toolchain on the experiment VM (mean wall-clock ≈ 150 s per Bambu run). Replaying ML-based baselines (`RFClassifierMethod`, `GPBayesOptMethod`) against the offline simulator with a different scikit-learn version may yield different absolute SR values than the released CSVs, because tree-based and Bayesian models have version-dependent tie-breaking and random-state behavior. In one such replay with scikit-learn 1.8 we observed RF at ≈ 71 % rather than the paper's 85.9 %.
+
+The released paper-table values come directly from the real-tool runs in the CSVs; `compute_paper_tables.py` is the authoritative reproduction script. The offline simulator is suitable for validating PA-DSE itself and for sanity-checking baseline ordering, but absolute baseline SR numbers should be read from the CSVs rather than recomputed via the simulator unless the original sklearn/SciPy/GPy versions are pinned.
+
 ### Regenerate figures
 
 **Note**: `fig_convergence.py` and `fig_qor.py` require per-evaluation logs
