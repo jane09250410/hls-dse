@@ -239,18 +239,28 @@ def main():
     delta = pa.mean() - ofrs.mean()
 
     from scipy import stats
-    # Paired test over per-benchmark means
-    pa_bench = df[df['method']=='PA-DSE'].groupby('benchmark')['sr_pct'].mean()
-    ofrs_bench = df[df['method']=='SCF+OFRS'].groupby('benchmark')['sr_pct'].mean()
-    common = sorted(set(pa_bench.index) & set(ofrs_bench.index))
-    t_stat, p_val = stats.ttest_rel([pa_bench[b] for b in common],
-                                     [ofrs_bench[b] for b in common])
+    # Paired test over 80 (benchmark, queue_permutation_id) pairs.
+    # We pair PA-DSE and SCF+OFRS by (benchmark, queue_permutation_id) because
+    # both methods use the same queue permutation seeds, making the comparison
+    # properly paired at the run level. Using per-benchmark means would result
+    # in identical paired differences (all ~36.3) because each benchmark gives
+    # exactly 56 feasible designs at B=120 with PA-DSE consuming 67.5 calls
+    # vs. SCF+OFRS consuming all 120, which makes scipy.stats.ttest_rel emit
+    # a precision-loss warning and report t=inf.
+    pa_runs = df[df['method'] == 'PA-DSE'].copy()
+    ofrs_runs = df[df['method'] == 'SCF+OFRS'].copy()
+    paired = pa_runs.merge(
+        ofrs_runs, on=['benchmark', 'queue_permutation_id'],
+        suffixes=('_pa', '_ofrs')
+    )
+    t_stat, p_val = stats.ttest_rel(paired['sr_pct_pa'].values,
+                                     paired['sr_pct_ofrs'].values)
 
     print(f"\n*** KEY RESULT ***")
     print(f"  PA-DSE (SCF+DFRL): {pa.mean():.1f}% ± {pa.std():.1f}")
     print(f"  SCF+OFRS:          {ofrs.mean():.1f}% ± {ofrs.std():.1f}")
     print(f"  Delta:             {delta:+.1f} pp")
-    print(f"  Paired t-test:     t={t_stat:.3f}, p={p_val:.4f}")
+    print(f"  Paired t-test ({len(paired)} pairs): t={t_stat:.3f}, p={p_val:.4e}")
     if abs(delta) > 0.5 and p_val < 0.05:
         print(f"  --> RPE CONTRIBUTES at B=120 (significant)")
     elif abs(delta) > 0.5:
