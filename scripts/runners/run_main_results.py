@@ -12,7 +12,7 @@ import argparse, os, subprocess, sys, time, tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from config_generator import generate_bambu_configs, config_to_bambu_cmd
-from exp_logging.experiment_logger import ExperimentLogger
+from logging.experiment_logger import ExperimentLogger
 from runners.run_single import run_single
 from methods.baseline_methods import (
     RandomMethod, FilteredRandomMethod, GridMethod, LHSMethod, FailureMemoMethod)
@@ -25,24 +25,17 @@ BAMBU = {
     "vadd":      {"src": "benchmarks/vadd/vadd.c",           "top": "vadd"},
     "fir":       {"src": "benchmarks/fir/fir.c",             "top": "fir"},
     "histogram": {"src": "benchmarks/histogram/histogram.c", "top": "histogram"},
-    "atax":      {"src": "benchmarks/atax/atax.c",           "top": "atax"},
-    "bicg":      {"src": "benchmarks/bicg/bicg.c",           "top": "bicg"},
-    "gemm":      {"src": "benchmarks/gemm/gemm.c",           "top": "gemm"},
-    "gesummv":   {"src": "benchmarks/gesummv/gesummv.c",     "top": "gesummv"},
 }
 BAMBU_PRIMARY = [60]
 BAMBU_SWEEP   = [20, 40, 60, 80]
 
 DYNAMATIC_PATH = os.path.expanduser("~/dynamatic")
 DYNAMATIC = {
-    "matmul":    {"src": f"{DYNAMATIC_PATH}/integration-test/matrix/matrix.c",       "top": "matrix"},
-    "vadd":      {"src": f"{DYNAMATIC_PATH}/integration-test/vadd/vadd.c",           "top": "vadd"},
-    "fir":       {"src": f"{DYNAMATIC_PATH}/integration-test/fir/fir.c",             "top": "fir"},
-    "histogram": {"src": f"{DYNAMATIC_PATH}/integration-test/histogram/histogram.c", "top": "histogram"},
-    "atax":      {"src": f"{DYNAMATIC_PATH}/integration-test/atax/atax.c",           "top": "atax"},
-    "bicg":      {"src": f"{DYNAMATIC_PATH}/integration-test/bicg/bicg.c",           "top": "bicg"},
-    "gemm":      {"src": f"{DYNAMATIC_PATH}/integration-test/gemm/gemm.c",           "top": "gemm"},
-    "gesummv":   {"src": f"{DYNAMATIC_PATH}/integration-test/gesummv/gesummv.c",     "top": "gesummv"},
+    "gcd":           {"src": f"{DYNAMATIC_PATH}/integration-test/gcd/gcd.c",                     "top": "gcd"},
+    "matching":      {"src": f"{DYNAMATIC_PATH}/integration-test/matching/matching.c",             "top": "matching"},
+    "binary_search": {"src": f"{DYNAMATIC_PATH}/integration-test/binary_search/binary_search.c",   "top": "binary_search"},
+    "fir":           {"src": f"{DYNAMATIC_PATH}/integration-test/fir/fir.c",                       "top": "fir"},
+    "histogram":     {"src": f"{DYNAMATIC_PATH}/integration-test/histogram/histogram.c",           "top": "histogram"},
 }
 DYNAMATIC_PRIMARY = [30]
 DYNAMATIC_SWEEP   = [20, 30, 40, 60]
@@ -68,11 +61,7 @@ def make_dynamatic_synth(src, top, results_base):
         # Copy source file to work directory
         src_abs = os.path.abspath(src)
         src_copy = os.path.join(work_dir, os.path.basename(src_abs))
-        src_dir_path = os.path.dirname(src_abs)
-        for f in os.listdir(src_dir_path):
-            full = os.path.join(src_dir_path, f)
-            if os.path.isfile(full):
-                shutil.copy2(full, work_dir)
+        shutil.copy2(src_abs, src_copy)
 
         success, metrics, raw_output = run_dynamatic_single(
             config=config,
@@ -145,14 +134,14 @@ def run_bambu_phase(benchmarks, budgets, logger, include_appendix):
 
             print(f"  PA-DSE_L1 / {bname} / B={B}")
             m = PADSEMethod(configs, bname, "bambu", B,
-                            ablation_config="SCF+DFRL",
+                            ablation_config="phago+Full",
                             dynamic_mode="intersection", source_path=src)
             run_single(m, synth, logger, tool="bambu",
-                       ablation_config="SCF+DFRL(L1)")
+                       ablation_config="phago+Full(L1)")
 
             print(f"  PA-DSE_Full / {bname} / B={B}")
             m = PADSEMethod(configs, bname, "bambu", B,
-                            ablation_config="SCF+DFRL", source_path=src)
+                            ablation_config="phago+Full", source_path=src)
             run_single(m, synth, logger, tool="bambu")
 
             # ── Appendix baselines (phase 2 only) ──────────────
@@ -202,14 +191,14 @@ def run_dynamatic_phase(benchmarks, budgets, logger, include_appendix):
 
             print(f"  PA-DSE_L1 / {bname} / B={B}", flush=True)
             m = PADSEMethod(configs, bname, "dynamatic", B,
-                            ablation_config="SCF+DFRL",
+                            ablation_config="phago+Full",
                             dynamic_mode="intersection", source_path=src)
             run_single(m, synth, logger, tool="dynamatic",
-                       ablation_config="SCF+DFRL(L1)")
+                       ablation_config="phago+Full(L1)")
 
             print(f"  PA-DSE_Full / {bname} / B={B}", flush=True)
             m = PADSEMethod(configs, bname, "dynamatic", B,
-                            ablation_config="SCF+DFRL", source_path=src)
+                            ablation_config="phago+Full", source_path=src)
             run_single(m, synth, logger, tool="dynamatic")
 
             # ── Appendix baselines (phase 2 only) ──────────────

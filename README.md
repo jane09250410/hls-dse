@@ -23,7 +23,7 @@ Evaluated on 8 shared benchmarks (matmul, vadd, fir, histogram, atax, bicg, gemm
 | Dynamatic (v2.0) | 30 | **91.3%** | GP-BO 90.2% | 2× faster TTFF |
 | Bambu | 120 | **83.0%** | SCF+OFRS 46.7% | RPE adds +36.3pp |
 
-Algorithmic overhead: 5.3 ms/iter on Bambu, 2.0 ms/iter on Dynamatic (< 0.25% of synthesis cost).
+Algorithmic overhead: 5.3 ms/iter on Bambu, 2.0 ms/iter on Dynamatic (< 0.22% of synthesis cost).
 
 ## Repository Structure
 
@@ -57,7 +57,7 @@ hls-dse/
 
 ## Reproducibility
 
-All `run_summary.csv` files needed to regenerate every table and most figures are checked in. Raw `eval_log.csv` files (35 GB on the experiment VM) are not included; the convergence and QoR figures require these traces (see note below).
+All `run_summary.csv` files needed to regenerate every table and figure are checked in. Raw `eval_log.csv` files (35 GB on the experiment VM) are not included.
 
 ### Regenerate figures
 
