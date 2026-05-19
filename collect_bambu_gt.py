@@ -38,21 +38,39 @@ def log(msg):
 
 
 def parse_bambu_output(output, returncode):
-    """Extract success/area/latency/error_type from Bambu output."""
+    """Extract success/area/latency/error_type from Bambu output.
+
+    Bambu's report format has varied across versions: some lines use
+    ': value', others 'value =' or '= value'. The regex accepts either.
+    Latency is preferred from 'Average execution' or 'Total cycles'; if
+    neither is present, falls back to 'Number of states'.
+    """
+    import re
     success = returncode == 0 and "Total estimated area" in output
 
     area, latency, error_type = None, None, ""
 
     if success:
-        for line in output.split('\n'):
-            if 'Total estimated area' in line:
+        # Area
+        m = re.search(r"Total\s+estimated\s+area\s*[=:]\s*([\d.]+)", output)
+        if m:
+            try:
+                area = float(m.group(1))
+            except ValueError:
+                pass
+        # Latency: prefer Average execution / Total cycles
+        m = re.search(r"(?:Average\s+execution|Total\s+cycles)\s*[=:]\s*([\d.]+)", output)
+        if m:
+            try:
+                latency = float(m.group(1))
+            except ValueError:
+                pass
+        # Fallback: Number of states (matches simulator and run_single conventions)
+        if latency is None:
+            m = re.search(r"Number\s+of\s+states\s*[=:]\s*(\d+)", output)
+            if m:
                 try:
-                    area = float(line.split(':')[-1].strip())
-                except ValueError:
-                    pass
-            if 'Average execution' in line or 'Total cycles' in line:
-                try:
-                    latency = float(line.split(':')[-1].strip())
+                    latency = float(m.group(1))
                 except ValueError:
                     pass
     else:
