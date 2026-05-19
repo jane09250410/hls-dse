@@ -74,7 +74,7 @@ bam = bam[bam["benchmark"].isin(BAMBU_BENCHMARKS)].copy()
 dyn = dyn[dyn["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
 print(f"[filter] Bambu: {before_b} -> {len(bam)} rows")
 print(f"[filter] Dynamatic: {before_d} -> {len(dyn)} rows "
-      f"(fir/histogram excluded, SR=100% for all methods)")
+      f"(vadd/fir/histogram excluded, SR=100% for all methods)")
 
 def compute_per_iter(df):
     scf_pi  = (df["overhead_phago_ms"] / df["total_evals"]).mean()
