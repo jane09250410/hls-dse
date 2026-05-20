@@ -23,6 +23,7 @@ from collections import defaultdict
 from typing import List, Optional, Dict, Any
 
 from methods.base import DSEMethod, Config
+from feasibility_filter import phagocytosis, default_static_rules
 
 
 # ──────────────────────────────────────────────────────────
@@ -38,6 +39,24 @@ def extract_qor(output: str) -> Optional[float]:
     if m:
         return float(m.group(1))
     return None
+
+
+
+def _apply_scf_prefilter(configs, benchmark_name, source_path):
+    """Apply Static Constraint Filter to remove blocked configurations.
+
+    Returns C \\ C_blk = active + suppressed configs (suppressed configs are
+    kept as risk-labeled but not removed; see paper §IV.A and Algorithm 1).
+    When source_path is None, prefiltering is skipped and raw configs are
+    returned unchanged (legacy behaviour).
+    """
+    if not source_path:
+        return list(configs)
+    active, _blocked, suppressed, _log = phagocytosis(
+        configs=configs, rules=default_static_rules(),
+        source_path=source_path, benchmark_name=benchmark_name,
+    )
+    return list(active) + list(suppressed)
 
 
 class ConfigEncoder:
@@ -91,7 +110,8 @@ class SimulatedAnnealingMethod(DSEMethod):
     """
 
     def __init__(self, configs, benchmark_name, tool, budget, seed=None,
-                 T_init=1000.0, T_final=1.0, **kwargs):
+                 T_init=1000.0, T_final=1.0, source_path=None, **kwargs):
+        configs = _apply_scf_prefilter(configs, benchmark_name, source_path)
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)
         self.T_init = T_init
         self.T_final = T_final
@@ -188,7 +208,8 @@ class GeneticAlgorithmMethod(DSEMethod):
     """
 
     def __init__(self, configs, benchmark_name, tool, budget, seed=None,
-                 pop_size=10, mutation_rate=0.1, tournament_k=3, **kwargs):
+                 pop_size=10, mutation_rate=0.1, tournament_k=3, source_path=None, **kwargs):
+        configs = _apply_scf_prefilter(configs, benchmark_name, source_path)
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)
         self.pop_size = pop_size
         self.mutation_rate = mutation_rate
@@ -324,7 +345,8 @@ class GPBayesOptMethod(DSEMethod):
     """
 
     def __init__(self, configs, benchmark_name, tool, budget, seed=None,
-                 n_init=5, **kwargs):
+                 n_init=5, source_path=None, **kwargs):
+        configs = _apply_scf_prefilter(configs, benchmark_name, source_path)
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)
         self.n_init = n_init
         self.rng = np.random.RandomState(seed if seed is not None else 0)
@@ -431,7 +453,8 @@ class RFClassifierMethod(DSEMethod):
     """
 
     def __init__(self, configs, benchmark_name, tool, budget, seed=None,
-                 n_init=10, retrain_every=5, **kwargs):
+                 n_init=10, retrain_every=5, source_path=None, **kwargs):
+        configs = _apply_scf_prefilter(configs, benchmark_name, source_path)
         super().__init__(configs, benchmark_name, tool, budget, seed=seed)
         self.n_init = n_init
         self.retrain_every = retrain_every
