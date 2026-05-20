@@ -46,7 +46,7 @@ def _apply_scf_prefilter(configs, benchmark_name, source_path):
     """Apply Static Constraint Filter to remove blocked configurations.
 
     Returns C \\ C_blk = active + suppressed configs (suppressed configs are
-    kept as risk-labeled but not removed; see paper §IV.A and Algorithm 1).
+    kept as risk-labeled but not removed; see paper §III.D and Algorithm 1).
     When source_path is None, prefiltering is skipped and raw configs are
     returned unchanged (legacy behaviour).
     """
