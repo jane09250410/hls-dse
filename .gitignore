@@ -82,3 +82,7 @@ results/master/*/vadd/
 **/skip_log.csv
 **/signature_log.csv
 _scratch/
+
+# theta sweep raw eval logs (too large, summary CSV is enough)
+results/theta_sweep/eval_log*.csv
+results/theta_sweep/theta_*/
