@@ -121,8 +121,9 @@ To our knowledge, PA-DSE is the first HLS DSE framework to make the coupling bet
 \centering
 \caption{Positioning of PA-DSE relative to the closest prior work. ``Action--evidence coupling'' refers to whether the system explicitly restricts each component's action class based on the strength of its evidence source.}
 \label{tab:positioning}
-\small
-\begin{tabular}{lcccc}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcccc@{}}
 \toprule
  & \textbf{PA-DSE} & \textbf{HGBO} & \textbf{Auto-} & \textbf{GP-BO} \\
  &                 & \textbf{-DSE}  & \textbf{Scale}  &  \\
@@ -130,13 +131,14 @@ To our knowledge, PA-DSE is the first HLS DSE framework to make the coupling bet
 Surrogate / model type   & None & GNN   & RF     & GP \\
 Offline training         & No   & Yes   & Yes    & No\textsuperscript{\dag} \\
 Feasibility filter       & 2-level & 1-level & No & No \\
-Online adaptation        & DFRL & No    & No     & Surrogate fitting \\
-Action--evidence         & Yes  & No    & No     & No \\
-\quad coupling           &      &       &        &    \\
+Online adaptation        & DFRL & No    & No     & Online \\
+Action--evidence coupling & Yes & No & No & No \\
 Decision traceable       & Yes  & No    & No     & No \\
 \bottomrule
-\multicolumn{5}{l}{\footnotesize\textsuperscript{\dag} GP-BO fits its Gaussian-process surrogate online within a single run; no separate offline training corpus is required.}\\
 \end{tabular}
+
+\vspace{2pt}
+\parbox{\columnwidth}{\footnotesize\textsuperscript{\dag} GP-BO fits its Gaussian-process surrogate online within a single run; no separate offline training corpus is required.}
 \end{table}
 
 
