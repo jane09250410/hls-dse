@@ -17,13 +17,13 @@ PA-DSE has two layers:
 
 Evaluated on 8 shared benchmarks (matmul, vadd, fir, histogram, atax, bicg, gemm, gesummv) on two HLS tools:
 
-| Tool | Budget | PA-DSE SR | Best Baseline | Wasted Reduction |
+| Tool | Budget | PA-DSE SR | Best Baseline | User-visible improvement |
 |---|---|---|---|---|
 | Bambu (v0.9.8) | 60 | **92.5%** | RF 85.9% | 1.9× fewer |
 | Dynamatic (v2.0) | 30 | **91.3%** | GP-BO 90.2% | 2× faster TTFF |
 | Bambu | 120 | **83.0%** | SCF+OFRS 46.7% | RPE adds +36.3pp |
 
-Algorithmic overhead: 5.3 ms/iter on Bambu, 2.0 ms/iter on Dynamatic (< 0.25% of synthesis cost).
+Algorithmic overhead: 5.3 ms/iter on Bambu, 2.0 ms/iter on Dynamatic (at roughly 0.25% of synthesis cost).
 
 ## Repository Structure
 
@@ -58,7 +58,9 @@ hls-dse/
 
 ## Reproducibility
 
-All paper-reported numbers were produced by running each method against the real Bambu and Dynamatic toolchains on the experiment VM (mean wall-clock $\approx 150$\,s per Bambu run, $\approx 16$\,s per Dynamatic run). The corresponding `run_summary.csv` files are checked in. Raw `eval_log.csv` files ($\sim 35$\,GB on the experiment VM) are not included; the convergence and QoR figures require these traces (see note below).
+All paper-reported numbers were produced by running each method against the real Bambu and Dynamatic toolchains on the experiment VM, with per-synthesis-call mean cost of $\approx 2.1$\,s on Bambu and $\approx 16.5$\,s on Dynamatic (see Table VIII). The corresponding `run_summary.csv` files are checked in. Raw `eval_log.csv` files ($\sim 35$\,GB on the experiment VM) are not included; the convergence and QoR figures require these traces (see note below).
+
+**Note on CSV column naming.** The column `overhead_phago_ms` in `run_summary.csv` corresponds to **SCF overhead** (Table VIII in the paper). "phago" is a legacy name from an earlier project iteration; the algorithm and semantics are identical to SCF as described in §III-D.
 
 ### Reproducing paper tables from the released CSVs (authoritative path)
 
@@ -140,10 +142,6 @@ python3 run_b120_bambu.py
 # Dynamatic ablation (5 permutations per benchmark; n=25 rows/config after filtering to 5 non-trivial benchmarks)
 python3 rerun_ablation_n5.py
 ```
-
-### CSV column naming
-
-The column `overhead_phago_ms` in `run_summary.csv` corresponds to **SCF overhead** (Table VIII in the paper). "phago" is a legacy name from an earlier project iteration; the algorithm and semantics are identical to SCF as described in §III-D.
 
 ## Citation
 
