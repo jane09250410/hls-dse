@@ -418,7 +418,7 @@ Trajectory-based baselines (SA, GA, GP-BO, RF) operate on the same unblocked con
     \item \textbf{SR (\%)}: fraction of evaluated configurations that synthesized successfully, the primary feasibility metric.
     \item \textbf{Wasted calls}: count of synthesis invocations that returned a failure, a proxy for user-visible time cost.
     \item \textbf{TTFF (s)}: wall-clock time to first feasible design, relevant for interactive use.
-    \item \textbf{UQoR}: number of unique Pareto-eligible QoR points (distinct (area, latency) pairs) discovered.
+    \item \textbf{UQoR}: number of unique $(\text{area}, \text{latency})$ pairs discovered across successful evaluations in a run (Python-set deduplication on the raw QoR tuple). Tables~\ref{tab:main_bambu}--\ref{tab:main_dynamatic} report the mean across runs. This is a measure of QoR-space coverage breadth; Pareto-front coverage is reported separately in Fig.~\ref{fig:qor} (\S\ref{sec:qor}).
     \item \textbf{Best area, best latency}: minima observed across successful configurations in the run.
     \item \textbf{Algorithmic overhead}: per-iteration time spent in each PA-DSE layer (\texttt{overhead\_scf\_ms}, \texttt{overhead\_rpe\_ms}, \texttt{overhead\_ofrs\_ms}).
 \end{itemize}
