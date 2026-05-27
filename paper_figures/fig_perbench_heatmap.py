@@ -53,7 +53,7 @@ cmap = LinearSegmentedColormap.from_list(
     "sr", ["#d73027", "#fdae61", "#fee08b", "#d9ef8b", "#a6d96a", "#1a9850"])
 
 fig, (axL, axR) = plt.subplots(1, 2, figsize=(14, 4.4),
-                                gridspec_kw={"width_ratios": [1.4, 0.85]})
+                                gridspec_kw={"width_ratios": [1.0, 1.0]})
 
 
 def plot_heatmap(ax, df, bench_order, title, show_ylabels=True):
@@ -126,9 +126,10 @@ DYN_BENCHES = ["matmul", "vadd", "fir", "histogram",
 im2 = plot_heatmap(axR, dyn_df, DYN_BENCHES, "(b) Dynamatic per-benchmark SR (%)",
                     show_ylabels=False)
 
-# Shared colorbar
-cbar = fig.colorbar(im2, ax=[axL, axR], orientation="vertical",
-                    shrink=0.78, pad=0.02)
+# Shared colorbar — independent axes to avoid squeezing subplots
+fig.subplots_adjust(right=0.90)
+cax = fig.add_axes([0.92, 0.18, 0.015, 0.65])  # [left, bottom, width, height]
+cbar = fig.colorbar(im2, cax=cax)
 cbar.set_label("Success Rate (%)")
 
 plt.savefig(OUT / "fig_perbench_heatmap.pdf", bbox_inches="tight")
