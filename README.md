@@ -51,7 +51,8 @@ hls-dse/
     ├── b120/bambu_main/                  # B=120 experiment (RPE active)
     ├── bambu_ground_truth/               # 420 configs × 8 benchmarks
     ├── dynamatic_ground_truth/           # 192 configs × 8 benchmarks
-    ├── theta_sweep_b120/                 # θ sensitivity sweep
+    ├── theta_sweep_b120/                 # θ sensitivity sweep (B=120)
+    ├── theta_sweep/                       # θ sensitivity sweep (B=60, §V-H cross-check)
     └── rerun/                            # PA-DSE permutation runs (overhead)
 ```
 
@@ -139,6 +140,10 @@ python3 run_b120_bambu.py
 # Dynamatic ablation (5 permutations per benchmark; n=25 rows/config after filtering to 5 non-trivial benchmarks)
 python3 rerun_ablation_n5.py
 ```
+
+### CSV column naming
+
+The column `overhead_phago_ms` in `run_summary.csv` corresponds to **SCF overhead** (Table VIII in the paper). "phago" is a legacy name from an earlier project iteration; the algorithm and semantics are identical to SCF as described in §III-D.
 
 ## Citation
 
