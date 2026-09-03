@@ -36,10 +36,10 @@ df = pd.read_csv(ROOT / "b120/bambu_main/run_summary.csv")
 RENAME = {'Random':'Random','Filtered_Random':'FilteredRandom',
           'SimulatedAnnealing':'SA','GeneticAlgorithm':'GA',
           'GP-BO':'GP-BO','RF_Classifier':'RF',
-          'PA-DSE_SCF+DFRL':'PA-DSE','PA-DSE_SCF+OFRS':'SCF+OFRS'}
+          'PA-DSE_SCF+DFRL':'FA-DSE','PA-DSE_SCF+OFRS':'SCF+OFRS'}
 df['method'] = df['strategy'].map(RENAME).fillna(df['strategy'])
 
-ORDER = ['Random','FilteredRandom','SA','GA','GP-BO','RF','SCF+OFRS','PA-DSE']
+ORDER = ['Random','FilteredRandom','SA','GA','GP-BO','RF','SCF+OFRS','FA-DSE']
 
 COLORS = {
     'Random':         BASE_COLORS['Random'],
@@ -49,7 +49,7 @@ COLORS = {
     'GP-BO':          BASE_COLORS['GP-BO'],
     'RF':             BASE_COLORS['RF'],
     'SCF+OFRS':       '#6B8E9B',
-    'PA-DSE':         BASE_COLORS['PA-DSE'],
+    'FA-DSE':         BASE_COLORS['FA-DSE'],
 }
 
 fig, ax = plt.subplots(figsize=(7, 4))
@@ -64,13 +64,13 @@ bars = ax.bar(x, means, yerr=stds, color=colors, edgecolor='black',
 
 for i, (m, v, s) in enumerate(zip(ORDER, means, stds)):
     ax.text(i, v+s+2, f'{v:.1f}', ha='center', fontsize=8,
-            fontweight='bold' if m=='PA-DSE' else 'normal',
-            color=COLORS[m] if m in ('PA-DSE','SCF+OFRS') else '#333')
+            fontweight='bold' if m=='FA-DSE' else 'normal',
+            color=COLORS[m] if m in ('FA-DSE','SCF+OFRS') else '#333')
 
 ax.annotate('', xy=(7, 83), xytext=(6, 47),
-            arrowprops=dict(arrowstyle='<->', color=COLORS['PA-DSE'], lw=1.5))
+            arrowprops=dict(arrowstyle='<->', color=COLORS['FA-DSE'], lw=1.5))
 ax.text(6.5, 64, '+36.3 pp\n(RPE)', ha='center', fontsize=9,
-        color=COLORS['PA-DSE'], fontweight='bold')
+        color=COLORS['FA-DSE'], fontweight='bold')
 
 ax.set_xticks(x)
 ax.set_xticklabels(ORDER, rotation=30, ha='right')

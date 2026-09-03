@@ -1,4 +1,4 @@
-"""fig_architecture.py — PA-DSE architecture diagram.
+"""fig_architecture.py — FA-DSE architecture diagram.
 
 Renders into paper_figures/out/fig_architecture.{pdf,png}, which is the
 path referenced by pa_dse_paper.tex via

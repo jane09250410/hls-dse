@@ -34,7 +34,7 @@ BASELINE_MAP = {
 }
 
 METRICS_MAIN = ["sr_pct", "wasted_calls", "ttff_s", "uqor", "best_area", "best_latency"]
-METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
+METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "FA-DSE"]
 
 
 def main_table(main_path, perms_path, bench_filter, qat_qsd_path=None):
@@ -48,16 +48,16 @@ def main_table(main_path, perms_path, bench_filter, qat_qsd_path=None):
           f"({len(bench_filter)} benchmarks)")
     print(f"  [filter] perms: {before_perms} -> {len(perms)} rows")
 
-    main = main[~main["strategy"].str.contains("PA-DSE")].copy()
+    main = main[~main["strategy"].str.contains("FA-DSE")].copy()
     main["strategy"] = main["strategy"].map(BASELINE_MAP).fillna(main["strategy"])
-    perms["strategy"] = "PA-DSE"
+    perms["strategy"] = "FA-DSE"
 
     extra = []
     if qat_qsd_path is not None and (ROOT / qat_qsd_path).exists():
         qat = pd.read_csv(ROOT / qat_qsd_path)
         qat = qat[qat["benchmark"].isin(bench_filter)].copy()
         if len(qat) > 0:
-            qat["strategy"] = "PA-DSE+QAT+QSD"
+            qat["strategy"] = "FA-DSE+QAT+QSD"
             extra.append(qat)
             print(f"  [extra] QAT+QSD: {len(qat)} rows from {qat_qsd_path}")
 

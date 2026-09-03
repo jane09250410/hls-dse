@@ -14,7 +14,7 @@ Reads eval_log.csv and computes cumulative successful count per
 (method, benchmark, run). Then averages across benchmarks/runs and plots
 one curve per method with shaded confidence band.
 
-Shows HOW methods reach their final SR: PA-DSE is faster/more monotone.
+Shows HOW methods reach their final SR: FA-DSE is faster/more monotone.
 
 Input:
     master/bambu_main/eval_log.csv
@@ -42,7 +42,7 @@ RENAME = {
     "GP-BO": "GP-BO",
     "RF_Classifier": "RF",
 }
-ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE", "PA-DSE+QAT+QSD"]
+ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "FA-DSE", "FA-DSE+QAT+QSD"]
 COLORS = {
     "Random":         "#B0B0B0",
     "FilteredRandom": "#808080",
@@ -50,22 +50,22 @@ COLORS = {
     "GA":             "#E9C46A",
     "GP-BO":          "#2A9D8F",
     "RF":             "#264653",
-    "PA-DSE":         "#C1272D",
-    "PA-DSE+QAT+QSD": "#7B0E12",
+    "FA-DSE":         "#C1272D",
+    "FA-DSE+QAT+QSD": "#7B0E12",
 }
 
 
 def load_and_process(main_path, perms_path, max_step, qat_qsd_path=None):
     main = pd.read_csv(ROOT / main_path)
     perms = pd.read_csv(ROOT / perms_path)
-    main = main[~main["strategy"].str.contains("PA-DSE")].copy()
+    main = main[~main["strategy"].str.contains("FA-DSE")].copy()
     main["strategy"] = main["strategy"].map(RENAME).fillna(main["strategy"])
     perms = perms.copy()
-    perms["strategy"] = "PA-DSE"
+    perms["strategy"] = "FA-DSE"
     frames = [main, perms]
     if qat_qsd_path is not None and (ROOT / qat_qsd_path).exists():
         qat = pd.read_csv(ROOT / qat_qsd_path).copy()
-        qat["strategy"] = "PA-DSE+QAT+QSD"
+        qat["strategy"] = "FA-DSE+QAT+QSD"
         frames.append(qat)
     df = pd.concat(frames, ignore_index=True)
 
@@ -117,8 +117,8 @@ def plot_curves(ax, curves, budget, title):
         arr = curves[strat]
         mean = arr.mean(axis=0)
         std  = arr.std(axis=0)
-        lw = 2.2 if strat == "PA-DSE" else 1.3
-        alpha_fill = 0.25 if strat == "PA-DSE" else 0.12
+        lw = 2.2 if strat == "FA-DSE" else 1.3
+        alpha_fill = 0.25 if strat == "FA-DSE" else 0.12
         ax.plot(x, mean, color=COLORS[strat], linewidth=lw, label=strat)
         ax.fill_between(x, mean - std, mean + std, color=COLORS[strat], alpha=alpha_fill, lw=0)
     ax.set_xlabel("Evaluation step")

@@ -1,4 +1,4 @@
-"""Figure 4: Ablation bar chart for PA-DSE components.
+"""Figure 4: Ablation bar chart for FA-DSE components.
 
 Visualizes 8 ablation configs grouped by which component is active, with error bars.
 Highlights the key findings: OFRS dominates, SCF is safety net, OFRS-skip breaks.
@@ -29,7 +29,7 @@ CONFIG_ORDER = [
     "SCF+RPE-reorder", "SCF+OFRS-skip",
 ]
 
-# Color coding: highlight the "full" PA-DSE; flag the "unsafe" OFRS-skip
+# Color coding: highlight the "full" FA-DSE; flag the "unsafe" OFRS-skip
 DEFAULT     = "#4E79A7"
 FULL_PA_DSE = "#C1272D"  # red highlight
 UNSAFE      = "#B71C1C"  # dark red for broken config
@@ -87,7 +87,7 @@ draw(axR, dyn, "(b) Dynamatic (B=30, 25 runs/config)")
 from matplotlib.patches import Patch
 legend_handles = [
     Patch(facecolor=DEFAULT,     edgecolor="black", label="ablation variant"),
-    Patch(facecolor=FULL_PA_DSE, edgecolor="black", label="PA-DSE full (SCF+DFRL)"),
+    Patch(facecolor=FULL_PA_DSE, edgecolor="black", label="FA-DSE full (SCF+DFRL)"),
     Patch(facecolor=UNSAFE,      edgecolor="black", label="evidence-hierarchy violation"),
 ]
 fig.legend(handles=legend_handles, loc="upper center",

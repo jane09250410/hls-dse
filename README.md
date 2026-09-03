@@ -1,12 +1,12 @@
-# PA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis
+# FA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis
 
-Implementation and experimental data for **PA-DSE**, a feasibility-aware HLS DSE policy built on the principle that *action strength must not exceed evidence strength*.
+Implementation and experimental data for **FA-DSE**, a feasibility-aware HLS DSE policy built on the principle that *action strength must not exceed evidence strength*.
 
-📄 **Paper**: [`pa_dse_paper.pdf`](pa_dse_paper.pdf) — *PA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis via Hierarchical Evidence-Bounded Pruning*
+📄 **Paper**: [`pa_dse_paper.pdf`](pa_dse_paper.pdf) — *FA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis via Hierarchical Evidence-Bounded Pruning*
 
 ## Overview
 
-PA-DSE has two layers:
+FA-DSE has two layers:
 
 - **SCF (Static Constraint Filter)** — permanently removes configurations matching tool-documented incompatibility rules.
 - **DFRL (Dynamic Failure Risk Learner)** — accumulates evidence online during a single run, with two sub-components:
@@ -17,7 +17,7 @@ PA-DSE has two layers:
 
 Evaluated on 8 shared benchmarks (matmul, vadd, fir, histogram, atax, bicg, gemm, gesummv) on two HLS tools:
 
-| Tool | Budget | PA-DSE SR | Best Baseline | User-visible improvement |
+| Tool | Budget | FA-DSE SR | Best Baseline | User-visible improvement |
 |---|---|---|---|---|
 | Bambu (v0.9.8) | 60 | **92.5%** | RF 85.9% | 1.9× fewer |
 | Dynamatic (v2.0) | 30 | **91.3%** | GP-BO 90.2% | 2× faster TTFF |
@@ -33,13 +33,13 @@ hls-dse/
 ├── pa_dse_paper.pdf      # Compiled paper
 ├── references.bib        # Bibliography
 ├── benchmarks/           # C source for 8 benchmarks
-├── scripts/              # PA-DSE implementation
+├── scripts/              # FA-DSE implementation
 │   ├── config_generator.py
 │   ├── dynamatic_config_generator.py
 │   ├── feasibility_filter.py       # SCF
 │   ├── pattern_learner.py          # RPE
 │   ├── dynamic_failure_learner.py  # OFRS
-│   ├── methods/                    # PA-DSE + baselines
+│   ├── methods/                    # FA-DSE + baselines
 │   └── runners/
 ├── offline_sim/          # Offline simulator (ground-truth oracle)
 ├── paper_figures/        # Plotting scripts + generated PDFs
@@ -53,7 +53,7 @@ hls-dse/
     ├── dynamatic_ground_truth/           # 192 configs × 8 benchmarks
     ├── theta_sweep_b120/                 # θ sensitivity sweep (B=120)
     ├── theta_sweep/                       # θ sensitivity sweep (B=60, §V-H cross-check)
-    └── rerun/                            # PA-DSE permutation runs (overhead)
+    └── rerun/                            # FA-DSE permutation runs (overhead)
 ```
 
 ## Reproducibility
@@ -70,25 +70,25 @@ python3 paper_figures/compute_paper_tables.py
 
 This regenerates every numerical value reported in Tables I-VIII byte-for-byte from the checked-in real-tool run summaries (main success-rate comparisons, ablation breakdowns, B=120 RPE analysis, theta sensitivity sweep, per-iteration overhead decomposition).
 
-### Validating PA-DSE end-to-end via the offline simulator
+### Validating FA-DSE end-to-end via the offline simulator
 
-`offline_sim/simulator.py` replays the released ground-truth tables (`results/{bambu,dynamatic}_ground_truth/run_summary.csv`) as a synthesis oracle so that the PA-DSE source code can be exercised end-to-end without re-running the HLS toolchain. We have verified the offline path reproduces PA-DSE main-table numbers within statistical noise:
+`offline_sim/simulator.py` replays the released ground-truth tables (`results/{bambu,dynamatic}_ground_truth/run_summary.csv`) as a synthesis oracle so that the FA-DSE source code can be exercised end-to-end without re-running the HLS toolchain. We have verified the offline path reproduces FA-DSE main-table numbers within statistical noise:
 
 | Method (Bambu B=60, n=40) | Released CSV | Offline replay | Δ |
 |---------------------------|-------------:|---------------:|---:|
-| PA-DSE                    | 92.5 % | 92.3 % | -0.2 |
+| FA-DSE                    | 92.5 % | 92.3 % | -0.2 |
 | Random                    | 15.0 % | 14.0 % | -1.0 |
 | Filtered Random           | 18.5 % | 18.3 % | -0.2 |
 
 | Method (Dynamatic B=30, n=50) | Released CSV | Offline replay | Δ |
 |-------------------------------|-------------:|---------------:|---:|
-| PA-DSE                        | 91.33 % | 91.33 % | exact |
+| FA-DSE                        | 91.33 % | 91.33 % | exact |
 
-This validates that the PA-DSE source code in this repository implements the algorithm reported in the paper.
+This validates that the FA-DSE source code in this repository implements the algorithm reported in the paper.
 
 ### Note on reproducing stochastic baselines via the offline simulator
 
-When the released CSVs were generated, the experiment runner fed each method the SCF-prefiltered active set (the 280 unblocked Bambu configurations after the documented MEM\_ACC rules) rather than the raw 420-point grid. This shared SCF prefilter is part of the paper's evidence-hierarchy design: SCF is layer 1 of PA-DSE, and giving every baseline the same SCF-filtered starting point isolates the additional contribution of DFRL (layers 2-3) over a vanilla optimizer. The released `run_summary.csv` files reflect this configuration.
+When the released CSVs were generated, the experiment runner fed each method the SCF-prefiltered active set (the 280 unblocked Bambu configurations after the documented MEM\_ACC rules) rather than the raw 420-point grid. This shared SCF prefilter is part of the paper's evidence-hierarchy design: SCF is layer 1 of FA-DSE, and giving every baseline the same SCF-filtered starting point isolates the additional contribution of DFRL (layers 2-3) over a vanilla optimizer. The released `run_summary.csv` files reflect this configuration.
 
 The `SimulatedAnnealingMethod`, `GeneticAlgorithmMethod`, `GPBayesOptMethod`, and `RFClassifierMethod` classes in `scripts/methods/advanced_baselines.py` accept an optional `source_path` argument; when provided, each class applies the SCF prefilter at construction time, mirroring the behaviour of `FilteredRandomMethod`. Passing `source_path=str(REPO / f"benchmarks/{benchmark}/{benchmark}.c")` to the constructor is sufficient to align the offline replay with the paper's experimental configuration. Replays under this configuration reproduce the paper's Bambu baseline SRs within statistical noise (RF Δ=−0.2, GP-BO Δ=−1.0, SA and GA within paper σ). When `source_path` is omitted the classes fall back to the raw configuration set for backward compatibility; in that case trajectory-dependent baselines under-perform the released CSV numbers by several percentage points, because a single-point mutation chain starting in the blocked region (140 of 420 configurations) gets stuck there. The released CSVs remain the authoritative source for paper-reported baseline numbers.
 
@@ -147,7 +147,7 @@ python3 rerun_ablation_n5.py
 
 ```bibtex
 @article{padse2026,
-  title={PA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis
+  title={FA-DSE: Feasibility-Aware Design Space Exploration for High-Level Synthesis
          via Hierarchical Evidence-Bounded Pruning},
   author={Zhang, Xinyu and Pilato, Christian},
   year={2026},

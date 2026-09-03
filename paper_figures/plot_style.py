@@ -1,4 +1,4 @@
-"""Shared plot style for PA-DSE TRETS paper figures.
+"""Shared plot style for FA-DSE TRETS paper figures.
 
 Import at the top of every figure script:
     from plot_style import setup, COLORS, METHOD_ORDER, save_fig
@@ -17,9 +17,9 @@ import matplotlib as mpl
 from pathlib import Path
 
 # ======================= Method ordering & colors =======================
-METHOD_ORDER = ["Random", "Filtered_Random", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
+METHOD_ORDER = ["Random", "Filtered_Random", "SA", "GA", "GP-BO", "RF", "FA-DSE"]
 
-# Colorblind-safe, PA-DSE = red for emphasis
+# Colorblind-safe, FA-DSE = red for emphasis
 COLORS = {
     "Random":           "#B0B0B0",  # gray
     "Filtered_Random":  "#808080",  # darker gray
@@ -27,7 +27,7 @@ COLORS = {
     "GA":               "#E9C46A",  # muted yellow
     "GP-BO":            "#2A9D8F",  # teal
     "RF":               "#264653",  # dark slate
-    "PA-DSE":           "#C1272D",  # red (highlight)
+    "FA-DSE":           "#C1272D",  # red (highlight)
 }
 
 # ======================= Benchmark whitelists =======================

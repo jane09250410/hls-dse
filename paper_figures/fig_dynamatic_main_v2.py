@@ -41,9 +41,9 @@ plt.rcParams.update({
 dyn_main  = pd.read_csv(ROOT / "master/dynamatic_main/run_summary.csv")
 dyn_perms = pd.read_csv(ROOT / "rerun/dynamatic_pa_dse_perms/run_summary.csv")
 
-dyn_main_clean = dyn_main[~dyn_main["strategy"].str.contains("PA-DSE")].copy()
+dyn_main_clean = dyn_main[~dyn_main["strategy"].str.contains("FA-DSE")].copy()
 dyn_perms_clean = dyn_perms.copy()
-dyn_perms_clean["strategy"] = "PA-DSE"
+dyn_perms_clean["strategy"] = "FA-DSE"
 
 
 RENAME = {
@@ -65,7 +65,7 @@ df = df[df["benchmark"].isin(DYNAMATIC_BENCHMARKS)].copy()
 print(f"[filter] Dynamatic 5 non-trivial benchmarks: {before} -> {len(df)} rows")
 
 # ==================== Method order + colors ====================
-METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
+METHOD_ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "FA-DSE"]
 BENCH_ORDER_PANEL_B = DYNAMATIC_BENCHMARKS
 
 COLORS = {
@@ -75,7 +75,7 @@ COLORS = {
     "GA":             "#59A14F",
     "GP-BO":          "#F28E2B",
     "RF":             "#E15759",
-    "PA-DSE":         "#C1272D",}
+    "FA-DSE":         "#C1272D",}
 
 # Filter METHOD_ORDER to only methods that have data
 METHOD_ORDER = [m for m in METHOD_ORDER if m in df["strategy"].unique()]
@@ -104,7 +104,7 @@ for i, method in enumerate(METHOD_ORDER):
     m = row["mean"]
     s = row["std"]
     y_pos = m + s + 2
-    if method in ("PA-DSE"):
+    if method in ("FA-DSE"):
         axL.text(i, y_pos, f"{m:.1f}",
                  ha="center", fontsize=9, fontweight="bold",
                  color=COLORS[method])

@@ -3,10 +3,10 @@ fig_pareto.py
 =============
 Pareto trade-off scatter plot: best_latency vs SR for each method on
 Bambu (a) and Dynamatic (b). Highlights the production-feasible region
-(SR >= 85%) where PA-DSE+QAT+QSD attains the Pareto frontier.
+(SR >= 85%) where FA-DSE+QAT+QSD attains the Pareto frontier.
 
 Directly responds to the reader's likely question: "Why are some
-PA-DSE QoR numbers lower than Random/GA/SA?" Answer: those methods
+FA-DSE QoR numbers lower than Random/GA/SA?" Answer: those methods
 trade 25-39pp of SR for marginal latency, leaving them outside any
 production-feasible operating regime.
 """
@@ -42,8 +42,8 @@ COLORS = {
     "GA":             "#59A14F",
     "GP-BO":          "#F28E2B",
     "RF":             "#E15759",
-    "PA-DSE":         "#C1272D",
-    "PA-DSE+QAT+QSD": "#7B0E12",
+    "FA-DSE":         "#C1272D",
+    "FA-DSE+QAT+QSD": "#7B0E12",
 }
 MARKERS = {
     "Random":         "o",
@@ -52,8 +52,8 @@ MARKERS = {
     "GA":             "^",
     "GP-BO":          "D",
     "RF":             "P",
-    "PA-DSE":         "*",
-    "PA-DSE+QAT+QSD": "*",
+    "FA-DSE":         "*",
+    "FA-DSE+QAT+QSD": "*",
 }
 
 DYNAMATIC_BENCHMARKS = ["matmul", "atax", "bicg", "gemm", "gesummv"]
@@ -64,19 +64,19 @@ BAMBU_BENCHMARKS = ["matmul", "vadd", "fir", "histogram",
 def load(main_path, perms_path, qat_qsd_path, bench_filter):
     main = pd.read_csv(ROOT / main_path)
     main = main[main["benchmark"].isin(bench_filter)].copy()
-    main = main[~main["strategy"].str.contains("PA-DSE")].copy()
+    main = main[~main["strategy"].str.contains("FA-DSE")].copy()
     main["strategy"] = main["strategy"].map(RENAME).fillna(main["strategy"])
 
     perms = pd.read_csv(ROOT / perms_path)
     perms = perms[perms["benchmark"].isin(bench_filter)].copy()
-    perms["strategy"] = "PA-DSE"
+    perms["strategy"] = "FA-DSE"
 
     frames = [main, perms]
     if (ROOT / qat_qsd_path).exists():
         qat = pd.read_csv(ROOT / qat_qsd_path)
         qat = qat[qat["benchmark"].isin(bench_filter)].copy()
         if len(qat) > 0:
-            qat["strategy"] = "PA-DSE+QAT+QSD"
+            qat["strategy"] = "FA-DSE+QAT+QSD"
             frames.append(qat)
 
     return pd.concat(frames, ignore_index=True)
@@ -110,7 +110,7 @@ def plot_panel(ax, df, title, threshold=85, lat_pad_frac=0.07):
 
     # Plot each method
     methods = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF",
-               "PA-DSE", "PA-DSE+QAT+QSD"]
+               "FA-DSE", "FA-DSE+QAT+QSD"]
     for m in methods:
         row = df[df["strategy"] == m]
         if len(row) == 0:
@@ -118,7 +118,7 @@ def plot_panel(ax, df, title, threshold=85, lat_pad_frac=0.07):
         sr = row["SR"].iloc[0]
         bl = row["best_lat"].iloc[0]
 
-        if m in ("PA-DSE", "PA-DSE+QAT+QSD"):
+        if m in ("FA-DSE", "FA-DSE+QAT+QSD"):
             sz = 320
             ec = "black"; ew = 1.0
         else:

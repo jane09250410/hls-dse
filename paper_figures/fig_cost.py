@@ -4,7 +4,7 @@ Two-panel bar chart:
   (a) Wasted synthesis calls per method (Bambu + Dynamatic side by side)
   (b) Time-to-first-feasible (TTFF) per method
 
-Highlights PA-DSE's cost advantage that SR alone doesn't reveal.
+Highlights FA-DSE's cost advantage that SR alone doesn't reveal.
 """
 
 import numpy as np
@@ -16,7 +16,7 @@ OUT = Path(__file__).resolve().parent / "out"
 bam = pd.read_csv(OUT / "table_main_bambu.csv").set_index("method")
 dyn = pd.read_csv(OUT / "table_main_dynamatic.csv").set_index("method")
 
-ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE"]
+ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "FA-DSE"]
 COLORS = {
     "Random":         "#B0B0B0",
     "FilteredRandom": "#808080",
@@ -24,7 +24,7 @@ COLORS = {
     "GA":             "#E9C46A",
     "GP-BO":          "#2A9D8F",
     "RF":             "#264653",
-    "PA-DSE":         "#C1272D",
+    "FA-DSE":         "#C1272D",
 }
 
 plt.rcParams.update({
@@ -52,8 +52,8 @@ axL.bar(x + w/2, wa_dyn, w, yerr=wa_dyn_s,
         hatch="//", label="Dynamatic (B=30)", capsize=2, error_kw={"elinewidth": 0.6})
 
 for i, m in enumerate(ORDER):
-    fw = "bold" if m == "PA-DSE" else "normal"
-    c  = "#C1272D" if m == "PA-DSE" else "#333"
+    fw = "bold" if m == "FA-DSE" else "normal"
+    c  = "#C1272D" if m == "FA-DSE" else "#333"
     axL.text(i - w/2, wa_bam[i] + wa_bam_s[i] + 1, f"{wa_bam[i]:.1f}",
              ha="center", fontsize=8, color=c, fontweight=fw)
 
@@ -84,8 +84,8 @@ axR.bar(x + w/2, ttff_dyn, w, yerr=clip_err(ttff_dyn, ttff_dyn_s),
         hatch="//", label="Dynamatic (B=30)", capsize=2, error_kw={"elinewidth": 0.6})
 
 for i, m in enumerate(ORDER):
-    fw = "bold" if m == "PA-DSE" else "normal"
-    c  = "#C1272D" if m == "PA-DSE" else "#333"
+    fw = "bold" if m == "FA-DSE" else "normal"
+    c  = "#C1272D" if m == "FA-DSE" else "#333"
     # label Bambu value above Bambu bar (left), Dynamatic value above Dynamatic bar (right)
     axR.text(i - w/2, ttff_bam[i] + min(ttff_bam_s[i], ttff_bam[i]) + 2,
              f"{ttff_bam[i]:.1f}",

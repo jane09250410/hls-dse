@@ -1,6 +1,6 @@
 """Figure 9: Per-benchmark SR heatmap — method × benchmark grid.
 
-Shows PA-DSE wins or ties on every benchmark, revealing consistency.
+Shows FA-DSE wins or ties on every benchmark, revealing consistency.
 Uses run_summary.csv (simpler, no eval_log needed).
 
 Output: fig_perbench_heatmap.pdf
@@ -23,20 +23,20 @@ RENAME = {
     "GP-BO": "GP-BO",
     "RF_Classifier": "RF",
 }
-ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "PA-DSE", "PA-DSE+QAT+QSD"]
+ORDER = ["Random", "FilteredRandom", "SA", "GA", "GP-BO", "RF", "FA-DSE", "FA-DSE+QAT+QSD"]
 
 
 def load_main(main_path, perms_path, qat_qsd_path=None):
     main = pd.read_csv(ROOT / main_path)
     perms = pd.read_csv(ROOT / perms_path)
-    main = main[~main["strategy"].str.contains("PA-DSE")].copy()
+    main = main[~main["strategy"].str.contains("FA-DSE")].copy()
     main["strategy"] = main["strategy"].map(RENAME).fillna(main["strategy"])
     perms = perms.copy()
-    perms["strategy"] = "PA-DSE"
+    perms["strategy"] = "FA-DSE"
     frames = [main, perms]
     if qat_qsd_path is not None and (ROOT / qat_qsd_path).exists():
         qat = pd.read_csv(ROOT / qat_qsd_path).copy()
-        qat["strategy"] = "PA-DSE+QAT+QSD"
+        qat["strategy"] = "FA-DSE+QAT+QSD"
         frames.append(qat)
     return pd.concat(frames, ignore_index=True)
 
@@ -94,12 +94,12 @@ def plot_heatmap(ax, df, bench_order, title, show_ylabels=True):
     ax.grid(which="minor", color="white", linewidth=1)
     ax.tick_params(which="minor", length=0)
 
-    # Bold PA-DSE / PA-DSE+QAT+QSD row labels
+    # Bold FA-DSE / FA-DSE+QAT+QSD row labels
     if show_ylabels:
         for lbl in ax.get_yticklabels():
-            if lbl.get_text() == "PA-DSE":
+            if lbl.get_text() == "FA-DSE":
                 lbl.set_color("#C1272D"); lbl.set_fontweight("bold")
-            elif lbl.get_text() == "PA-DSE+QAT+QSD":
+            elif lbl.get_text() == "FA-DSE+QAT+QSD":
                 lbl.set_color("#7B0E12"); lbl.set_fontweight("bold")
     return im
 

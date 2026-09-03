@@ -1,8 +1,8 @@
 """Figure 1 (v2): Bambu main results — bar chart + distribution box plot.
 
 Reads SAME source as Table II (compute_paper_tables.py):
-  - results/master/bambu_main/run_summary.csv      (baselines; PA-DSE rows dropped)
-  - results/rerun/bambu_pa_dse_perms/run_summary.csv (PA-DSE perms, 80 runs = 10 perm x 8 bench)
+  - results/master/bambu_main/run_summary.csv      (baselines; FA-DSE rows dropped)
+  - results/rerun/bambu_pa_dse_perms/run_summary.csv (FA-DSE perms, 80 runs = 10 perm x 8 bench)
 
 Panel (a): Overall mean SR (%) with std error bars.
 Panel (b): Per-method SR distribution across all runs (boxplot + strip).
@@ -36,11 +36,11 @@ BASELINE_MAP = {
 main = pd.read_csv(ROOT / "master/bambu_main/run_summary.csv")
 perms = pd.read_csv(ROOT / "rerun/bambu_pa_dse_perms/run_summary.csv")
 
-# Drop any PA-DSE rows from master so we use perms as the authoritative PA-DSE source.
-main = main[~main["strategy"].str.contains("PA-DSE")].copy()
+# Drop any FA-DSE rows from master so we use perms as the authoritative FA-DSE source.
+main = main[~main["strategy"].str.contains("FA-DSE")].copy()
 main["strategy"] = main["strategy"].map(BASELINE_MAP).fillna(main["strategy"])
 perms = perms.copy()
-perms["strategy"] = "PA-DSE"
+perms["strategy"] = "FA-DSE"
 
 df = pd.concat([main, perms], ignore_index=True)
 df = df.rename(columns={"strategy": "method"})
@@ -66,8 +66,8 @@ ax1.barh(y_pos, means, xerr=stds, color=bar_colors,
          error_kw={"elinewidth": 0.8, "capsize": 3, "ecolor": "#333"})
 
 for i, (m, s) in enumerate(zip(means, stds)):
-    color = "#C1272D" if METHOD_ORDER[i] == "PA-DSE" else "black"
-    weight = "bold" if METHOD_ORDER[i] == "PA-DSE" else "normal"
+    color = "#C1272D" if METHOD_ORDER[i] == "FA-DSE" else "black"
+    weight = "bold" if METHOD_ORDER[i] == "FA-DSE" else "normal"
     ax1.text(m + s + 2, i, f"{m:.1f}\u00B1{s:.1f}",
              va="center", ha="left", fontsize=8.5,
              color=color, fontweight=weight)
@@ -81,7 +81,7 @@ ax1.set_title("(a) Mean SR (across all runs)")
 ax1.grid(axis="y", visible=False)
 
 for label in ax1.get_yticklabels():
-    if label.get_text() == "PA-DSE":
+    if label.get_text() == "FA-DSE":
         label.set_color("#C1272D")
         label.set_fontweight("bold")
 
@@ -120,7 +120,7 @@ ax2.set_title("(b) SR distribution across runs")
 ax2.grid(axis="x", visible=False)
 
 for label in ax2.get_xticklabels():
-    if label.get_text() == "PA-DSE":
+    if label.get_text() == "FA-DSE":
         label.set_color("#C1272D")
         label.set_fontweight("bold")
 

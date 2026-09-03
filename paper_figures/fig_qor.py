@@ -11,12 +11,12 @@ Aggregated run_summary.csv files (used by all OTHER figure scripts) ARE in the r
 """Figure 8 (v4): QoR coverage classification.
 
 Each unique (area, latency) point is classified by who found it:
-  • Shared       — gray — found by PA-DSE AND at least one baseline
-  • PA-DSE only  — red  — only PA-DSE found it
-  • Baseline only — blue — no PA-DSE run found it, but some baseline did
+  • Shared       — gray — found by FA-DSE AND at least one baseline
+  • FA-DSE only  — red  — only FA-DSE found it
+  • Baseline only — blue — no FA-DSE run found it, but some baseline did
 
 Global Pareto front overlaid in black. This is the HONEST version: it shows
-that PA-DSE's coverage is (near-) identical to the union of all baselines,
+that FA-DSE's coverage is (near-) identical to the union of all baselines,
 while reaching all Pareto-optimal points.
 """
 
@@ -41,10 +41,10 @@ RENAME = {
 def load_successes(main_path, perms_path):
     main = pd.read_csv(ROOT / main_path)
     perms = pd.read_csv(ROOT / perms_path)
-    main = main[~main["strategy"].str.contains("PA-DSE")].copy()
+    main = main[~main["strategy"].str.contains("FA-DSE")].copy()
     main["strategy"] = main["strategy"].map(RENAME).fillna(main["strategy"])
     perms = perms.copy()
-    perms["strategy"] = "PA-DSE"
+    perms["strategy"] = "FA-DSE"
     df = pd.concat([main, perms], ignore_index=True)
 
     # 4-bench Dynamatic filter (paper §IV.A): exclude fir/histogram on Dynamatic
@@ -69,9 +69,9 @@ def classify_points(df):
     df["l_r"] = df["latency"].round(6)
     grouped = (df.groupby(["a_r", "l_r"])["strategy"]
                  .apply(set).reset_index())
-    grouped["has_padse"] = grouped["strategy"].apply(lambda s: "PA-DSE" in s)
+    grouped["has_padse"] = grouped["strategy"].apply(lambda s: "FA-DSE" in s)
     grouped["has_base"]  = grouped["strategy"].apply(
-        lambda s: any(m != "PA-DSE" for m in s))
+        lambda s: any(m != "FA-DSE" for m in s))
 
     def cls(row):
         if row["has_padse"] and row["has_base"]: return "shared"
@@ -111,8 +111,8 @@ CLASS_STYLE = {
                           edgecolor="white", linewidth=0.4),
 }
 CLASS_LABELS = {
-    "shared":        "Shared (PA-DSE and baselines)",
-    "padse_only":    "PA-DSE only",
+    "shared":        "Shared (FA-DSE and baselines)",
+    "padse_only":    "FA-DSE only",
     "baseline_only": "Baselines only",
 }
 DRAW_ORDER = ["shared", "baseline_only", "padse_only"]
@@ -139,7 +139,7 @@ def plot_qor(ax, classified, all_pts, title, tool_name):
         pf = pf[np.argsort(pf[:, 0])]
         pareto_count = len(pf)
 
-        # check Pareto points' class (is PA-DSE in their finder set?)
+        # check Pareto points' class (is FA-DSE in their finder set?)
         pf_set = set(map(tuple, np.round(pf, 6)))
         for _, row in classified.iterrows():
             pt = (row["area"], row["latency"])
@@ -155,7 +155,7 @@ def plot_qor(ax, classified, all_pts, title, tool_name):
                    linewidth=1.5, zorder=21)
 
     # Annotation box: Pareto coverage stat
-    annot = (f"PA-DSE Pareto coverage:\n"
+    annot = (f"FA-DSE Pareto coverage:\n"
              f"{pareto_on_padse} / {pareto_count} vertices")
     ax.text(0.98, 0.03, annot,
             transform=ax.transAxes, ha="right", va="bottom",
