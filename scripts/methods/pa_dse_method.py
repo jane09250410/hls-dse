@@ -259,6 +259,38 @@ class PADSEMethod(DSEMethod):
         self._overhead["ofrs"] += (time.perf_counter() - t0) * 1000
         return queue
 
+    def commit_selection(self, queue, index, *, via_lsqd=False):
+        """Unified dequeue primitive (HFDS integration refactor).
+
+        Pops queue[index] and performs ALL selection bookkeeping exactly once:
+        _step_for_lsqd increment, base_action derivation, probe-flag
+        consumption, _evaluated_param_dicts tracking.
+
+        base_action is computed HERE (evaluate | probe | lsqd) from internal
+        state — callers must not override it, so a HYP-selected config that
+        RPE marked as probe keeps its probe accounting. External selector
+        labels (HYP/BASE/AUDIT) are the adapter's business and never enter
+        PA-DSE statistics. Both vanilla select_next() and the HFDS HYP path
+        go through here.
+        """
+        if not (0 <= index < len(queue)):
+            raise IndexError(
+                f"commit_selection: index {index} out of range (queue len {len(queue)})")
+        self._step_for_lsqd += 1
+        cfg = queue.pop(index)
+        cid = int(cfg.get("id", -1))
+        if via_lsqd:
+            base_action = "lsqd"
+        else:
+            base_action = "probe" if cid in self._probe_flags else "evaluate"
+        self._probe_flags.discard(cid)
+        # Track for LSQD novelty (record all evaluated, success or not)
+        self._evaluated_param_dicts.append(
+            {k: v for k, v in cfg.items()
+             if not k.startswith("_") and k != "id"}
+        )
+        return cfg, base_action
+
     def select_next(self, queue):
         """
         Select the next config to evaluate.
@@ -270,16 +302,20 @@ class PADSEMethod(DSEMethod):
         pick the config maximally distant in parameter space from the
         already-evaluated set. This forces coverage of OFRS-deferred
         regions, reducing best_lat / best_area / UQoR variance across runs.
+
+        Refactored to route through commit_selection(); the LSQD decision
+        uses next_step = _step_for_lsqd + 1, equivalent to the previous
+        increment-then-test order (verified by no-op equivalence tests).
         """
-        self._step_for_lsqd += 1
+        next_step = self._step_for_lsqd + 1
 
         # Decide whether this step is an LSQD diversification step
         do_lsqd = (
             self._lsqd
             and len(queue) >= 2
             and len(self._evaluated_param_dicts) >= self.n_min   # need a reference set
-            and self._step_for_lsqd / max(1, self.budget) >= self._lsqd_start_frac
-            and (self._step_for_lsqd % self._lsqd_period) == 0
+            and next_step / max(1, self.budget) >= self._lsqd_start_frac
+            and (next_step % self._lsqd_period) == 0
         )
 
         if do_lsqd:
@@ -290,22 +326,8 @@ class PADSEMethod(DSEMethod):
                 d = self._min_hamming(c, ref)
                 if d > best_d:
                     best_d, best_idx = d, i
-            cfg = queue.pop(best_idx)
-            cid = int(cfg.get("id", -1))
-            action = "lsqd"
-            self._probe_flags.discard(cid)
-        else:
-            cfg = queue.pop(0)
-            cid = int(cfg.get("id", -1))
-            action = "probe" if cid in self._probe_flags else "evaluate"
-            self._probe_flags.discard(cid)
-
-        # Track for LSQD novelty (record all evaluated, success or not)
-        self._evaluated_param_dicts.append(
-            {k: v for k, v in cfg.items()
-             if not k.startswith("_") and k != "id"}
-        )
-        return cfg, action
+            return self.commit_selection(queue, best_idx, via_lsqd=True)
+        return self.commit_selection(queue, 0)
 
     @staticmethod
     def _min_hamming(c, ref_list):
