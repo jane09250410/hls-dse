@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-pa_dse_method.py — Unified PA-DSE method for all 8 ablation configurations.
+pa_dse_method.py — Unified FA-DSE method for all 8 ablation configurations.
 
 Config map:
   no-filter        scf=off  rpe=off      ofrs=off
@@ -53,7 +53,7 @@ class PADSEMethod(DSEMethod):
                  source_path=None,
                  dynamic_mode="full",   # "full" or "intersection" for L1
                  # ── Categorical-coverage extension (CC) ────────────────
-                 # Forwarded to OFRS. beta_cov=0 reproduces vanilla PA-DSE.
+                 # Forwarded to OFRS. beta_cov=0 reproduces vanilla FA-DSE.
                  # method_name appends "+CC" when active so logs distinguish
                  # the variant.
                  beta_cov=0.0, n_cov=2,

@@ -5,7 +5,7 @@ run_b120_bambu.py
 B=120 Bambu main comparison + SCF+OFRS ablation via offline simulation.
 Requires: results/bambu_ground_truth/run_summary.csv (from collect_bambu_gt.py)
 
-Methods: Random, FilteredRandom, SA, GA, GP-BO, RF, PA-DSE (SCF+DFRL), SCF+OFRS
+Methods: Random, FilteredRandom, SA, GA, GP-BO, RF, FA-DSE (SCF+DFRL), SCF+OFRS
 8 benchmarks × 10 seeds/perms = 80 runs per method, 640 total
 Runtime: ~10 minutes (offline simulation)
 
@@ -176,7 +176,7 @@ def main():
                 summary_rows.append(result_to_row(result, rid, seed))
                 eval_rows.extend(eval_log_rows(result, rid))
 
-        # === PA-DSE (SCF+DFRL full) ===
+        # === FA-DSE (SCF+DFRL full) ===
         for perm in range(N_SEEDS):
             m = PADSEMethod(configs, bench, "bambu", BUDGET,
                             ablation_config="SCF+DFRL",
@@ -215,10 +215,10 @@ def main():
     RENAME = {'Random':'Random','Filtered_Random':'FilteredRandom',
               'SimulatedAnnealing':'SA','GeneticAlgorithm':'GA',
               'GP-BO':'GP-BO','RF_Classifier':'RF',
-              'PA-DSE_SCF+DFRL':'PA-DSE','PA-DSE_SCF+OFRS':'SCF+OFRS'}
+              'PA-DSE_SCF+DFRL':'FA-DSE','PA-DSE_SCF+OFRS':'SCF+OFRS'}
     df['method'] = df['strategy'].map(RENAME).fillna(df['strategy'])
 
-    ORDER = ['Random','FilteredRandom','SA','GA','GP-BO','RF','SCF+OFRS','PA-DSE']
+    ORDER = ['Random','FilteredRandom','SA','GA','GP-BO','RF','SCF+OFRS','FA-DSE']
 
     print(f"\n{'Method':20s}  {'SR':>12s}  {'Wasted':>8s}  {'TTFF':>8s}  {'UQoR':>6s}  {'Sigs':>6s}  n")
     print("-" * 80)
@@ -233,21 +233,21 @@ def main():
               f"  {sub['uqor'].mean():6.1f}"
               f"  {sigs:6.1f}  {len(sub)}")
 
-    # KEY COMPARISON: PA-DSE vs SCF+OFRS
-    pa = df[df['method'] == 'PA-DSE']['sr_pct']
+    # KEY COMPARISON: FA-DSE vs SCF+OFRS
+    pa = df[df['method'] == 'FA-DSE']['sr_pct']
     ofrs = df[df['method'] == 'SCF+OFRS']['sr_pct']
     delta = pa.mean() - ofrs.mean()
 
     from scipy import stats
     # Paired test over 80 (benchmark, queue_permutation_id) pairs.
-    # We pair PA-DSE and SCF+OFRS by (benchmark, queue_permutation_id) because
+    # We pair FA-DSE and SCF+OFRS by (benchmark, queue_permutation_id) because
     # both methods use the same queue permutation seeds, making the comparison
     # properly paired at the run level. Using per-benchmark means would result
     # in identical paired differences (all ~36.3) because each benchmark gives
-    # exactly 56 feasible designs at B=120 with PA-DSE consuming 67.5 calls
+    # exactly 56 feasible designs at B=120 with FA-DSE consuming 67.5 calls
     # vs. SCF+OFRS consuming all 120, which makes scipy.stats.ttest_rel emit
     # a precision-loss warning and report t=inf.
-    pa_runs = df[df['method'] == 'PA-DSE'].copy()
+    pa_runs = df[df['method'] == 'FA-DSE'].copy()
     ofrs_runs = df[df['method'] == 'SCF+OFRS'].copy()
     paired = pa_runs.merge(
         ofrs_runs, on=['benchmark', 'queue_permutation_id'],
@@ -257,7 +257,7 @@ def main():
                                      paired['sr_pct_ofrs'].values)
 
     print(f"\n*** KEY RESULT ***")
-    print(f"  PA-DSE (SCF+DFRL): {pa.mean():.1f}% ± {pa.std():.1f}")
+    print(f"  FA-DSE (SCF+DFRL): {pa.mean():.1f}% ± {pa.std():.1f}")
     print(f"  SCF+OFRS:          {ofrs.mean():.1f}% ± {ofrs.std():.1f}")
     print(f"  Delta:             {delta:+.1f} pp")
     print(f"  Paired t-test ({len(paired)} pairs): t={t_stat:.3f}, p={p_val:.4e}")
@@ -269,7 +269,7 @@ def main():
         print(f"  --> RPE absorbed by OFRS even at B=120")
 
     # RPE activation stats
-    pa_runs = df[df['method'] == 'PA-DSE']
+    pa_runs = df[df['method'] == 'FA-DSE']
     print(f"\n  RPE activation: sigs_learned = {pa_runs['signatures_learned'].mean():.2f} ± {pa_runs['signatures_learned'].std():.2f}")
     print(f"  Probes triggered: {pa_runs['probes_triggered'].mean():.1f}")
     print(f"  Total skipped: {pa_runs['total_skipped'].mean():.1f}")

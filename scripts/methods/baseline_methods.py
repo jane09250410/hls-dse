@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-baseline_methods.py — Non-PA-DSE methods with unified DSEMethod interface.
+baseline_methods.py — Non-FA-DSE methods with unified DSEMethod interface.
 
   RandomMethod         — uniform random, feasibility-unaware
   FilteredRandomMethod — random after Phagocytosis filtering

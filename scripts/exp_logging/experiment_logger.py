@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-experiment_logger.py — Unified logger for PA-DSE experiments.
+experiment_logger.py — Unified logger for FA-DSE experiments.
 
 Four log types (append-only CSV):
   1. eval_log      — one row per synthesis evaluation

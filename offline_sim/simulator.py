@@ -265,7 +265,7 @@ def run_padse_offline(
     alpha_attract: float = 0.0,
     qat_min_succ: int = 4,
 ):
-    """Run one PA-DSE offline simulation (Bambu or Dynamatic)."""
+    """Run one FA-DSE offline simulation (Bambu or Dynamatic)."""
     from methods.pa_dse_method import PADSEMethod
 
     if tool == "bambu":

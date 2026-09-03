@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-advanced_baselines.py — Strong DSE baselines for comparison with PA-DSE.
+advanced_baselines.py — Strong DSE baselines for comparison with FA-DSE.
 
 All four baselines fit the DSEMethod interface and share the same
-config space, budget, seed, and synthesize_fn as PA-DSE.
+config space, budget, seed, and synthesize_fn as FA-DSE.
 
 Methods:
   SimulatedAnnealingMethod   — geometric cooling, neighbor-by-1-param
